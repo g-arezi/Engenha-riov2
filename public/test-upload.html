@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Upload - Engenha Rio</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .upload-form { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 15px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .debug { background: #e2e3e5; padding: 15px; border-radius: 4px; margin-top: 20px; }
+        pre { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Teste de Upload - Engenha Rio</h1>
+    
+    <div class="upload-form">
+        <h3>Upload via Formulário HTML</h3>
+        <form method="POST" action="/documents/upload" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="document">Arquivo:</label>
+                <input type="file" id="document" name="document" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="name">Nome:</label>
+                <input type="text" id="name" name="name" placeholder="Nome do documento">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Descrição:</label>
+                <input type="text" id="description" name="description" placeholder="Descrição">
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Categoria:</label>
+                <select id="category" name="category">
+                    <option value="">Selecione...</option>
+                    <option value="projeto">Projeto</option>
+                    <option value="contrato">Contrato</option>
+                    <option value="relatorio">Relatório</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="project_id">ID do Projeto:</label>
+                <input type="text" id="project_id" name="project_id" placeholder="projeto_1">
+            </div>
+            
+            <button type="submit">Upload via Form</button>
+        </form>
+    </div>
+    
+    <div class="upload-form">
+        <h3>Upload via AJAX</h3>
+        <form id="ajaxForm">
+            <div class="form-group">
+                <label for="ajaxFile">Arquivo:</label>
+                <input type="file" id="ajaxFile" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="ajaxName">Nome:</label>
+                <input type="text" id="ajaxName" placeholder="Nome do documento">
+            </div>
+            
+            <button type="submit">Upload via AJAX</button>
+        </form>
+        
+        <div id="ajaxResult"></div>
+    </div>
+    
+    <div class="debug">
+        <h3>Debug Info</h3>
+        <div id="debugInfo">
+            <p>Verificando configurações...</p>
+            <script>
+                // Verificar configurações do navegador
+                document.getElementById('debugInfo').innerHTML = `
+                    <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                    <p><strong>File API Support:</strong> ${typeof FileReader !== 'undefined' ? 'Yes' : 'No'}</p>
+                    <p><strong>FormData Support:</strong> ${typeof FormData !== 'undefined' ? 'Yes' : 'No'}</p>
+                    <p><strong>Current URL:</strong> ${window.location.href}</p>
+                `;
+            </script>
+        </div>
+    </div>
+
+    <script>
+        // Testar upload via AJAX
+        document.getElementById('ajaxForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('ajaxFile');
+            const nameInput = document.getElementById('ajaxName');
+            const resultDiv = document.getElementById('ajaxResult');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<div class="result error">Selecione um arquivo</div>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('document', fileInput.files[0]);
+            formData.append('name', nameInput.value);
+            formData.append('description', 'Teste via AJAX');
+            formData.append('category', 'teste');
+            formData.append('project_id', 'projeto_1');
+            
+            resultDiv.innerHTML = '<div class="result">Enviando...</div>';
+            
+            fetch('/documents/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (response.ok) {
+                    if (response.headers.get('content-type')?.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        return response.text();
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                
+                if (typeof data === 'string') {
+                    resultDiv.innerHTML = `<div class="result success">✅ Upload realizado com sucesso!</div>`;
+                } else if (data.success) {
+                    resultDiv.innerHTML = `<div class="result success">✅ ${data.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ ${data.message || 'Erro desconhecido'}</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                resultDiv.innerHTML = `<div class="result error">❌ Erro: ${error.message}</div>`;
+            });
+        });
+        
+        // Monitor form tradicional
+        document.querySelector('form[action="/documents/upload"]').addEventListener('submit', function() {
+            console.log('Enviando formulário tradicional...');
+        });
+    </script>
+</body>
+</html>

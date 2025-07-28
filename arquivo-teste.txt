@@ -1,0 +1,7 @@
+Este é um arquivo de teste para upload no sistema Engenha Rio.
+
+Data: 2025-07-26
+Conteúdo: Teste de funcionalidade de upload
+Formato: TXT
+
+O sistema deve ser capaz de processar este arquivo corretamente.

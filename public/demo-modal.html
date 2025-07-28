@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Modal de Upload - Engenha Rio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .demo-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .demo-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .demo-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .feature-list {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            color: #555;
+        }
+        
+        .feature-item i {
+            color: #28a745;
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        /* Estilos do Modal */
+        .upload-circle, .success-circle, .error-circle {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .upload-circle {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border: 2px solid #e9ecef;
+            animation: pulse 2s infinite;
+        }
+
+        .success-circle {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        .error-circle {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .progress {
+            border-radius: 10px;
+            background-color: #f1f3f4;
+            height: 6px;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-title">
+            <h2><i class="fas fa-cloud-upload-alt text-primary me-2"></i>Novo Modal de Upload</h2>
+            <p class="text-muted">Design simples, elegante e moderno</p>
+        </div>
+        
+        <div class="feature-list">
+            <h5><i class="fas fa-sparkles text-warning me-2"></i>Melhorias Implementadas</h5>
+            <div class="feature-item">
+                <i class="fas fa-check"></i>
+                <span>Modal compacto e elegante</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check"></i>
+                <span>Animações suaves e modernas</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check"></i>
+                <span>Feedback visual aprimorado</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check"></i>
+                <span>Auto-redirecionamento após sucesso</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check"></i>
+                <span>Design responsivo e limpo</span>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <button class="btn demo-button me-2" onclick="showUploadDemo()">
+                <i class="fas fa-play me-2"></i>Demo Upload
+            </button>
+            <button class="btn demo-button me-2" onclick="showSuccessDemo()">
+                <i class="fas fa-check me-2"></i>Demo Sucesso
+            </button>
+            <button class="btn demo-button" onclick="showErrorDemo()">
+                <i class="fas fa-times me-2"></i>Demo Erro
+            </button>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/documents/upload" class="btn btn-outline-primary">
+                <i class="fas fa-upload me-2"></i>Testar Upload Real
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal Demo -->
+    <div class="modal fade" id="demoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-body text-center p-4">
+                    <!-- Estado: Enviando -->
+                    <div id="uploadingDemo">
+                        <div class="upload-animation mb-3">
+                            <div class="upload-circle">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-2">Enviando arquivo...</h6>
+                        <div class="progress mb-3" style="height: 6px;">
+                            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 45%" id="demoProgress"></div>
+                        </div>
+                        <small class="text-muted">Processando...</small>
+                    </div>
+                    
+                    <!-- Estado: Sucesso -->
+                    <div id="successDemo" style="display: none;">
+                        <div class="success-animation mb-3">
+                            <div class="success-circle">
+                                <i class="fas fa-check fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h6 class="text-success mb-2">Enviado com sucesso!</h6>
+                        <p class="text-muted small mb-3">Seu arquivo foi processado.</p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary btn-sm">
+                                <i class="fas fa-folder me-1"></i> Ver Documentos
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-plus me-1"></i> Enviar Outro
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado: Erro -->
+                    <div id="errorDemo" style="display: none;">
+                        <div class="error-animation mb-3">
+                            <div class="error-circle">
+                                <i class="fas fa-times fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h6 class="text-danger mb-2">Erro no envio</h6>
+                        <p class="text-muted small mb-3">Arquivo muito grande.</p>
+                        <button type="button" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-redo me-1"></i> Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showUploadDemo() {
+            const modal = new bootstrap.Modal(document.getElementById('demoModal'));
+            
+            // Resetar estados
+            document.getElementById('uploadingDemo').style.display = 'block';
+            document.getElementById('successDemo').style.display = 'none';
+            document.getElementById('errorDemo').style.display = 'none';
+            
+            modal.show();
+        }
+        
+        function showSuccessDemo() {
+            const modal = new bootstrap.Modal(document.getElementById('demoModal'));
+            
+            // Mostrar estado de sucesso
+            document.getElementById('uploadingDemo').style.display = 'none';
+            document.getElementById('successDemo').style.display = 'block';
+            document.getElementById('errorDemo').style.display = 'none';
+            
+            modal.show();
+        }
+        
+        function showErrorDemo() {
+            const modal = new bootstrap.Modal(document.getElementById('demoModal'));
+            
+            // Mostrar estado de erro
+            document.getElementById('uploadingDemo').style.display = 'none';
+            document.getElementById('successDemo').style.display = 'none';
+            document.getElementById('errorDemo').style.display = 'block';
+            
+            modal.show();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+    "teste": {
+        "id": "teste",
+        "name": "Teste",
+        "code": "teste",
+        "description": "aqui está um teste, onde você deve selecionar a categoria, o status do tamplate, os documentos que o usuario terá que enviar(cada documento você escolhera e sempre que tiver mais de um documento, só clicar em \"adicionar outro documento\"",
+        "category": "documentacao_legal",
+        "status": "ativo",
+        "required_documents": [
+            {
+                "name": "documento teste",
+                "description": "documento teste, escolhido em pdf(obrigatório)",
+                "required": true,
+                "format": "PDF",
+                "max_size": "50MB"
+            },
+            {
+                "name": "documento teste2",
+                "description": "podendo escolher todo tipo de formato( podendo escolher se é obrigatório ou não)",
+                "required": false,
+                "format": "Todos",
+                "max_size": "50MB"
+            }
+        ],
+        "created_at": "2025-07-27 03:25:13",
+        "updated_at": "2025-07-27 03:25:13"
+    }
+}
