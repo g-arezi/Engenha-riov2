@@ -133,6 +133,18 @@ class ProjectController
         $clients = $this->db->findAll('users', ['role' => 'cliente']);
         $analysts = $this->db->findAll('users', ['role' => 'analista']);
         
+        // Carregar templates disponíveis
+        $templatesFile = __DIR__ . '/../../data/document_templates.json';
+        $templates = [];
+        if (file_exists($templatesFile)) {
+            $content = file_get_contents($templatesFile);
+            $allTemplates = json_decode($content, true) ?? [];
+            // Filtrar apenas templates ativos
+            $templates = array_filter($allTemplates, function($template) {
+                return ($template['status'] ?? 'ativo') === 'ativo';
+            });
+        }
+        
         require_once __DIR__ . '/../../views/projects/edit.php';
     }
 
@@ -225,11 +237,14 @@ class ProjectController
         $data = [
             'name' => $_POST['name'] ?? '',
             'description' => $_POST['description'] ?? '',
+            'project_type' => $_POST['project_type'] ?? '',
+            'document_template' => $_POST['document_template'] ?? '',
             'client_id' => $_POST['client_id'] ?? '',
             'analyst_id' => $_POST['analyst_id'] ?? '',
             'status' => $_POST['status'] ?? 'pendente',
             'priority' => $_POST['priority'] ?? 'media',
-            'deadline' => $_POST['deadline'] ?? null
+            'deadline' => $_POST['deadline'] ?? null,
+            'updated_at' => date('Y-m-d H:i:s')
         ];
 
         $this->db->update('projects', $id, $data);

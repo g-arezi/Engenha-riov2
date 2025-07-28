@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal Simples</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Teste Modal</h1>
+        <button id="testBtn" class="btn btn-primary">Testar Modal</button>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="documentInfoModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Informações do Documento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="documentInfoContent">
+                            Carregando...
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('testBtn').addEventListener('click', function() {
+            testDocumentInfo();
+        });
+
+        function testDocumentInfo() {
+            console.log('=== INICIANDO TESTE ===');
+            
+            const modal = new bootstrap.Modal(document.getElementById('documentInfoModal'));
+            modal.show();
+            
+            document.getElementById('documentInfoContent').innerHTML = 'Carregando...';
+            
+            fetch('/documents/project/doc_proj_1/info', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                console.log('Response type:', response.type);
+                console.log('Response URL:', response.url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                console.log('=== RAW RESPONSE ===');
+                console.log('Length:', text.length);
+                console.log('Text:', text);
+                console.log('First 10 chars:', JSON.stringify(text.substring(0, 10)));
+                console.log('Last 10 chars:', JSON.stringify(text.substring(text.length - 10)));
+                
+                try {
+                    const data = JSON.parse(text);
+                    console.log('=== PARSED SUCCESS ===');
+                    console.log('Data:', data);
+                    
+                    if (data.success && data.document) {
+                        document.getElementById('documentInfoContent').innerHTML = `
+                            <div class="alert alert-success">
+                                <h6>Documento: ${data.document.name}</h6>
+                                <p>Tipo: ${data.document.document_type}</p>
+                                <p>Status: ${data.document.status}</p>
+                                <p>Tamanho: ${data.document.size_formatted}</p>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error('Dados inválidos');
+                    }
+                } catch (parseError) {
+                    console.error('=== PARSE ERROR ===');
+                    console.error('Error:', parseError);
+                    console.error('Message:', parseError.message);
+                    
+                    document.getElementById('documentInfoContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6>Erro de Parse JSON</h6>
+                            <p>Erro: ${parseError.message}</p>
+                            <details>
+                                <summary>Raw Response</summary>
+                                <pre>${text}</pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('=== FETCH ERROR ===');
+                console.error('Error:', error);
+                
+                document.getElementById('documentInfoContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>Erro de Requisição</h6>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

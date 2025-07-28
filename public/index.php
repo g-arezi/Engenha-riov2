@@ -23,6 +23,11 @@ use App\Middleware\AuthMiddleware;
 // Start session
 session_start();
 
+// Auto login for development (remove in production)
+if (!isset($_SESSION['user_id'])) {
+    require_once __DIR__ . '/../auto_login.php';
+}
+
 // Create router instance
 $router = new Router();
 
@@ -118,7 +123,10 @@ $router->get('/documents/project/upload', [DocumentWorkflowController::class, 'u
 $router->post('/documents/project/upload', [DocumentWorkflowController::class, 'uploadDocument'], [AuthMiddleware::class]);
 $router->post('/documents/{id}/approve', [DocumentWorkflowController::class, 'approveDocument'], [AuthMiddleware::class]);
 $router->post('/documents/{id}/reject', [DocumentWorkflowController::class, 'rejectDocument'], [AuthMiddleware::class]);
+$router->post('/documents/update-status', [DocumentWorkflowController::class, 'updateDocumentStatus'], [AuthMiddleware::class]);
 $router->get('/documents/project/{id}/download', [DocumentWorkflowController::class, 'downloadDocument'], [AuthMiddleware::class]);
+$router->delete('/documents/project/{id}', [DocumentWorkflowController::class, 'deleteDocument'], [AuthMiddleware::class]);
+$router->get('/documents/project/{id}/info', [DocumentWorkflowController::class, 'getDocumentInfo'], [AuthMiddleware::class]);
 
 // Project workflow management routes (AJAX)
 $router->post('/document-workflow/update-stage', [DocumentWorkflowController::class, 'updateStage'], [AuthMiddleware::class]);

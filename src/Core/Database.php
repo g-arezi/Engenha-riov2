@@ -38,11 +38,11 @@ class Database
         $data = $this->getTable($table);
         
         if (empty($criteria)) {
-            return array_values($data);
+            return $data;
         }
 
         $filtered = [];
-        foreach ($data as $item) {
+        foreach ($data as $id => $item) {
             $match = true;
             foreach ($criteria as $field => $value) {
                 if (!isset($item[$field]) || $item[$field] !== $value) {
@@ -51,7 +51,7 @@ class Database
                 }
             }
             if ($match) {
-                $filtered[] = $item;
+                $filtered[$id] = $item;
             }
         }
 

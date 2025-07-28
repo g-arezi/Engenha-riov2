@@ -103,4 +103,21 @@ class NotificationService
             $this->markAsRead($notification['id']);
         }
     }
+
+    public function addNotification(string $userId, string $title, string $message, string $type = 'info', string $priority = 'medium'): void
+    {
+        $notification = [
+            'id' => 'notif_' . uniqid(),
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'priority' => $priority,
+            'is_read' => false,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->insert('notifications', $notification);
+    }
 }

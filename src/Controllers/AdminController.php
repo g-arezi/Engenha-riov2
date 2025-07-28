@@ -188,17 +188,54 @@ class AdminController
     public function deleteUser(string $id): void
     {
         if (!Auth::check() || !Auth::hasPermission('admin.manage_users')) {
+            // Verificar se é requisição AJAX
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest' ||
+                     (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
+            
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Acesso negado']);
+                exit;
+            }
+            
             header('Location: /admin');
             exit;
         }
 
         // Não permitir deletar o próprio usuário
         if ($id === Auth::id()) {
+            // Verificar se é requisição AJAX
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest' ||
+                     (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
+            
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Você não pode excluir seu próprio usuário']);
+                exit;
+            }
+            
             header('Location: /admin?error=cannot_delete_self');
             exit;
         }
 
-        $this->db->delete('users', $id);
+        $result = $this->db->delete('users', $id);
+        
+        // Verificar se é requisição AJAX
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest' ||
+                 (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false);
+        
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => $result, 
+                'message' => $result ? 'Usuário excluído com sucesso' : 'Erro ao excluir usuário'
+            ]);
+            exit;
+        }
+        
         header('Location: /admin?success=user_deleted');
         exit;
     }
@@ -206,35 +243,37 @@ class AdminController
     public function approveUser(string $id): void
     {
         if (!Auth::check() || !Auth::hasPermission('admin.manage_users')) {
-            header('HTTP/1.0 403 Forbidden');
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Acesso negado']);
             exit;
         }
 
-        $this->db->update('users', $id, [
+        $result = $this->db->update('users', $id, [
             'status' => 'ativo',
             'approved_at' => date('Y-m-d H:i:s'),
             'approved_by' => Auth::id()
         ]);
 
         header('Content-Type: application/json');
-        echo json_encode(['success' => true]);
+        echo json_encode(['success' => $result, 'message' => $result ? 'Usuário aprovado com sucesso' : 'Erro ao aprovar usuário']);
     }
 
     public function rejectUser(string $id): void
     {
         if (!Auth::check() || !Auth::hasPermission('admin.manage_users')) {
-            header('HTTP/1.0 403 Forbidden');
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Acesso negado']);
             exit;
         }
 
-        $this->db->update('users', $id, [
+        $result = $this->db->update('users', $id, [
             'status' => 'rejeitado',
             'rejected_at' => date('Y-m-d H:i:s'),
             'rejected_by' => Auth::id()
         ]);
 
         header('Content-Type: application/json');
-        echo json_encode(['success' => true]);
+        echo json_encode(['success' => $result, 'message' => $result ? 'Usuário rejeitado com sucesso' : 'Erro ao rejeitar usuário']);
     }
 
     private function storeUser(): void

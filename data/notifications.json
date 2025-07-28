@@ -1,0 +1,114 @@
+{
+    "6887cb7c3b32c6.68646470": {
+        "user_id": "admin",
+        "type": "user_registration",
+        "title": "Nova Solicitação de Cadastro",
+        "message": "O usuário usuarioteste (usuarioteste@engenhario.com) solicitou cadastro como cliente.",
+        "data": "{\"new_user_id\":\"6887cb7c384b75.22527396\",\"requested_role\":\"cliente\",\"user_name\":\"usuarioteste\",\"user_email\":\"usuarioteste@engenhario.com\"}",
+        "is_read": false,
+        "created_at": "2025-07-28 21:11:56",
+        "id": "6887cb7c3b32c6.68646470",
+        "updated_at": "2025-07-28 21:11:56"
+    },
+    "6887cb7c3dba97.61661293": {
+        "user_id": "maria_coordenadora",
+        "type": "user_registration",
+        "title": "Nova Solicitação de Cadastro",
+        "message": "O usuário usuarioteste (usuarioteste@engenhario.com) solicitou cadastro como cliente.",
+        "data": "{\"new_user_id\":\"6887cb7c384b75.22527396\",\"requested_role\":\"cliente\",\"user_name\":\"usuarioteste\",\"user_email\":\"usuarioteste@engenhario.com\"}",
+        "is_read": false,
+        "created_at": "2025-07-28 21:11:56",
+        "id": "6887cb7c3dba97.61661293",
+        "updated_at": "2025-07-28 21:11:56"
+    },
+    "6887cdaf1035f1.33527835": {
+        "user_id": "admin",
+        "type": "user_registration",
+        "title": "Nova Solicitação de Cadastro",
+        "message": "O usuário usuarioteste2 (usuarioteste2@engenhario.com) solicitou cadastro como cliente.",
+        "data": "{\"new_user_id\":\"6887cdaf0cf3a8.51328972\",\"requested_role\":\"cliente\",\"user_name\":\"usuarioteste2\",\"user_email\":\"usuarioteste2@engenhario.com\"}",
+        "is_read": false,
+        "created_at": "2025-07-28 21:21:19",
+        "id": "6887cdaf1035f1.33527835",
+        "updated_at": "2025-07-28 21:21:19"
+    },
+    "6887cdaf12f672.86071610": {
+        "user_id": "maria_coordenadora",
+        "type": "user_registration",
+        "title": "Nova Solicitação de Cadastro",
+        "message": "O usuário usuarioteste2 (usuarioteste2@engenhario.com) solicitou cadastro como cliente.",
+        "data": "{\"new_user_id\":\"6887cdaf0cf3a8.51328972\",\"requested_role\":\"cliente\",\"user_name\":\"usuarioteste2\",\"user_email\":\"usuarioteste2@engenhario.com\"}",
+        "is_read": false,
+        "created_at": "2025-07-28 21:21:19",
+        "id": "6887cdaf12f672.86071610",
+        "updated_at": "2025-07-28 21:21:19"
+    },
+    "6887de5b7c6fb": {
+        "id": "6887de5b7c6fb",
+        "user_id": null,
+        "project_id": "6885806d05f9c2.27368890",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Projeto",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-28 22:32:27",
+        "updated_at": "2025-07-28 22:32:27"
+    },
+    "6887de5ea51b8": {
+        "id": "6887de5ea51b8",
+        "user_id": null,
+        "project_id": "6885806d05f9c2.27368890",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Documentos",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-28 22:32:30",
+        "updated_at": "2025-07-28 22:32:30"
+    },
+    "6887dfab97349": {
+        "id": "6887dfab97349",
+        "user_id": null,
+        "project_id": "projeto_3",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Projeto",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-28 22:38:03",
+        "updated_at": "2025-07-28 22:38:03"
+    },
+    "6887dfae28290": {
+        "id": "6887dfae28290",
+        "user_id": null,
+        "project_id": "projeto_3",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Documentos",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-28 22:38:06",
+        "updated_at": "2025-07-28 22:38:06"
+    },
+    "6887e1b15ccf10.37753170": {
+        "type": "document_approved",
+        "title": "Documento Aprovado",
+        "message": "Documento 'Contrato de Locação se Pde não Socio' foi aprovado",
+        "user_id": "rafael",
+        "project_id": "projeto_1",
+        "document_id": "doc_proj_2",
+        "is_read": false,
+        "priority": "normal",
+        "id": "6887e1b15ccf10.37753170",
+        "created_at": "2025-07-28 22:46:41",
+        "updated_at": "2025-07-28 22:46:41"
+    },
+    "6887e1b7c03a4": {
+        "id": "6887e1b7c03a4",
+        "user_id": null,
+        "project_id": "projeto_1",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Documentos",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-28 22:46:47",
+        "updated_at": "2025-07-28 22:46:47"
+    }
+}

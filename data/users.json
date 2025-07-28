@@ -21,61 +21,47 @@
         "updated_at": "2025-01-01 00:00:00",
         "last_login": null
     },
-    "maria_coordenadora": {
-        "id": "maria_coordenadora",
-        "name": "Maria Silva",
-        "email": "maria@engenhario.com",
-        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC\/.og\/at2.uheWG\/igi",
-        "role": "coordenador",
-        "status": "ativo",
-        "created_at": "2025-07-25 09:00:00",
-        "updated_at": "2025-07-25 09:00:00",
-        "last_login": "2025-07-25 14:30:00"
-    },
-    "joao_cliente": {
-        "id": "joao_cliente",
-        "name": "João Santos",
-        "email": "joao@cliente.com",
-        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC\/.og\/at2.uheWG\/igi",
-        "role": "cliente",
-        "status": "ativo",
-        "created_at": "2025-07-24 16:00:00",
-        "updated_at": "2025-07-24 16:00:00",
-        "last_login": "2025-07-26 08:15:00"
-    },
-    "ana_pendente": {
-        "id": "ana_pendente",
-        "name": "Ana Costa",
-        "email": "ana@exemplo.com",
-        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC\/.og\/at2.uheWG\/igi",
-        "role": "analista",
-        "status": "pendente",
-        "created_at": "2025-07-26 10:30:00",
-        "updated_at": "2025-07-26 10:30:00",
-        "last_login": null
-    },
     "carlos_pendente": {
         "id": "carlos_pendente",
         "name": "Carlos Oliveira",
         "email": "carlos@exemplo.com",
         "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC\/.og\/at2.uheWG\/igi",
         "role": "cliente",
-        "status": "pendente",
+        "status": "rejeitado",
         "created_at": "2025-07-26 11:15:00",
-        "updated_at": "2025-07-26 11:15:00",
-        "last_login": null
+        "updated_at": "2025-07-28 21:36:15",
+        "last_login": null,
+        "rejected_at": "2025-07-28 21:36:15",
+        "rejected_by": "admin"
     },
-    "6885877cc72b00.94064079": {
-        "name": "João da Silva Teste",
-        "email": "joao.teste@email.com",
-        "phone": "(11) 99999-9999",
-        "company": "Empresa Teste LTDA",
-        "password": "$2y$10$9nimLSOGLQR5bOrYfTFAKONvjePJrHLRvvLSTZElcunZcfMO0niva",
-        "role": "cliente",
-        "status": "pendente",
+    "6887cb7c384b75.22527396": {
+        "name": "usuarioteste",
+        "email": "usuarioteste@engenhario.com",
+        "phone": "",
+        "company": "",
+        "password": "$2y$10$Buqh.xDVjkEUkKZr2Nw29eJiy78FhGiAgMzt7.nEpCGZQQN9glPni",
+        "role": "analista",
+        "status": "ativo",
         "requested_role": "cliente",
-        "created_at": "2025-07-27 03:57:16",
-        "updated_at": "2025-07-27 03:57:16",
-        "id": "6885877cc72b00.94064079"
+        "created_at": "2025-07-28 21:11:56",
+        "updated_at": "2025-07-28 21:57:53",
+        "id": "6887cb7c384b75.22527396",
+        "approved_at": "2025-07-28 21:57:34",
+        "approved_by": "admin"
+    },
+    "6887cdaf0cf3a8.51328972": {
+        "name": "usuarioteste2",
+        "email": "usuarioteste2@engenhario.com",
+        "phone": "",
+        "company": "",
+        "password": "$2y$10$R6FVu7AM26iJvtTlgBoH.etCL4bfEV5Ll34PC4oQBWtDf3hmXQCki",
+        "role": "cliente",
+        "status": "ativo",
+        "requested_role": "cliente",
+        "created_at": "2025-07-28 21:21:19",
+        "updated_at": "2025-07-28 21:57:28",
+        "id": "6887cdaf0cf3a8.51328972",
+        "approved_at": "2025-07-28 21:57:28",
+        "approved_by": "admin"
     }
 }

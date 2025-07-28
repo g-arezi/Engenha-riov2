@@ -46,6 +46,11 @@ body {
     letter-spacing: -0.025em;
 }
 
+.login-logo {
+    max-width: 200px;
+    height: auto;
+}
+
 .login-form .input-group-text {
     background-color: #f1f5f9;
     border-color: #e2e8f0;

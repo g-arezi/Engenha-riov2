@@ -8,7 +8,7 @@
         "original_name": "BASES_AND_POSTOS.dwg",
         "filename": "bases_and_postos_12345.dwg",
         "size": 10485760,
-        "mime_type": "application/dwg",
+        "mime_type": "application\/dwg",
         "uploaded_by": "rafael",
         "status": "em_analise",
         "stage": "documentos",
@@ -31,18 +31,18 @@
         "original_name": "contrato_locacao.pdf",
         "filename": "contrato_locacao_12346.pdf",
         "size": 2048000,
-        "mime_type": "application/pdf",
+        "mime_type": "application\/pdf",
         "uploaded_by": "rafael",
-        "status": "em_analise",
+        "status": "aprovado",
         "stage": "documentos",
         "version": 1,
-        "approved_by": null,
-        "approved_at": null,
+        "approved_by": "admin",
+        "approved_at": "2025-07-28 22:46:41",
         "rejected_by": null,
         "rejected_at": null,
         "rejection_reason": null,
-        "comments": "",
+        "comments": "aprovado",
         "created_at": "2025-07-24 15:30:00",
-        "updated_at": "2025-07-24 15:30:00"
+        "updated_at": "2025-07-28 22:46:41"
     }
 }

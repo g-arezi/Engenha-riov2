@@ -203,91 +203,71 @@ ob_start();
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Documento Responsável Legal -->
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-file-pdf text-danger me-2"></i>
-                                <div>
-                                    <div class="fw-medium">Identidade do Responsável Legal</div>
-                                    <small class="text-muted">BASES_AND_POSTOS.dwg</small>
+                    <?php if (!empty($documents)): ?>
+                        <?php foreach ($documents as $document): ?>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    <div>
+                                        <div class="fw-medium"><?= htmlspecialchars($document['name']) ?></div>
+                                        <small class="text-muted"><?= htmlspecialchars($document['original_name']) ?></small>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="file-format-badge">dwg</span>
-                        </td>
-                        <td>
-                            <span class="file-size">10MB/1GB - 17:45</span>
-                        </td>
-                        <td>
-                            <div class="upload-progress">
-                                <div class="progress" style="height: 4px;">
-                                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                            </td>
+                            <td>
+                                <span class="file-format-badge"><?= strtolower(pathinfo($document['original_name'], PATHINFO_EXTENSION)) ?></span>
+                            </td>
+                            <td>
+                                <span class="file-size"><?= number_format($document['size'] / 1024 / 1024, 1) ?>MB - <?= date('H:i', strtotime($document['created_at'])) ?></span>
+                            </td>
+                            <td>
+                                <div class="upload-progress">
+                                    <div class="progress" style="height: 4px;">
+                                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                                    </div>
+                                    <small class="text-success">Concluído</small>
                                 </div>
-                                <small class="text-success">Concluído</small>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-danger btn-sm" title="Excluir">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" title="Informações">
-                                    <i class="fas fa-info"></i>
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" title="Download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge bg-primary">Em análise</span>
-                        </td>
-                    </tr>
-                    
-                    <!-- Mais documentos seguem o mesmo padrão -->
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-file-pdf text-danger me-2"></i>
-                                <div>
-                                    <div class="fw-medium">Contrato de Locação se Pde não Socio</div>
-                                    <small class="text-muted">BASES_AND_POSTOS.dwg</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-danger btn-sm" title="Excluir" onclick="deleteDocument('<?= $document['id'] ?>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" title="Informações" onclick="showDocumentInfo('<?= $document['id'] ?>')">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" title="Download" onclick="downloadDocument('<?= $document['id'] ?>')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="file-format-badge">dwg</span>
-                        </td>
-                        <td>
-                            <span class="file-size">10MB/1GB - 17:45</span>
-                        </td>
-                        <td>
-                            <div class="upload-progress">
-                                <div class="progress" style="height: 4px;">
-                                    <div class="progress-bar bg-success" style="width: 100%"></div>
+                            </td>
+                            <td>
+                                <?php if (Auth::hasPermission('documents.approve')): ?>
+                                <div class="status-controls">
+                                    <select class="form-select form-select-sm status-select" data-document-id="<?= $document['id'] ?>" onchange="updateDocumentStatus(this)">
+                                        <option value="em_analise" <?= $document['status'] === 'em_analise' ? 'selected' : '' ?>>Em análise</option>
+                                        <option value="aprovado" <?= $document['status'] === 'aprovado' ? 'selected' : '' ?>>Aprovado</option>
+                                        <option value="rejeitado" <?= $document['status'] === 'rejeitado' ? 'selected' : '' ?>>Rejeitado</option>
+                                    </select>
                                 </div>
-                                <small class="text-success">Concluído</small>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-danger btn-sm" title="Excluir">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" title="Informações">
-                                    <i class="fas fa-info"></i>
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" title="Download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge bg-primary">Em análise</span>
-                        </td>
-                    </tr>
+                                <?php else: ?>
+                                <span class="badge bg-<?= $document['status'] === 'aprovado' ? 'success' : ($document['status'] === 'rejeitado' ? 'danger' : 'primary') ?>">
+                                    <?= ucfirst(str_replace('_', ' ', $document['status'])) ?>
+                                </span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-file-upload fa-2x mb-2"></i>
+                                <p>Nenhum documento foi enviado ainda</p>
+                                <small>Faça upload dos documentos necessários para continuar</small>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -324,6 +304,36 @@ ob_start();
                 Se estiver amarelo, falta algum documento a ser enviado ou aprovado.<br>
                 Ao clicar, Abre a aba debaixo.
             </p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Informações do Documento -->
+<div class="modal fade" id="documentInfoModal" tabindex="-1" aria-labelledby="documentInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentInfoModalLabel">
+                    <i class="fas fa-file-alt me-2"></i>
+                    Informações do Documento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="documentInfoContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando informações...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="downloadFromModal" style="display: none;">
+                    <i class="fas fa-download me-1"></i>
+                    Download
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -400,6 +410,41 @@ ob_start();
     border-radius: 8px;
     padding: 2rem;
     background-color: #f8f9fa;
+}
+
+/* Status Select Styling */
+.status-controls {
+    min-width: 120px;
+}
+
+.status-select {
+    border: 1px solid #dee2e6;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 110px;
+}
+
+.status-select.status-em-analise {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+.status-select.status-aprovado {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.status-select.status-rejeitado {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.status-select:disabled {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .upload-instructions {
@@ -609,6 +654,354 @@ function rejectDocument(documentId) {
             showAlert('Erro de conexão', 'error');
         });
     }
+}
+
+function updateDocumentStatus(selectElement) {
+    const documentId = selectElement.getAttribute('data-document-id');
+    const newStatus = selectElement.value;
+    const originalValue = selectElement.getAttribute('data-original-value') || selectElement.options[0].value;
+    
+    let additionalData = {};
+    let confirmMessage = '';
+    
+    // Preparar dados específicos baseados no status
+    switch (newStatus) {
+        case 'aprovado':
+            confirmMessage = 'Confirma a aprovação deste documento?';
+            const comments = prompt('Comentários (opcional):');
+            if (comments !== null) {
+                additionalData.comments = comments;
+            } else {
+                // Se cancelou o prompt, volta ao valor original
+                selectElement.value = originalValue;
+                return;
+            }
+            break;
+            
+        case 'rejeitado':
+            const rejectionReason = prompt('Motivo da rejeição (obrigatório):');
+            if (rejectionReason && rejectionReason.trim()) {
+                additionalData.rejection_reason = rejectionReason.trim();
+                confirmMessage = 'Confirma a rejeição deste documento?';
+            } else {
+                alert('O motivo da rejeição é obrigatório');
+                selectElement.value = originalValue;
+                return;
+            }
+            break;
+            
+        case 'em_analise':
+            confirmMessage = 'Confirma colocar este documento em análise?';
+            const analysisComments = prompt('Comentários (opcional):');
+            if (analysisComments !== null) {
+                additionalData.comments = analysisComments;
+            } else {
+                selectElement.value = originalValue;
+                return;
+            }
+            break;
+    }
+    
+    // Confirmar a ação
+    if (!confirm(confirmMessage)) {
+        selectElement.value = originalValue;
+        return;
+    }
+    
+    // Desabilitar o select durante a requisição
+    selectElement.disabled = true;
+    
+    // Fazer a requisição
+    fetch('/documents/update-status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            document_id: documentId,
+            status: newStatus,
+            ...additionalData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Status do documento atualizado com sucesso!', 'success');
+            // Atualizar o valor original para o novo status
+            selectElement.setAttribute('data-original-value', newStatus);
+            
+            // Atualizar a aparência visual baseada no novo status
+            updateStatusVisualFeedback(selectElement, newStatus);
+        } else {
+            showAlert(data.message || 'Erro ao atualizar status do documento', 'error');
+            selectElement.value = originalValue;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Erro de conexão', 'error');
+        selectElement.value = originalValue;
+    })
+    .finally(() => {
+        selectElement.disabled = false;
+    });
+}
+
+function updateStatusVisualFeedback(selectElement, status) {
+    // Remover classes de status anteriores
+    selectElement.classList.remove('status-em-analise', 'status-aprovado', 'status-rejeitado');
+    
+    // Adicionar classe baseada no novo status
+    switch (status) {
+        case 'em_analise':
+            selectElement.classList.add('status-em-analise');
+            break;
+        case 'aprovado':
+            selectElement.classList.add('status-aprovado');
+            break;
+        case 'rejeitado':
+            selectElement.classList.add('status-rejeitado');
+            break;
+    }
+}
+
+// Inicializar valores originais quando a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelects = document.querySelectorAll('.status-select');
+    statusSelects.forEach(select => {
+        select.setAttribute('data-original-value', select.value);
+        updateStatusVisualFeedback(select, select.value);
+    });
+});
+
+// Funções auxiliares para ações dos documentos
+function deleteDocument(documentId) {
+    if (confirm('Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.')) {
+        fetch(`/documents/project/${documentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Documento excluído com sucesso!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert(data.message || 'Erro ao excluir documento', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Erro de conexão', 'error');
+        });
+    }
+}
+
+function showDocumentInfo(documentId) {
+    // Abrir modal
+    const modal = new bootstrap.Modal(document.getElementById('documentInfoModal'));
+    modal.show();
+    
+    // Resetar conteúdo para loading
+    document.getElementById('documentInfoContent').innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando informações...</p>
+        </div>
+    `;
+    
+    // Buscar informações do documento
+    fetch(`/documents/project/${documentId}/info`, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            
+            try {
+                const data = JSON.parse(text.trim());
+                console.log('Parsed data:', data);
+                
+                if (data.success && data.document) {
+                    displayDocumentInfo(data.document);
+                } else {
+                    throw new Error(data.message || 'Dados inválidos recebidos');
+                }
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response text:', text);
+                document.getElementById('documentInfoContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Erro ao processar resposta do servidor.
+                        <br><small>Detalhes: ${parseError.message}</small>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('documentInfoContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro ao carregar informações do documento: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function displayDocumentInfo(document) {
+    const content = `
+        <div class="row">
+            <div class="col-md-8">
+                <h6 class="text-primary mb-3">
+                    <i class="fas fa-file-alt me-2"></i>
+                    ${document.name}
+                </h6>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Arquivo original:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.original_name}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Tamanho:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.size_formatted}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Tipo de arquivo:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.mime_type}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Enviado por:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.uploader}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Data de envio:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.created_at_formatted}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Projeto:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.project_name}
+                    </div>
+                </div>
+                
+                ${document.description ? `
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Descrição:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        ${document.description}
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Status</h6>
+                        <span class="badge fs-6 bg-${getStatusColor(document.status)}">
+                            ${document.status_label}
+                        </span>
+                        
+                        ${document.approved_by ? `
+                        <hr>
+                        <small class="text-muted">
+                            <strong>Aprovado por:</strong><br>
+                            ${document.approved_by}<br>
+                            ${document.approved_at ? new Date(document.approved_at).toLocaleString('pt-BR') : ''}
+                        </small>
+                        ` : ''}
+                        
+                        ${document.rejected_by ? `
+                        <hr>
+                        <small class="text-muted">
+                            <strong>Rejeitado por:</strong><br>
+                            ${document.rejected_by}<br>
+                            ${document.rejected_at ? new Date(document.rejected_at).toLocaleString('pt-BR') : ''}
+                        </small>
+                        ${document.rejection_reason ? `<br><br><strong>Motivo:</strong><br>${document.rejection_reason}` : ''}
+                        ` : ''}
+                        
+                        ${document.comments ? `
+                        <hr>
+                        <small class="text-muted">
+                            <strong>Comentários:</strong><br>
+                            ${document.comments}
+                        </small>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('documentInfoContent').innerHTML = content;
+    
+    // Mostrar botão de download
+    const downloadBtn = document.getElementById('downloadFromModal');
+    downloadBtn.style.display = 'inline-block';
+    downloadBtn.onclick = () => downloadDocument(document.id);
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'aprovado': return 'success';
+        case 'rejeitado': return 'danger';
+        case 'em_analise': return 'warning';
+        default: return 'secondary';
+    }
+}
+
+function downloadDocument(documentId) {
+    window.open(`/documents/project/${documentId}/download`, '_blank');
 }
 
 function showAlert(message, type) {

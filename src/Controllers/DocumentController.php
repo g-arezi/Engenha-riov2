@@ -27,8 +27,13 @@ class DocumentController
 
     public function upload(): void
     {
+        // Iniciar sessão se não estiver ativa
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         if (!Auth::check() || !Auth::hasPermission('documents.upload')) {
-            header('Location: /documents');
+            header('Location: /login?redirect=' . urlencode('/documents/upload'));
             exit;
         }
 
@@ -132,6 +137,32 @@ class DocumentController
         // Log para debug
         error_log("Upload attempt - FILES: " . json_encode($_FILES));
         error_log("Upload attempt - POST: " . json_encode($_POST));
+        error_log("Upload attempt - Session: " . json_encode($_SESSION));
+        error_log("Upload attempt - Auth user: " . json_encode(Auth::user()));
+
+        // Verificar se usuário está autenticado
+        if (!Auth::check()) {
+            $message = 'Usuário não autenticado';
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $message, 'redirect' => '/login']);
+                exit;
+            }
+            header('Location: /login');
+            exit;
+        }
+
+        // Verificar permissões
+        if (!Auth::hasPermission('documents.upload')) {
+            $message = 'Sem permissão para upload de documentos';
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $message]);
+                exit;
+            }
+            header('Location: /documents?error=' . urlencode($message));
+            exit;
+        }
 
         if (!isset($_FILES['document'])) {
             $message = 'Nenhum arquivo foi enviado';

@@ -32,12 +32,12 @@
             margin-bottom: 50px;
         }
         
-        .logo-title {
-            font-size: 3.5rem;
-            font-weight: 300;
-            letter-spacing: 8px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
+        .logo-image {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            filter: brightness(1.1) contrast(1.05);
         }
         
         .logo-subtitle {
@@ -151,9 +151,8 @@
         }
         
         @media (max-width: 768px) {
-            .logo-title {
-                font-size: 2.5rem;
-                letter-spacing: 4px;
+            .logo-image {
+                max-width: 280px;
             }
             
             .features-grid {
@@ -183,7 +182,7 @@
         <div class="home-content">
             <!-- Logo e Título -->
             <div class="logo-section">
-                <h1 class="logo-title">ENGENHARIO</h1>
+                <img src="/assets/images/engenhario-logo.png" alt="Engenha Rio" class="logo-image">
                 <p class="logo-subtitle">Sistema Completo de Gestão de Documentos e Projetos de Arquitetura</p>
             </div>
             
@@ -236,8 +235,8 @@
     
     <!-- Footer -->
     <div class="footer-info">
-        <strong>Desenvolvedor:</strong> Gabriel Ariza<br>
-        <strong>Portfólio:</strong> <a href="#" style="color: #3498db;">Clique aqui</a>
+        <strong>Desenvolvedor:</strong> Gabriel Arezi<br>
+        <strong>Portfólio:</strong> <a href="https://bit.ly/Gabriel-Arezi" style="color: #3498db;">Clique aqui</a>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

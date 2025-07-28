@@ -139,12 +139,12 @@ class AuthController
         $email = trim($_POST['email'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
         $company = trim($_POST['company'] ?? '');
-        $requestedRole = $_POST['requested_role'] ?? '';
+        $requestedRole = 'cliente'; // Sempre cliente por padrão
         $password = $_POST['password'] ?? '';
         $passwordConfirmation = $_POST['password_confirmation'] ?? '';
 
         // Validações
-        if (empty($name) || empty($email) || empty($requestedRole) || empty($password)) {
+        if (empty($name) || empty($email) || empty($password) || empty($passwordConfirmation)) {
             $_SESSION['error'] = 'Preencha todos os campos obrigatórios.';
             header('Location: /auth/register');
             exit;
@@ -164,12 +164,6 @@ class AuthController
 
         if ($password !== $passwordConfirmation) {
             $_SESSION['error'] = 'As senhas não coincidem.';
-            header('Location: /auth/register');
-            exit;
-        }
-
-        if (!in_array($requestedRole, ['cliente', 'analista'])) {
-            $_SESSION['error'] = 'Tipo de usuário inválido.';
             header('Location: /auth/register');
             exit;
         }

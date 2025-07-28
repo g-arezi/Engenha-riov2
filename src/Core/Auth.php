@@ -101,21 +101,21 @@ class Auth
                 'projects.view', 'projects.create', 'projects.edit', 'projects.delete', 'projects.manage_workflow',
                 'documents.view', 'documents.upload', 'documents.download', 'documents.delete', 'documents.approve', 'documents.reject',
                 'users.view', 'users.create', 'users.edit', 'users.delete',
-                'admin.view', 'admin.manage', 'admin.manage_permissions', 'admin.manage_documents',
+                'admin.view', 'admin.manage', 'admin.manage_permissions', 'admin.manage_documents', 'admin.manage_users',
                 'support.view', 'support.manage'
             ],
             'analista' => [
                 'dashboard.view',
                 'projects.view', 'projects.create', 'projects.edit', 'projects.manage_workflow',
                 'documents.view', 'documents.upload', 'documents.download', 'documents.approve', 'documents.reject',
-                'admin.view',
+                'admin.view', 'admin.manage_users',
                 'support.view', 'support.manage'
             ],
             'coordenador' => [
                 'dashboard.view',
                 'projects.view', 'projects.create', 'projects.edit', 'projects.manage_workflow',
                 'documents.view', 'documents.upload', 'documents.download', 'documents.approve', 'documents.reject',
-                'admin.view',
+                'admin.view', 'admin.manage_users',
                 'support.view', 'support.manage'
             ],
             'cliente' => [

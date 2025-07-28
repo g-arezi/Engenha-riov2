@@ -42,7 +42,7 @@ ob_start();
     <div class="col-lg-8">
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="/documents/upload" enctype="multipart/form-data" data-validate="true">
+                <form method="POST" action="/documents/upload" enctype="multipart/form-data" data-validate="true" id="uploadForm">
                     <!-- Seleção de Projeto -->
                     <div class="mb-4">
                         <label for="project_id" class="form-label">
@@ -186,9 +186,13 @@ ob_start();
                     </div>
                     
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="ajaxSubmit">
                             <i class="fas fa-upload me-1"></i>
-                            Enviar Documento
+                            Enviar Documento (AJAX)
+                        </button>
+                        <button type="submit" class="btn btn-success" id="normalSubmit">
+                            <i class="fas fa-upload me-1"></i>
+                            Enviar Documento (Normal)
                         </button>
                         <a href="/documents" class="btn btn-outline-secondary">
                             Cancelar
@@ -416,21 +420,89 @@ ob_start();
 </style>
 
 <script>
-// Interceptar submit do formulário para mostrar progresso
-document.querySelector('form[action="/documents/upload"]').addEventListener('submit', function(e) {
-    const fileInput = document.getElementById('document');
+// Debug inicial
+console.log('Upload page loaded');
+
+let useAjax = true;
+
+// Função para fazer upload via AJAX
+function submitWithAjax(form) {
+    const formData = new FormData(form);
     
-    if (fileInput.files.length > 0) {
-        e.preventDefault();
-        showUploadProgress();
+    // Mostrar modal de progresso
+    showUploadProgress();
+    simulateUploadProgress();
+    
+    // Fazer requisição
+    const xhr = new XMLHttpRequest();
+    
+    xhr.open('POST', '/documents/upload', true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    
+    xhr.onload = function() {
+        console.log('Response:', xhr.status, xhr.responseText);
         
-        // Simular progresso
-        simulateUploadProgress();
+        document.getElementById('uploadProgress').style.width = '100%';
+        document.getElementById('uploadStatus').textContent = 'Concluído';
         
-        // Submeter formulário via AJAX
-        submitFormWithProgress(this);
+        setTimeout(() => {
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        showUploadSuccess(data);
+                    } else {
+                        showUploadError(data.message || 'Erro no servidor');
+                    }
+                } catch (e) {
+                    // Se não é JSON, assumir sucesso
+                    showUploadSuccess({ success: true, message: 'Upload realizado!' });
+                }
+            } else {
+                showUploadError(`Erro ${xhr.status}: Falha na conexão`);
+            }
+        }, 500);
+    };
+    
+    xhr.onerror = function() {
+        console.error('Network error');
+        showUploadError('Erro de conexão. Verifique sua internet.');
+    };
+    
+    xhr.timeout = 30000;
+    xhr.send(formData);
+}
+
+// Event listeners para os botões
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('uploadForm');
+    const ajaxBtn = document.getElementById('ajaxSubmit');
+    const normalBtn = document.getElementById('normalSubmit');
+    
+    if (ajaxBtn) {
+        ajaxBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('AJAX upload requested');
+            
+            const fileInput = document.getElementById('document');
+            if (fileInput.files.length === 0) {
+                alert('Por favor, selecione um arquivo primeiro.');
+                return;
+            }
+            
+            submitWithAjax(form);
+        });
+    }
+    
+    if (normalBtn) {
+        normalBtn.addEventListener('click', function(e) {
+            console.log('Normal upload requested');
+            // Permite envio normal do formulário
+        });
     }
 });
+
+// Restante das funções...
 
 function showUploadProgress() {
     const modal = new bootstrap.Modal(document.getElementById('uploadProgressModal'));
@@ -474,42 +546,78 @@ function simulateUploadProgress() {
 function submitFormWithProgress(form) {
     const formData = new FormData(form);
     
-    fetch('/documents/upload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
+    // Adicionar cabeçalho para identificar requisição AJAX
+    const xhr = new XMLHttpRequest();
+    
+    xhr.open('POST', '/documents/upload', true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    
+    xhr.onload = function() {
+        console.log('Response status:', xhr.status);
+        console.log('Response text:', xhr.responseText);
+        
         // Completar barra de progresso
         document.getElementById('uploadProgress').style.width = '100%';
         document.getElementById('uploadStatus').textContent = 'Finalizando...';
         
-        if (response.ok) {
-            // Verificar se é JSON ou redirecionamento
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                return response.json();
-            } else {
-                // Se não é JSON, é redirecionamento - sucesso
-                return { success: true, redirect: true };
+        if (xhr.status === 200) {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                console.log('Parsed response:', data);
+                
+                setTimeout(() => {
+                    if (data.success) {
+                        showUploadSuccess(data);
+                    } else {
+                        showUploadError(data.message || 'Erro desconhecido no servidor');
+                    }
+                }, 500);
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+                console.log('Raw response:', xhr.responseText);
+                
+                // Se não é JSON, pode ser redirecionamento de sucesso
+                if (xhr.responseText.includes('documents') || xhr.responseText.includes('success')) {
+                    setTimeout(() => {
+                        showUploadSuccess({ success: true, message: 'Upload realizado com sucesso!' });
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        showUploadError('Erro ao processar resposta do servidor');
+                    }, 500);
+                }
             }
         } else {
-            throw new Error(`Erro ${response.status}: ${response.statusText}`);
+            setTimeout(() => {
+                showUploadError(`Erro ${xhr.status}: ${xhr.statusText}`);
+            }, 500);
         }
-    })
-    .then(data => {
+    };
+    
+    xhr.onerror = function() {
+        console.error('Network error occurred');
         setTimeout(() => {
-            if (data.success) {
-                showUploadSuccess(data);
-            } else {
-                showUploadError(data.message || 'Erro desconhecido');
-            }
+            showUploadError('Erro de conexão. Verifique sua rede.');
         }, 500);
-    })
-    .catch(error => {
+    };
+    
+    xhr.ontimeout = function() {
+        console.error('Request timeout');
         setTimeout(() => {
-            showUploadError(error.message);
+            showUploadError('Timeout na conexão. Tente novamente.');
         }, 500);
-    });
+    };
+    
+    // Timeout de 30 segundos
+    xhr.timeout = 30000;
+    
+    try {
+        xhr.send(formData);
+        console.log('Form data sent');
+    } catch (e) {
+        console.error('Error sending request:', e);
+        showUploadError('Erro ao enviar requisição: ' + e.message);
+    }
 }
 
 function showUploadSuccess(data) {

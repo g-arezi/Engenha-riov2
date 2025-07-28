@@ -14,8 +14,8 @@
         "end_date": "2025-12-31",
         "created_by": "admin",
         "created_at": "2025-07-20 10:00:00",
-        "updated_at": "2025-07-27 01:52:10",
-        "workflow_stage": 4
+        "updated_at": "2025-07-28 22:46:47",
+        "workflow_stage": 1
     },
     "projeto_2": {
         "id": "projeto_2",
@@ -35,24 +35,6 @@
         "updated_at": "2025-07-27 01:46:44",
         "workflow_stage": 1
     },
-    "projeto_3": {
-        "id": "projeto_3",
-        "name": "Viaduto da Avenida Principal",
-        "description": "Construção de viaduto para melhorar o fluxo de trânsito",
-        "client_id": "rafael",
-        "client_name": "Governo do Estado",
-        "analyst_id": "rafael",
-        "analyst_name": "Rafael Edinaldo",
-        "status": "finalizado",
-        "priority": "alta",
-        "deadline": "2025-03-15",
-        "start_date": "2024-12-01",
-        "end_date": "2025-03-15",
-        "created_by": "admin",
-        "created_at": "2024-12-01 09:00:00",
-        "updated_at": "2025-07-27 01:46:44",
-        "workflow_stage": 1
-    },
     "6885806d05f9c2.27368890": {
         "name": "Projeto Teste 1",
         "description": "aqui está o projeto, onde você colocará a descrição, o tipo de projeto, o tamplate de documentos solicitados, o cliente e analista escolhido, o prazo de entrega e a prioridade",
@@ -63,10 +45,10 @@
         "status": "pendente",
         "priority": "media",
         "deadline": "2025-07-30",
-        "workflow_stage": "documentos",
+        "workflow_stage": 1,
         "created_by": "admin",
         "created_at": "2025-07-27 03:27:09",
-        "updated_at": "2025-07-27 03:27:09",
+        "updated_at": "2025-07-28 22:32:30",
         "id": "6885806d05f9c2.27368890"
     },
     "projeto_teste_template": {

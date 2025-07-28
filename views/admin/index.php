@@ -703,18 +703,35 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(response => {
-            if (response.ok) {
+            console.log('Delete response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Delete response text:', text);
+            try {
+                const data = JSON.parse(text);
+                console.log('Delete parsed data:', data);
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao excluir usuário: ' + (data.message || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                // Se não é JSON, assumir que é uma resposta de redirecionamento bem-sucedida
                 location.reload();
-            } else {
-                alert('Erro ao excluir usuário. Tente novamente.');
             }
         })
         .catch(error => {
             console.error('Erro:', error);
-            alert('Erro ao excluir usuário. Tente novamente.');
+            alert('Erro ao excluir usuário: ' + error.message);
         });
     }
     
@@ -723,19 +740,34 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const row = button.closest('tr');
-                row.style.backgroundColor = '#d4edda';
-                row.style.transition = 'background-color 0.3s';
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            } else {
-                alert('Erro ao aprovar usuário. Tente novamente.');
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Response text:', text);
+            try {
+                const data = JSON.parse(text);
+                console.log('Parsed data:', data);
+                if (data.success) {
+                    const row = button.closest('tr');
+                    row.style.backgroundColor = '#d4edda';
+                    row.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert('Erro ao aprovar usuário: ' + (data.message || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                alert('Erro na resposta do servidor: ' + text);
             }
         })
         .catch(error => {
@@ -749,19 +781,34 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const row = button.closest('tr');
-                row.style.backgroundColor = '#f8d7da';
-                row.style.transition = 'background-color 0.3s';
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            } else {
-                alert('Erro ao rejeitar usuário. Tente novamente.');
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Response text:', text);
+            try {
+                const data = JSON.parse(text);
+                console.log('Parsed data:', data);
+                if (data.success) {
+                    const row = button.closest('tr');
+                    row.style.backgroundColor = '#f8d7da';
+                    row.style.transition = 'background-color 0.3s';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert('Erro ao rejeitar usuário: ' + (data.message || 'Erro desconhecido'));
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                alert('Erro na resposta do servidor: ' + text);
             }
         })
         .catch(error => {

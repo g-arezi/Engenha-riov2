@@ -194,6 +194,131 @@ class DocumentWorkflowController
         exit;
     }
 
+    public function updateDocumentStatus(): void
+    {
+        if (!Auth::check() || !Auth::hasPermission('documents.approve')) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Método não permitido']);
+            exit;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($data['document_id']) || !isset($data['status'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Dados inválidos']);
+            exit;
+        }
+
+        $documentId = $data['document_id'];
+        $newStatus = $data['status'];
+        $comments = $data['comments'] ?? '';
+        $rejectionReason = $data['rejection_reason'] ?? '';
+
+        // Validar status
+        $validStatuses = ['em_analise', 'aprovado', 'rejeitado'];
+        if (!in_array($newStatus, $validStatuses)) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Status inválido']);
+            exit;
+        }
+
+        $document = $this->db->find('project_documents', $documentId);
+        if (!$document) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Documento não encontrado']);
+            exit;
+        }
+
+        // Preparar dados para atualização
+        $updateData = [
+            'status' => $newStatus,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        // Adicionar campos específicos baseados no status
+        switch ($newStatus) {
+            case 'aprovado':
+                $updateData['approved_by'] = Auth::id();
+                $updateData['approved_at'] = date('Y-m-d H:i:s');
+                $updateData['comments'] = $comments;
+                // Limpar campos de rejeição
+                $updateData['rejected_by'] = null;
+                $updateData['rejected_at'] = null;
+                $updateData['rejection_reason'] = null;
+                break;
+                
+            case 'rejeitado':
+                $updateData['rejected_by'] = Auth::id();
+                $updateData['rejected_at'] = date('Y-m-d H:i:s');
+                $updateData['rejection_reason'] = $rejectionReason;
+                // Limpar campos de aprovação
+                $updateData['approved_by'] = null;
+                $updateData['approved_at'] = null;
+                $updateData['comments'] = $comments;
+                break;
+                
+            case 'em_analise':
+                // Limpar todos os campos de aprovação/rejeição
+                $updateData['approved_by'] = null;
+                $updateData['approved_at'] = null;
+                $updateData['rejected_by'] = null;
+                $updateData['rejected_at'] = null;
+                $updateData['rejection_reason'] = null;
+                $updateData['comments'] = $comments;
+                break;
+        }
+
+        // Atualizar documento
+        $this->db->update('project_documents', $documentId, $updateData);
+
+        // Criar notificação apropriada
+        $project = $this->db->find('projects', $document['project_id']);
+        $uploader = $this->db->find('users', $document['uploaded_by']);
+
+        if ($uploader) {
+            $notificationType = '';
+            $notificationData = [
+                'user_id' => $uploader['id'],
+                'project_id' => $document['project_id'],
+                'document_id' => $documentId,
+                'document_name' => $document['name'],
+                'project_name' => $project['name'] ?? 'Projeto'
+            ];
+
+            switch ($newStatus) {
+                case 'aprovado':
+                    $notificationType = 'document_approved';
+                    break;
+                case 'rejeitado':
+                    $notificationType = 'document_rejected';
+                    $notificationData['reason'] = $rejectionReason;
+                    break;
+                case 'em_analise':
+                    $notificationType = 'document_under_review';
+                    break;
+            }
+
+            if ($notificationType) {
+                $this->notificationService->createDocumentNotification($notificationType, $notificationData);
+            }
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Status do documento atualizado com sucesso',
+            'new_status' => $newStatus
+        ]);
+        exit;
+    }
+
     public function downloadDocument(string $documentId): void
     {
         if (!Auth::check() || !Auth::hasPermission('documents.download')) {
@@ -837,5 +962,120 @@ class DocumentWorkflowController
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro interno do servidor']);
         }
+    }
+
+    public function deleteDocument(string $documentId): void
+    {
+        if (!Auth::check() || !Auth::hasPermission('documents.delete')) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Sem permissão para excluir documentos']);
+            exit;
+        }
+
+        $documents = $this->db->findAll('project_documents');
+        
+        if (!isset($documents[$documentId])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Documento não encontrado']);
+            exit;
+        }
+
+        $document = $documents[$documentId];
+        
+        // Deletar arquivo físico se existir
+        $uploadPath = __DIR__ . '/../../public/uploads/';
+        $filePath = $uploadPath . $document['filename'];
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        // Remover do banco de dados
+        unset($documents[$documentId]);
+        
+        // Salvar alterações
+        $documentsFile = __DIR__ . '/../../data/project_documents.json';
+        file_put_contents($documentsFile, json_encode($documents, JSON_PRETTY_PRINT));
+
+        // Adicionar notificação
+        $this->notificationService->addNotification(
+            $document['uploaded_by'],
+            'Documento excluído',
+            "O documento '{$document['name']}' foi excluído.",
+            'document_deleted'
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Documento excluído com sucesso']);
+        exit;
+    }
+
+    public function getDocumentInfo(string $documentId): void
+    {
+        if (!Auth::check()) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+            exit;
+        }
+
+        $documents = $this->db->findAll('project_documents');
+        
+        if (!isset($documents[$documentId])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Documento não encontrado']);
+            exit;
+        }
+
+        $document = $documents[$documentId];
+        
+        // Buscar informações do usuário que fez upload
+        $users = $this->db->findAll('users');
+        $uploader = $users[$document['uploaded_by']] ?? null;
+        
+        // Buscar projeto
+        $projects = $this->db->findAll('projects');
+        $project = $projects[$document['project_id']] ?? null;
+
+        // Montar dados de resposta
+        $response = [
+            'success' => true,
+            'document' => [
+                'id' => $document['id'],
+                'name' => $document['name'],
+                'description' => $document['description'],
+                'original_name' => $document['original_name'],
+                'size' => $document['size'],
+                'size_formatted' => $this->formatFileSize($document['size']),
+                'mime_type' => $document['mime_type'],
+                'status' => $document['status'],
+                'status_label' => ucfirst(str_replace('_', ' ', $document['status'])),
+                'created_at' => $document['created_at'],
+                'created_at_formatted' => date('d/m/Y H:i', strtotime($document['created_at'])),
+                'uploader' => $uploader ? $uploader['name'] : 'Usuário não encontrado',
+                'project_name' => $project ? $project['name'] : 'Projeto não encontrado',
+                'document_type' => $document['document_type'],
+                'version' => $document['version'] ?? 1,
+                'comments' => $document['comments'] ?? '',
+                'approved_by' => $document['approved_by'],
+                'approved_at' => $document['approved_at'],
+                'rejected_by' => $document['rejected_by'],
+                'rejected_at' => $document['rejected_at'],
+                'rejection_reason' => $document['rejection_reason']
+            ]
+        ];
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    private function formatFileSize(int $bytes): string
+    {
+        if ($bytes === 0) return '0 Bytes';
+        
+        $k = 1024;
+        $sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        $i = floor(log($bytes) / log($k));
+        
+        return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
     }
 }

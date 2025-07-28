@@ -177,18 +177,18 @@ function createDocumentModal(document) {
 // ===============================
 
 function viewProject(projectId) {
-    window.location.href = `/projects/view/${projectId}`;
+    window.location.href = `/projects/${projectId}`;
 }
 
 function editProject(projectId) {
-    window.location.href = `/projects/edit/${projectId}`;
+    window.location.href = `/projects/${projectId}/edit`;
 }
 
 function deleteProject(projectId) {
     if (confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.')) {
         showLoader();
         
-        fetch(`/projects/delete/${projectId}`, {
+        fetch(`/projects/${projectId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Modal Debug</title>
+</head>
+<body>
+    <h1>Teste Modal Debug</h1>
+    <button onclick="testFetch()">Testar Fetch</button>
+    <div id="result"></div>
+
+    <script>
+    function testFetch() {
+        console.log('Iniciando teste...');
+        
+        fetch('/documents/project/doc_proj_1/info', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            console.log('Response headers:', response.headers);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Raw response length:', text.length);
+            console.log('Raw response:', text);
+            console.log('First 100 chars:', text.substring(0, 100));
+            console.log('Last 100 chars:', text.substring(text.length - 100));
+            
+            try {
+                const data = JSON.parse(text);
+                console.log('Parsed successfully:', data);
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Error message:', parseError.message);
+                document.getElementById('result').innerHTML = '<div style="color: red;">Parse Error: ' + parseError.message + '</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            document.getElementById('result').innerHTML = '<div style="color: red;">Fetch Error: ' + error.message + '</div>';
+        });
+    }
+    </script>
+</body>
+</html>

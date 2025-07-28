@@ -41,20 +41,14 @@ class Router
     {
         $path = parse_url($requestUri, PHP_URL_PATH);
         
-        // Debug logging
-        error_log("Dispatching: Method=$requestMethod, Path=$path");
-        
         foreach ($this->routes as $route) {
-            error_log("Checking route: {$route['path']} (method: {$route['method']})");
             if ($this->matchRoute($route, $path, $requestMethod)) {
-                error_log("Route matched: {$route['path']}");
                 $this->executeRoute($route, $path);
                 return;
             }
         }
 
         // 404 Not Found
-        error_log("No route matched for $path");
         http_response_code(404);
         require_once __DIR__ . '/../../views/errors/404.php';
     }
@@ -65,6 +59,7 @@ class Router
             return false;
         }
 
+        // Melhor handling para parâmetros com pontos e caracteres especiais
         $pattern = preg_replace('/\{([^}]+)\}/', '([^/]+)', $route['path']);
         $pattern = str_replace('/', '\/', $pattern);
         $pattern = '/^' . $pattern . '$/';
