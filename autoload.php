@@ -1,6 +1,8 @@
 <?php
 
-// Simple autoloader for the Engenha Rio system
+// para um sistema de debug, autoload para logar
+//  automaticamente e sanar alguma falha invisivel.
+
 spl_autoload_register(function ($class) {
     // Convert namespace to file path
     $prefix = 'App\\';
@@ -15,7 +17,8 @@ spl_autoload_register(function ($class) {
     // Get relative class name
     $relative_class = substr($class, $len);
     
-    // Replace namespace separators with directory separators and add .php
+    // Replace namespace separators 
+    // with directory separators and add .php
     $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
     
     // If file exists, require it
