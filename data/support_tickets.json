@@ -1,52 +1,12 @@
 {
-    "68855aa82b19c4.96301025": {
+    "688a689fa15ee7.57357003": {
         "subject": "testes",
-        "description": "teste",
-        "priority": "media",
-        "status": "aberto",
-        "user_id": "admin",
-        "id": "68855aa82b19c4.96301025",
-        "created_at": "2025-07-27 00:46:00",
-        "updated_at": "2025-07-27 00:46:00"
-    },
-    "68855bdb41db69.96170824": {
-        "subject": "Teste via script",
-        "description": "Este é um teste de criação de ticket via script PHP direto",
-        "priority": "media",
-        "status": "aberto",
-        "user_id": "admin",
-        "id": "68855bdb41db69.96170824",
-        "created_at": "2025-07-27 00:51:07",
-        "updated_at": "2025-07-27 00:51:07"
-    },
-    "68855ce210d801.49618393": {
-        "subject": "teste",
-        "description": "teste",
-        "priority": "media",
-        "status": "aberto",
-        "user_id": "admin",
-        "id": "68855ce210d801.49618393",
-        "created_at": "2025-07-27 00:55:30",
-        "updated_at": "2025-07-27 00:55:30"
-    },
-    "68856188594b63.95256013": {
-        "subject": "testes",
-        "description": "teste",
+        "description": "testando sistemaatestando sistemaatestando sistemaa",
         "priority": "alta",
         "status": "aberto",
-        "user_id": "admin",
-        "id": "68856188594b63.95256013",
-        "created_at": "2025-07-27 01:15:20",
-        "updated_at": "2025-07-27 01:15:20"
-    },
-    "688a5d447682c3.90147134": {
-        "subject": "preciso resolver um problema",
-        "description": "problema no arquivo",
-        "priority": "urgente",
-        "status": "aberto",
         "user_id": "6887cdaf0cf3a8.51328972",
-        "id": "688a5d447682c3.90147134",
-        "created_at": "2025-07-30 17:58:28",
-        "updated_at": "2025-07-30 17:58:28"
+        "id": "688a689fa15ee7.57357003",
+        "created_at": "2025-07-30 18:46:55",
+        "updated_at": "2025-07-30 18:46:55"
     }
 }

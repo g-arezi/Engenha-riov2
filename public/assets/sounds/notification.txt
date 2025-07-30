@@ -1,0 +1,7 @@
+Este é um marcador para o som de notificação. 
+Você deve baixar um arquivo de notificação de som curto (.mp3) e salvá-lo aqui com o nome "notification.mp3".
+
+Exemplos de sons gratuitos podem ser encontrados em:
+- https://mixkit.co/free-sound-effects/notification/
+- https://freesound.org/
+- https://notificationsounds.com/

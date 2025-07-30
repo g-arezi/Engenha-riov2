@@ -86,7 +86,9 @@ ob_start();
     <div class="col-md-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Meus Tickets</h6>
+                <h6 class="mb-0">
+                    <?= Auth::hasPermission('admin.view') || Auth::hasPermission('support.manage') ? 'Todos os Tickets' : 'Meus Tickets' ?>
+                </h6>
                 <a href="/support/create" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus"></i> Novo
                 </a>
@@ -108,7 +110,7 @@ ob_start();
                                class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
                                data-ticket-id="<?= $ticket['id'] ?>"
                                data-status="<?= $ticket['status'] ?>"
-                               style="<?= $ticket['status'] === 'fechado' ? 'display: none;' : '' ?>">
+                               data-user="<?= $ticket['user_id'] ?>">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h6 class="mb-1"><?= htmlspecialchars($ticket['subject']) ?></h6>
                                     <small class="text-muted"><?= date('d/m/Y', strtotime($ticket['created_at'])) ?></small>
@@ -118,9 +120,15 @@ ob_start();
                                     <?= strlen($ticket['description']) > 100 ? '...' : '' ?>
                                 </p>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-<?= $ticket['status'] === 'aberto' ? 'success' : ($ticket['status'] === 'em_andamento' ? 'warning' : 'secondary') ?>">
-                                        <?= ucfirst(str_replace('_', ' ', $ticket['status'])) ?>
-                                    </span>
+                                    <div>
+                                        <span class="badge bg-<?= $ticket['status'] === 'aberto' ? 'success' : ($ticket['status'] === 'em_andamento' ? 'warning' : 'secondary') ?>">
+                                            <?= ucfirst(str_replace('_', ' ', $ticket['status'])) ?>
+                                        </span>
+                                        <span class="text-muted small ms-2">
+                                            <i class="fas fa-user me-1"></i>
+                                            <?= htmlspecialchars(isset($ticket['user_name']) ? $ticket['user_name'] : $ticket['user_id']) ?>
+                                        </span>
+                                    </div>
                                     <span class="badge bg-<?= $ticket['priority'] === 'alta' || $ticket['priority'] === 'urgente' ? 'danger' : ($ticket['priority'] === 'media' ? 'warning' : 'info') ?>">
                                         <?= ucfirst($ticket['priority']) ?>
                                     </span>
@@ -149,9 +157,63 @@ ob_start();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Mostrar todos os tickets disponíveis na página
+    const allTickets = document.querySelectorAll('.ticket-item');
+    console.log("DEBUG - Total de tickets no DOM antes de qualquer filtro: " + allTickets.length);
+    
+    // Lista todos os tickets e seus atributos para debug
+    allTickets.forEach(item => {
+        console.log("TICKET DISPONÍVEL: " + 
+                    "ID=" + item.getAttribute('data-ticket-id') + 
+                    ", Status=" + item.getAttribute('data-status') + 
+                    ", User=" + item.getAttribute('data-user'));
+    });
+    
     // Handle tab switching
     const tabs = document.querySelectorAll('.support-tab');
-    tabs.forEach(tab => {
+    
+    // IMPORTANTE: Remover qualquer estilo display:none que possa estar aplicado
+    allTickets.forEach(item => {
+        if (item.style.display === 'none') {
+            console.log("Corrigindo visibilidade do ticket: " + item.getAttribute('data-ticket-id'));
+        }
+        item.style.display = '';
+    });
+    
+    console.log("Total de tickets no DOM após correção: " + allTickets.length);
+    
+    // Função para filtrar tickets baseado na aba ativa
+    function filterTickets(tabType) {
+        console.log("Filtrando tickets por: " + tabType);
+        
+        // Primeiro mostre TODOS os tickets para garantir que nenhum esteja escondido
+        document.querySelectorAll('.ticket-item').forEach(item => {
+            // Sempre reset primeiro
+            item.style.display = '';
+            
+            console.log("Verificando ticket para filtro: " + 
+                      "ID=" + item.getAttribute('data-ticket-id') + 
+                      ", Status=" + item.getAttribute('data-status'));
+            
+            // Então aplica o filtro
+            if (tabType === 'open') {
+                // Show only open tickets
+                if (item.getAttribute('data-status') === 'fechado') {
+                    item.style.display = 'none';
+                    console.log("Ocultando ticket fechado: " + item.getAttribute('data-ticket-id'));
+                }
+            } else if (tabType === 'history') {
+                // Show only history tickets
+                if (item.getAttribute('data-status') !== 'fechado') {
+                    item.style.display = 'none';
+                    console.log("Ocultando ticket aberto: " + item.getAttribute('data-ticket-id'));
+                }
+            }
+        });
+    }
+    
+    // Aplicar filtragem inicial (tickets abertos devem ser mostrados por padrão)
+    filterTickets('open');    tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             // Remove active class from all tabs
             tabs.forEach(t => t.classList.remove('active'));
@@ -159,18 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
             
             const tabType = this.getAttribute('data-tab');
-            
-            // Show/hide tickets based on the selected tab
-            const ticketItems = document.querySelectorAll('.ticket-item');
-            ticketItems.forEach(item => {
-                if (tabType === 'open') {
-                    // Show only open tickets
-                    item.style.display = item.classList.contains('history-ticket') ? 'none' : '';
-                } else if (tabType === 'history') {
-                    // Show only history tickets
-                    item.style.display = item.classList.contains('open-ticket') ? 'none' : '';
-                }
-            });
+            filterTickets(tabType);
         });
     });
 });

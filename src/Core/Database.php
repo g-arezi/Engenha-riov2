@@ -15,6 +15,27 @@ class Database
             mkdir($this->dataPath, 0755, true);
         }
     }
+    
+    // Method to get all data from a table without filtering
+    public function getAllData(string $table): array
+    {
+        $filePath = $this->dataPath . $table . '.json';
+        
+        // Verificação extra para debug
+        echo "<!-- DEBUG Database::getAllData - Reading from: {$filePath} -->\n";
+        
+        if (!file_exists($filePath)) {
+            echo "<!-- DEBUG Database::getAllData - File does not exist! -->\n";
+            return [];
+        }
+        
+        $content = file_get_contents($filePath);
+        $data = json_decode($content, true) ?: [];
+        
+        echo "<!-- DEBUG Database::getAllData - Records found: " . count($data) . " -->\n";
+        
+        return $data;
+    }
 
     public function find(string $table, string $id): ?array
     {
@@ -37,6 +58,13 @@ class Database
     {
         $data = $this->getTable($table);
         
+        // Log for debugging
+        error_log("Database::findAll - Table: {$table}, Total records: " . count($data) . ", Criteria: " . json_encode($criteria));
+        
+        // Log all records IDs for debugging
+        $allIds = array_keys($data);
+        error_log("All records IDs: " . implode(", ", $allIds));
+        
         if (empty($criteria)) {
             return $data;
         }
@@ -55,6 +83,10 @@ class Database
             }
         }
 
+        // Log filtered records IDs for debugging
+        $filteredIds = array_keys($filtered);
+        error_log("Filtered records IDs: " . implode(", ", $filteredIds));
+        error_log("Database::findAll - Filtered records: " . count($filtered));
         return $filtered;
     }
 
@@ -119,12 +151,19 @@ class Database
     {
         $filePath = $this->dataPath . $table . '.json';
         
+        echo "<!-- DEBUG Database::getTable - Reading from: {$filePath} -->\n";
+        
         if (!file_exists($filePath)) {
+            echo "<!-- DEBUG Database::getTable - File does not exist! -->\n";
             return [];
         }
 
         $content = file_get_contents($filePath);
-        return json_decode($content, true) ?: [];
+        $data = json_decode($content, true) ?: [];
+        
+        echo "<!-- DEBUG Database::getTable - Records found: " . count($data) . " -->\n";
+        
+        return $data;
     }
 
     private function saveTable(string $table, array $data): void

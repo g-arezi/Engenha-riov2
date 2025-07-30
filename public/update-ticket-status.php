@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Ensure user is logged in and has permission
-if (!Auth::check() || !Auth::hasPermission('support.manage')) {
+if (!Auth::check() || !(Auth::hasPermission('admin.view') || Auth::hasPermission('support.manage'))) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Acesso negado']);
     exit;

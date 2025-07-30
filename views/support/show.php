@@ -77,7 +77,7 @@ ob_start();
                             <small class="text-muted d-block">Criado por</small>
                             <div class="d-flex align-items-center">
                                 <img src="/assets/images/avatar-default.svg" alt="Avatar" class="rounded-circle me-2" width="24" height="24">
-                                <span><?= htmlspecialchars($ticket['user_id']) ?></span>
+                                <span><?= htmlspecialchars(isset($creatorName) ? $creatorName : $ticket['user_id']) ?></span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -95,21 +95,21 @@ ob_start();
                 <h6 class="mb-0">Respostas</h6>
             </div>
             <div class="card-body">
-                <div class="replies-list">
+                <div id="replies-list" class="replies-list" data-ticket-id="<?= $ticket['id'] ?>">
                     <?php if (empty($replies)): ?>
-                        <div class="text-center py-4 text-muted">
+                        <div class="text-center py-4 text-muted no-replies">
                             <i class="fas fa-comments fa-2x mb-3"></i>
                             <p>Nenhuma resposta ainda</p>
                         </div>
                     <?php else: ?>
                         <?php foreach ($replies as $reply): ?>
-                            <div class="reply-item mb-3">
+                            <div class="reply-item mb-3" data-reply-id="<?= $reply['id'] ?>">
                                 <div class="d-flex">
                                     <img src="/assets/images/avatar-default.svg" alt="Avatar" class="rounded-circle me-3" width="32" height="32">
                                     <div class="flex-grow-1">
                                         <div class="reply-header d-flex justify-content-between align-items-center mb-2">
                                             <div>
-                                                <strong><?= htmlspecialchars($reply['user_id']) ?></strong>
+                                                <strong><?= htmlspecialchars(isset($reply['user_name']) && !empty($reply['user_name']) ? $reply['user_name'] : $reply['user_id']) ?></strong>
                                                 <?php if ($reply['is_staff']): ?>
                                                     <span class="badge bg-primary ms-1">Equipe</span>
                                                 <?php endif; ?>
@@ -118,6 +118,18 @@ ob_start();
                                         </div>
                                         <div class="reply-content">
                                             <?= nl2br(htmlspecialchars($reply['message'])) ?>
+                                            
+                                            <?php if (isset($reply['attachment']) && !empty($reply['attachment'])): ?>
+                                            <div class="reply-attachment mt-2">
+                                                <a href="<?= $reply['attachment'] ?>" target="_blank" class="d-block">
+                                                    <img src="<?= $reply['attachment'] ?>" alt="Imagem anexada" class="img-fluid img-thumbnail" style="max-height: 200px;">
+                                                </a>
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="fas fa-paperclip me-1"></i>
+                                                    <?= isset($reply['attachment_name']) ? htmlspecialchars($reply['attachment_name']) : 'Imagem anexada' ?>
+                                                </small>
+                                            </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -130,11 +142,16 @@ ob_start();
                 <!-- Reply Form -->
                 <?php if ($ticket['status'] !== 'fechado'): ?>
                     <div class="reply-form mt-4">
-                        <form method="POST" action="/reply-ticket.php?id=<?= $ticket['id'] ?>">
+                        <form method="POST" action="/reply-ticket.php?id=<?= $ticket['id'] ?>" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="message" class="form-label">Sua Resposta</label>
                                 <textarea class="form-control" id="message" name="message" rows="4" 
                                           placeholder="Digite sua resposta..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="attachment" class="form-label">Anexar Imagem (opcional)</label>
+                                <input type="file" class="form-control" id="attachment" name="attachment" accept="image/*">
+                                <div class="form-text">Formatos aceitos: JPG, JPEG, PNG, GIF - tamanho máximo 2MB</div>
                             </div>
                             
                             <?php if (Auth::hasPermission('support.manage')): ?>
@@ -242,6 +259,18 @@ ob_start();
 .reply-item {
     border-left: 3px solid #e9ecef;
     padding-left: 1rem;
+    transition: background-color 0.5s ease;
+}
+
+/* Animação para novas respostas */
+.reply-item.new-reply {
+    animation: highlightNew 3s ease;
+}
+
+@keyframes highlightNew {
+    0% { background-color: rgba(0, 123, 255, 0.1); }
+    70% { background-color: rgba(0, 123, 255, 0.1); }
+    100% { background-color: transparent; }
 }
 
 .reply-form {
@@ -259,14 +288,23 @@ ob_start();
     padding-bottom: 0;
 }
 
+.auto-refresh-status {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
 @media print {
-    .card-header, .btn, .reply-form {
+    .card-header, .btn, .reply-form, .auto-refresh-status {
         display: none !important;
     }
 }
 </style>
 
 <?php
+// Adicionar scripts de atualização automática das respostas
+echo '<script src="/assets/js/ticket-refresh.js?v=' . time() . '"></script>';
+echo '<script src="/assets/js/ticket-init.js?v=' . time() . '"></script>';
+
 $content = ob_get_clean();
 include __DIR__ . '/../layouts/app.php';
 ?>
