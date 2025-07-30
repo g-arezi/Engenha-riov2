@@ -15,7 +15,7 @@ ob_start();
             <p class="text-muted mb-0">Acompanhe as atualizações do sistema</p>
         </div>
         <?php if (!empty($notifications) && count(array_filter($notifications, fn($n) => !($n['is_read'] ?? false))) > 0): ?>
-        <button class="btn btn-outline-primary" onclick="markAllNotificationsAsRead()">
+        <button class="btn btn-outline-primary" onclick="markAllAsRead()">
             <i class="fas fa-check-double me-1"></i>
             Marcar todas como lidas
         </button>
@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.mark-as-read').forEach(button => {
         button.addEventListener('click', function() {
             const notificationId = this.dataset.id;
+            // Use the button element directly, which will be removed after the notification is marked as read
             markAsRead(notificationId, this);
         });
     });
@@ -118,13 +119,13 @@ document.addEventListener('DOMContentLoaded', function() {
         markAllAsRead();
     });
     
+    // Local version of markAsRead for managing DOM elements in the notifications page
     function markAsRead(notificationId, button) {
-        fetch('/notifications/mark-read', {
+        fetch(`/notifications/mark-read/${notificationId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ notification_id: notificationId })
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -138,24 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Erro ao marcar notificação como lida:', error);
-        });
-    }
-    
-    function markAllNotificationsAsRead() {
-        fetch('/notifications/mark-all-read', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.reload();
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao marcar todas as notificações:', error);
         });
     }
 });

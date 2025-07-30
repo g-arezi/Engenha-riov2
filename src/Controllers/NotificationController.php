@@ -35,15 +35,18 @@ class NotificationController
         require_once __DIR__ . '/../../views/notifications/index.php';
     }
 
-    public function markAsRead(): void
+    public function markAsRead(string $notificationId = null): void
     {
         if (!Auth::check()) {
             header('HTTP/1.0 401 Unauthorized');
             exit;
         }
 
-        $input = json_decode(file_get_contents('php://input'), true);
-        $notificationId = $input['notification_id'] ?? null;
+        // If no ID provided in URL, try to get from request body
+        if (!$notificationId) {
+            $input = json_decode(file_get_contents('php://input'), true);
+            $notificationId = $input['notification_id'] ?? null;
+        }
 
         if (!$notificationId) {
             header('Content-Type: application/json');
@@ -59,7 +62,7 @@ class NotificationController
         }
 
         $this->db->update('notifications', $notificationId, [
-            'read' => true,
+            'is_read' => true,
             'read_at' => date('Y-m-d H:i:s')
         ]);
 
@@ -74,11 +77,11 @@ class NotificationController
             exit;
         }
 
-        $notifications = $this->db->findAll('notifications', ['user_id' => Auth::id(), 'read' => false]);
+        $notifications = $this->db->findAll('notifications', ['user_id' => Auth::id(), 'is_read' => false]);
         
         foreach ($notifications as $notification) {
             $this->db->update('notifications', $notification['id'], [
-                'read' => true,
+                'is_read' => true,
                 'read_at' => date('Y-m-d H:i:s')
             ]);
         }
@@ -94,7 +97,7 @@ class NotificationController
             exit;
         }
 
-        $count = count($this->db->findAll('notifications', ['user_id' => Auth::id(), 'read' => false]));
+        $count = count($this->db->findAll('notifications', ['user_id' => Auth::id(), 'is_read' => false]));
 
         header('Content-Type: application/json');
         echo json_encode(['count' => $count]);

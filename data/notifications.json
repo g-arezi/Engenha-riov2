@@ -5,10 +5,11 @@
         "title": "Nova Solicitação de Cadastro",
         "message": "O usuário usuarioteste (usuarioteste@engenhario.com) solicitou cadastro como cliente.",
         "data": "{\"new_user_id\":\"6887cb7c384b75.22527396\",\"requested_role\":\"cliente\",\"user_name\":\"usuarioteste\",\"user_email\":\"usuarioteste@engenhario.com\"}",
-        "is_read": false,
+        "is_read": true,
         "created_at": "2025-07-28 21:11:56",
         "id": "6887cb7c3b32c6.68646470",
-        "updated_at": "2025-07-28 21:11:56"
+        "updated_at": "2025-07-30 17:57:23",
+        "read_at": "2025-07-30 17:57:23"
     },
     "6887cb7c3dba97.61661293": {
         "user_id": "maria_coordenadora",
@@ -27,10 +28,11 @@
         "title": "Nova Solicitação de Cadastro",
         "message": "O usuário usuarioteste2 (usuarioteste2@engenhario.com) solicitou cadastro como cliente.",
         "data": "{\"new_user_id\":\"6887cdaf0cf3a8.51328972\",\"requested_role\":\"cliente\",\"user_name\":\"usuarioteste2\",\"user_email\":\"usuarioteste2@engenhario.com\"}",
-        "is_read": false,
+        "is_read": true,
         "created_at": "2025-07-28 21:21:19",
         "id": "6887cdaf1035f1.33527835",
-        "updated_at": "2025-07-28 21:21:19"
+        "updated_at": "2025-07-30 17:57:23",
+        "read_at": "2025-07-30 17:57:23"
     },
     "6887cdaf12f672.86071610": {
         "user_id": "maria_coordenadora",
@@ -117,10 +119,11 @@
         "title": "Novo Projeto Criado",
         "message": "O projeto \"Teste criaçao com tamplate modificado\" foi criado e está aguardando documentos.",
         "data": "{\"project_id\":\"688a44e4707da0.00549663\"}",
-        "is_read": false,
+        "is_read": true,
         "created_at": "2025-07-30 16:14:28",
         "id": "688a44e470a179.79238371",
-        "updated_at": "2025-07-30 16:14:28"
+        "updated_at": "2025-07-30 17:57:31",
+        "read_at": "2025-07-30 17:57:31"
     },
     "688a44e473aa43.77038342": {
         "user_id": "6887cb7c384b75.22527396",
@@ -139,10 +142,11 @@
         "title": "Novo Projeto Criado",
         "message": "O projeto \"Teste criaçao com tamplate modificado\" foi criado e está aguardando documentos.",
         "data": "{\"project_id\":\"688a45b0b536e7.74536271\"}",
-        "is_read": false,
+        "is_read": true,
         "created_at": "2025-07-30 16:17:52",
         "id": "688a45b0b57ed9.48990021",
-        "updated_at": "2025-07-30 16:17:52"
+        "updated_at": "2025-07-30 17:57:31",
+        "read_at": "2025-07-30 17:57:31"
     },
     "688a45b0b80a12.51943187": {
         "user_id": "6887cb7c384b75.22527396",
@@ -161,10 +165,11 @@
         "title": "Novo Projeto Criado",
         "message": "O projeto \"Teste criaçao com tamplate modificado\" foi criado e está aguardando documentos.",
         "data": "{\"project_id\":\"proj_1753892536_9899\"}",
-        "is_read": false,
+        "is_read": true,
         "created_at": "2025-07-30 16:22:16",
         "id": "688a46b8608b31.90384598",
-        "updated_at": "2025-07-30 16:22:16"
+        "updated_at": "2025-07-30 17:57:31",
+        "read_at": "2025-07-30 17:57:31"
     },
     "688a46b8637097.14407697": {
         "user_id": "rafael",
@@ -219,11 +224,12 @@
         "user_id": "admin",
         "project_id": "proj_1753892536_9899",
         "document_id": "doc_688a4ec7b1ba3",
-        "is_read": false,
+        "is_read": true,
         "priority": "high",
         "id": "688a4edf4b77d4.48266452",
         "created_at": "2025-07-30 16:57:03",
-        "updated_at": "2025-07-30 16:57:03"
+        "updated_at": "2025-07-30 17:57:23",
+        "read_at": "2025-07-30 17:57:23"
     },
     "688a55c7ca8fe7.82362984": {
         "type": "document_uploaded",

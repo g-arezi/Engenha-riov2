@@ -38,5 +38,15 @@
         "id": "68856188594b63.95256013",
         "created_at": "2025-07-27 01:15:20",
         "updated_at": "2025-07-27 01:15:20"
+    },
+    "688a5d447682c3.90147134": {
+        "subject": "preciso resolver um problema",
+        "description": "problema no arquivo",
+        "priority": "urgente",
+        "status": "aberto",
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "id": "688a5d447682c3.90147134",
+        "created_at": "2025-07-30 17:58:28",
+        "updated_at": "2025-07-30 17:58:28"
     }
 }
