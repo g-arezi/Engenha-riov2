@@ -89,16 +89,17 @@ $router->get('/admin/templates/{id}/edit', [TemplateController::class, 'edit'], 
 $router->post('/admin/templates/{id}/edit', [TemplateController::class, 'edit'], [AuthMiddleware::class]);
 $router->delete('/admin/templates/{id}/delete', [TemplateController::class, 'delete'], [AuthMiddleware::class]);
 
-// Project routes
+// Project routes - IMPORTANTE: Rotas mais específicas primeiro, depois as mais gerais com parâmetros
 $router->get('/projects', [ProjectController::class, 'index'], [AuthMiddleware::class]);
 $router->get('/projects/create', [ProjectController::class, 'create'], [AuthMiddleware::class]);
 $router->post('/projects/create', [ProjectController::class, 'create'], [AuthMiddleware::class]);
-$router->get('/projects/{id}', [ProjectController::class, 'show'], [AuthMiddleware::class]);
 $router->get('/projects/view/{id}', [ProjectController::class, 'show'], [AuthMiddleware::class]);
+$router->post('/projects/update-status/{id}', [ProjectController::class, 'updateStatus'], [AuthMiddleware::class]);
+// Rotas com parâmetros devem vir depois das mais específicas
 $router->get('/projects/{id}/edit', [ProjectController::class, 'edit'], [AuthMiddleware::class]);
 $router->post('/projects/{id}/edit', [ProjectController::class, 'edit'], [AuthMiddleware::class]);
 $router->delete('/projects/{id}', [ProjectController::class, 'delete'], [AuthMiddleware::class]);
-$router->post('/projects/update-status/{id}', [ProjectController::class, 'updateStatus'], [AuthMiddleware::class]);
+$router->get('/projects/{id}', [ProjectController::class, 'show'], [AuthMiddleware::class]);
 
 // Document routes
 $router->get('/documents', [DocumentController::class, 'index'], [AuthMiddleware::class]);
@@ -136,6 +137,10 @@ $router->post('/document-workflow/revert', [DocumentWorkflowController::class, '
 $router->post('/document-workflow/finalize', [DocumentWorkflowController::class, 'finalize'], [AuthMiddleware::class]);
 $router->post('/document-workflow/approve-document-ajax', [DocumentWorkflowController::class, 'approveDocumentAjax'], [AuthMiddleware::class]);
 $router->post('/document-workflow/reject-document-ajax', [DocumentWorkflowController::class, 'rejectDocumentAjax'], [AuthMiddleware::class]);
+
+// Additional document upload route for AJAX drag-and-drop functionality
+$router->post('/documents/upload-project-file', [DocumentWorkflowController::class, 'uploadProjectFile'], [AuthMiddleware::class]);
+$router->post('/documents/handle-drag-drop', [DocumentWorkflowController::class, 'handleDragDropUpload'], [AuthMiddleware::class]);
 
 // Support routes
 $router->get('/support', [SupportController::class, 'index'], [AuthMiddleware::class]);

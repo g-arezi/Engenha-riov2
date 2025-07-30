@@ -1,0 +1,112 @@
+/* Estilos para o workflow de etapas do projeto */
+
+.workflow-stages {
+    position: relative;
+    padding: 20px 0;
+}
+
+.stage-row {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 20px;
+}
+
+/* Linha de conexão entre os estágios */
+.stage-row:before {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 120px;
+    right: 120px;
+    height: 4px;
+    background-color: #e9ecef;
+    z-index: 1;
+}
+
+.stage-item {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    width: 120px;
+}
+
+.stage-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 1.2rem;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Status dos ícones de estágio */
+.stage-icon.current {
+    background-color: #ffc107;
+    color: #000;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+
+.stage-icon.completed {
+    background-color: #28a745;
+}
+
+.stage-icon.disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+}
+
+.stage-icon.analysis,
+.stage-icon.rejected {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.stage-label {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Status dos documentos */
+.document-status-pending {
+    color: #6c757d;
+}
+
+.document-status-analysis {
+    color: #ffc107;
+}
+
+.document-status-approved {
+    color: #28a745;
+}
+
+.document-status-rejected {
+    color: #ffc107; /* Amarelo para rejeitados, conforme solicitado */
+}
+
+/* Tabela de documentos */
+.document-row.status-analysis,
+.document-row.status-rejected {
+    background-color: #fff3cd !important; /* Fundo amarelo para documentos em análise ou rejeitados */
+}
+
+.document-row.status-approved {
+    background-color: #d1e7dd !important; /* Fundo verde claro para documentos aprovados */
+}
+
+/* Controle do workflow para admin/coordenador */
+.workflow-controls {
+    margin-top: 30px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}

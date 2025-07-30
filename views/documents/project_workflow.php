@@ -88,44 +88,47 @@ ob_start();
             <div class="stage-row d-flex justify-content-between align-items-center mb-3">
                 <!-- Documentos -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon completed">
-                        <i class="fas fa-file-alt"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] >= 1 ? ($project['workflow_stage'] == 1 ? 'current' : 'completed') : 'disabled' ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 1 ? 'check' : ($project['workflow_stage'] == 1 ? 'file-alt' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Documentos</div>
                 </div>
                 
                 <!-- Projeto -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon completed">
-                        <i class="fas fa-check"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] > 2 ? 'completed' : ($project['workflow_stage'] == 2 ? 'current' : 'disabled') ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 2 ? 'check' : ($project['workflow_stage'] == 2 ? 'sync-alt' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Projeto</div>
                 </div>
                 
                 <!-- Produção -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] >= 3 ? 'completed' : 'disabled' ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] >= 3 ? 'check' : 'lock' ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] > 3 ? 'completed' : ($project['workflow_stage'] == 3 ? 'current' : 'disabled') ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 3 ? 'check' : ($project['workflow_stage'] == 3 ? 'sync-alt' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Produção</div>
                 </div>
                 
                 <!-- Buildup -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] >= 4 ? 'completed' : 'disabled' ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] >= 4 ? 'check' : 'lock' ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] > 4 ? 'completed' : ($project['workflow_stage'] == 4 ? 'current' : 'disabled') ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 4 ? 'check' : ($project['workflow_stage'] == 4 ? 'sync-alt' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Buildup</div>
                 </div>
                 
                 <!-- Aprovado -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] >= 5 ? 'completed' : 'disabled' ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] >= 5 ? 'check' : 'lock' ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] == 5 ? 'current' : 'disabled' ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] == 5 ? 'check' : 'lock' ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Aprovado</div>
                 </div>
             </div>
+            
+            <!-- Hidden input to store current stage for JavaScript -->
+            <input type="hidden" id="workflow-stage" value="<?= $project['workflow_stage'] ?? 1 ?>">
             
             <?php if (Auth::hasPermission('projects.manage_workflow')): ?>
             <!-- Workflow Controls for Admins, Coordinators, and Analysts -->
@@ -1021,5 +1024,6 @@ function showAlert(message, type) {
 
 <?php
 $content = ob_get_clean();
+$scripts = '<script src="/assets/js/workflow-stages.js"></script>';
 include __DIR__ . '/../layouts/app.php';
 ?>

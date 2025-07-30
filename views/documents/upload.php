@@ -433,12 +433,31 @@ function submitWithAjax(form) {
     showUploadProgress();
     simulateUploadProgress();
     
+    // Verificar se o projeto foi selecionado
+    const projectId = document.querySelector('select[name="project_id"]').value;
+    if (!projectId) {
+        showUploadError('Por favor, selecione um projeto.');
+        return;
+    }
+    
+    // Verificar se o documento foi selecionado
+    const fileInput = document.getElementById('document');
+    if (!fileInput || fileInput.files.length === 0) {
+        showUploadError('Por favor, selecione um arquivo para upload.');
+        return;
+    }
+    
     // Fazer requisição
     const xhr = new XMLHttpRequest();
     
-    xhr.open('POST', '/documents/upload', true);
+    // Usar o endpoint correto de upload para documentos de projeto
+    xhr.open('POST', '/documents/project/upload', true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     
+    // Adicionar timeout e monitorar progresso
+    xhr.timeout = 60000; // 60 segundos
+    
+    // Lidar com a resposta
     xhr.onload = function() {
         console.log('Response:', xhr.status, xhr.responseText);
         
@@ -455,22 +474,54 @@ function submitWithAjax(form) {
                         showUploadError(data.message || 'Erro no servidor');
                     }
                 } catch (e) {
-                    // Se não é JSON, assumir sucesso
-                    showUploadSuccess({ success: true, message: 'Upload realizado!' });
+                    console.error('JSON parse error:', e, 'Text:', xhr.responseText);
+                    
+                    // Verificar se a resposta parece ser uma página HTML (redirecionamento)
+                    if (xhr.responseText.includes('<!DOCTYPE html>') || 
+                        xhr.responseText.includes('<html')) {
+                        showUploadError('O servidor redirecionou a resposta. Tente novamente ou use o método normal de upload.');
+                    } else {
+                        // Se não é JSON, assumir sucesso (com cuidado)
+                        showUploadSuccess({ success: true, message: 'Upload realizado!' });
+                    }
                 }
             } else {
-                showUploadError(`Erro ${xhr.status}: Falha na conexão`);
+                showUploadError(`Erro ${xhr.status}: ${xhr.statusText || 'Falha na conexão'}`);
             }
         }, 500);
     };
     
+    // Tratamento de erros específicos
     xhr.onerror = function() {
         console.error('Network error');
-        showUploadError('Erro de conexão. Verifique sua internet.');
+        showUploadError('Erro de conexão com o servidor. Verifique sua internet e tente novamente.');
     };
     
-    xhr.timeout = 30000;
-    xhr.send(formData);
+    xhr.ontimeout = function() {
+        console.error('Request timeout');
+        showUploadError('O servidor demorou muito para responder. O arquivo pode ser muito grande ou a conexão está instável.');
+    };
+    
+    // Monitorar progresso real do upload
+    xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+            const percentComplete = (event.loaded / event.total) * 100;
+            document.getElementById('uploadProgress').style.width = percentComplete + '%';
+            
+            if (percentComplete > 95) {
+                document.getElementById('uploadStatus').textContent = 'Processando...';
+            } else {
+                document.getElementById('uploadStatus').textContent = 'Enviando... ' + Math.round(percentComplete) + '%';
+            }
+        }
+    };
+    
+    try {
+        xhr.send(formData);
+    } catch (error) {
+        console.error('Error sending request:', error);
+        showUploadError('Erro ao enviar a requisição: ' + error.message);
+    }
 }
 
 // Event listeners para os botões

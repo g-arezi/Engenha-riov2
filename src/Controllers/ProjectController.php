@@ -75,13 +75,20 @@ class ProjectController
 
     public function show(string $id): void
     {
+        // Log para debug
+        error_log("Método show chamado com ID: " . $id);
+        
         if (!Auth::check() || !Auth::hasPermission('projects.view')) {
             header('Location: /projects');
             exit;
         }
 
+        // Adiciona trim para remover espaços indesejados
+        $id = trim($id);
+        
         $project = $this->db->find('projects', $id);
         if (!$project) {
+            error_log("Projeto não encontrado com ID: " . $id);
             header('Location: /projects');
             exit;
         }
@@ -151,12 +158,19 @@ class ProjectController
     public function delete(string $id): void
     {
         if (!Auth::check() || !Auth::hasPermission('projects.delete')) {
-            header('Location: /projects');
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Acesso negado']);
             exit;
         }
 
-        $this->db->delete('projects', $id);
-        header('Location: /projects');
+        $success = $this->db->delete('projects', $id);
+        
+        header('Content-Type: application/json');
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Projeto excluído com sucesso']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao excluir o projeto']);
+        }
         exit;
     }
 
@@ -199,6 +213,10 @@ class ProjectController
             exit;
         }
 
+        // Usar um ID mais simples em vez de uniqid() para evitar problemas de URL
+        $simpleId = 'proj_' . time() . '_' . rand(1000, 9999);
+        $data['id'] = $simpleId; // Define o ID manualmente
+        
         $projectId = $this->db->insert('projects', $data);
         
         // Criar notificação para o cliente
@@ -228,6 +246,10 @@ class ProjectController
         }
         
         $_SESSION['success'] = 'Projeto criado com sucesso!';
+        
+        // Log para debug
+        error_log("Redirecionando para: /projects/" . $projectId);
+        
         header('Location: /projects/' . $projectId);
         exit;
     }
@@ -248,7 +270,7 @@ class ProjectController
         ];
 
         $this->db->update('projects', $id, $data);
-        header('Location: /projects/' . $id);
+        header('Location: /projects/' . urlencode($id));
         exit;
     }
     

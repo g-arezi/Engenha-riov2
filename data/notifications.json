@@ -110,5 +110,119 @@
         "is_read": false,
         "created_at": "2025-07-28 22:46:47",
         "updated_at": "2025-07-28 22:46:47"
+    },
+    "688a44e470a179.79238371": {
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "type": "project_created",
+        "title": "Novo Projeto Criado",
+        "message": "O projeto \"Teste criaçao com tamplate modificado\" foi criado e está aguardando documentos.",
+        "data": "{\"project_id\":\"688a44e4707da0.00549663\"}",
+        "is_read": false,
+        "created_at": "2025-07-30 16:14:28",
+        "id": "688a44e470a179.79238371",
+        "updated_at": "2025-07-30 16:14:28"
+    },
+    "688a44e473aa43.77038342": {
+        "user_id": "6887cb7c384b75.22527396",
+        "type": "project_assigned",
+        "title": "Projeto Atribuído",
+        "message": "Você foi designado como analista do projeto \"Teste criaçao com tamplate modificado\".",
+        "data": "{\"project_id\":\"688a44e4707da0.00549663\"}",
+        "is_read": false,
+        "created_at": "2025-07-30 16:14:28",
+        "id": "688a44e473aa43.77038342",
+        "updated_at": "2025-07-30 16:14:28"
+    },
+    "688a45b0b57ed9.48990021": {
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "type": "project_created",
+        "title": "Novo Projeto Criado",
+        "message": "O projeto \"Teste criaçao com tamplate modificado\" foi criado e está aguardando documentos.",
+        "data": "{\"project_id\":\"688a45b0b536e7.74536271\"}",
+        "is_read": false,
+        "created_at": "2025-07-30 16:17:52",
+        "id": "688a45b0b57ed9.48990021",
+        "updated_at": "2025-07-30 16:17:52"
+    },
+    "688a45b0b80a12.51943187": {
+        "user_id": "6887cb7c384b75.22527396",
+        "type": "project_assigned",
+        "title": "Projeto Atribuído",
+        "message": "Você foi designado como analista do projeto \"Teste criaçao com tamplate modificado\".",
+        "data": "{\"project_id\":\"688a45b0b536e7.74536271\"}",
+        "is_read": false,
+        "created_at": "2025-07-30 16:17:52",
+        "id": "688a45b0b80a12.51943187",
+        "updated_at": "2025-07-30 16:17:52"
+    },
+    "688a46b8608b31.90384598": {
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "type": "project_created",
+        "title": "Novo Projeto Criado",
+        "message": "O projeto \"Teste criaçao com tamplate modificado\" foi criado e está aguardando documentos.",
+        "data": "{\"project_id\":\"proj_1753892536_9899\"}",
+        "is_read": false,
+        "created_at": "2025-07-30 16:22:16",
+        "id": "688a46b8608b31.90384598",
+        "updated_at": "2025-07-30 16:22:16"
+    },
+    "688a46b8637097.14407697": {
+        "user_id": "rafael",
+        "type": "project_assigned",
+        "title": "Projeto Atribuído",
+        "message": "Você foi designado como analista do projeto \"Teste criaçao com tamplate modificado\".",
+        "data": "{\"project_id\":\"proj_1753892536_9899\"}",
+        "is_read": false,
+        "created_at": "2025-07-30 16:22:16",
+        "id": "688a46b8637097.14407697",
+        "updated_at": "2025-07-30 16:22:16"
+    },
+    "688a4788691a9": {
+        "id": "688a4788691a9",
+        "user_id": null,
+        "project_id": "proj_1753892536_9899",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Projeto",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-30 16:25:44",
+        "updated_at": "2025-07-30 16:25:44"
+    },
+    "688a478b43a87": {
+        "id": "688a478b43a87",
+        "user_id": null,
+        "project_id": "proj_1753892536_9899",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Documentos",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-30 16:25:47",
+        "updated_at": "2025-07-30 16:25:47"
+    },
+    "688a4ec7b1f0a9.06941588": {
+        "type": "document_uploaded",
+        "title": "Documento Enviado",
+        "message": "Novo documento 'Manual do Hacker Iniciante.pdf' foi enviado para o projeto 'Teste criaçao com tamplate modificado'",
+        "user_id": "rafael",
+        "project_id": "proj_1753892536_9899",
+        "document_id": "doc_688a4ec7b1ba3",
+        "is_read": false,
+        "priority": "normal",
+        "id": "688a4ec7b1f0a9.06941588",
+        "created_at": "2025-07-30 16:56:39",
+        "updated_at": "2025-07-30 16:56:39"
+    },
+    "688a4edf4b77d4.48266452": {
+        "type": "document_rejected",
+        "title": "Documento Rejeitado",
+        "message": "Documento 'Manual do Hacker Iniciante.pdf' foi rejeitado. Motivo: documento errado",
+        "user_id": "admin",
+        "project_id": "proj_1753892536_9899",
+        "document_id": "doc_688a4ec7b1ba3",
+        "is_read": false,
+        "priority": "high",
+        "id": "688a4edf4b77d4.48266452",
+        "created_at": "2025-07-30 16:57:03",
+        "updated_at": "2025-07-30 16:57:03"
     }
 }

@@ -61,10 +61,24 @@ class Database
     public function insert(string $table, array $data): string
     {
         $tableData = $this->getTable($table);
-        $id = $data['id'] ?? $this->generateId();
+        
+        // Se for a tabela projects e o ID já foi definido, use-o
+        if ($table === 'projects' && isset($data['id'])) {
+            $id = $data['id'];
+        } else {
+            // Para outras tabelas ou se o ID não foi definido
+            $id = $data['id'] ?? $this->generateId();
+        }
+        
         $data['id'] = $id;
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $data['updated_at'] = date('Y-m-d H:i:s');
+        
+        if (!isset($data['created_at'])) {
+            $data['created_at'] = date('Y-m-d H:i:s');
+        }
+        
+        if (!isset($data['updated_at'])) {
+            $data['updated_at'] = date('Y-m-d H:i:s');
+        }
         
         $tableData[$id] = $data;
         $this->saveTable($table, $tableData);

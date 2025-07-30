@@ -350,17 +350,32 @@ class DocumentWorkflowController
         // Verificar se é requisição AJAX
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+                  
+        // Log para debug
+        error_log('Document upload attempt - FILES: ' . json_encode($_FILES));
+        error_log('Document upload attempt - POST: ' . json_encode($_POST));
+        error_log('Document upload attempt - SERVER: ' . json_encode($_SERVER));
+        error_log('Document upload attempt - Auth: ' . json_encode([
+            'user_id' => Auth::id(),
+            'has_permission' => Auth::hasPermission('documents.upload')
+        ]));
 
         if (!isset($_FILES['document'])) {
-            $message = 'Nenhum arquivo foi enviado';
-            if ($isAjax) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => $message]);
+            // Try alternate field name used in drag-and-drop
+            if (isset($_FILES['file'])) {
+                $_FILES['document'] = $_FILES['file'];
+                error_log('Renamed file field from "file" to "document"');
+            } else {
+                $message = 'Nenhum arquivo foi enviado';
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $message]);
+                    exit;
+                }
+                $projectId = $_POST['project_id'] ?? '';
+                header('Location: /documents/project/upload?project_id=' . $projectId . '&error=' . urlencode($message));
                 exit;
             }
-            $projectId = $_POST['project_id'] ?? '';
-            header('Location: /documents/project/upload?project_id=' . $projectId . '&error=' . urlencode($message));
-            exit;
         }
 
         $file = $_FILES['document'];
@@ -377,6 +392,7 @@ class DocumentWorkflowController
             ];
             
             $message = $errorMessages[$file['error']] ?? 'Erro desconhecido no upload';
+            error_log('Upload error: ' . $message);
             $projectId = $_POST['project_id'] ?? '';
             
             if ($isAjax) {
@@ -393,9 +409,38 @@ class DocumentWorkflowController
         $filename = uniqid() . '.' . $extension;
         
         $uploadPath = __DIR__ . '/../../public/uploads/projects/';
+        
+        // Log para debug do caminho de upload
+        error_log('Upload path: ' . $uploadPath);
+        
+        // Verificar existência do diretório
         if (!is_dir($uploadPath)) {
-            if (!mkdir($uploadPath, 0755, true)) {
-                $message = 'Erro ao criar diretório de upload';
+            error_log('Upload directory does not exist, attempting to create it');
+            
+            try {
+                // Tentar criar o diretório com permissões mais abertas
+                if (!mkdir($uploadPath, 0777, true)) {
+                    throw new \Exception('Failed to create directory with mkdir');
+                }
+                
+                // Verificar se o diretório foi realmente criado
+                if (!is_dir($uploadPath)) {
+                    throw new \Exception('Directory was not created successfully');
+                }
+                
+                // Verificar permissões
+                if (!is_writable($uploadPath)) {
+                    chmod($uploadPath, 0777);
+                    if (!is_writable($uploadPath)) {
+                        throw new \Exception('Directory is not writable after chmod');
+                    }
+                }
+                
+                error_log('Upload directory created successfully: ' . $uploadPath);
+            } catch (\Exception $e) {
+                $message = 'Erro ao criar diretório de upload: ' . $e->getMessage();
+                error_log($message);
+                
                 $projectId = $_POST['project_id'] ?? '';
                 if ($isAjax) {
                     header('Content-Type: application/json');
@@ -406,9 +451,25 @@ class DocumentWorkflowController
                 exit;
             }
         }
+        
+        // Verificar permissão de escrita no diretório
+        if (!is_writable($uploadPath)) {
+            $message = 'Diretório de upload não tem permissão de escrita';
+            error_log($message . ': ' . $uploadPath);
+            
+            $projectId = $_POST['project_id'] ?? '';
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $message]);
+                exit;
+            }
+            header('Location: /documents/project/upload?project_id=' . $projectId . '&error=' . urlencode($message));
+            exit;
+        }
 
         if (!move_uploaded_file($file['tmp_name'], $uploadPath . $filename)) {
             $message = 'Erro ao mover arquivo para destino final';
+            error_log($message . ': from ' . $file['tmp_name'] . ' to ' . $uploadPath . $filename);
             $projectId = $_POST['project_id'] ?? '';
             if ($isAjax) {
                 header('Content-Type: application/json');
@@ -424,6 +485,7 @@ class DocumentWorkflowController
             'name' => $_POST['name'] ?? $originalName,
             'description' => $_POST['description'] ?? '',
             'type' => $_POST['type'] ?? 'Outros',
+            'document_type' => $_POST['document_type'] ?? 'Outros',
             'category' => $_POST['category'] ?? 'Documento',
             'original_name' => $originalName,
             'filename' => $filename,
@@ -431,7 +493,7 @@ class DocumentWorkflowController
             'mime_type' => $file['type'],
             'uploaded_by' => Auth::id(),
             'status' => 'pendente',
-            'stage' => 1,
+            'stage' => $_POST['stage'] ?? 1,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
@@ -439,6 +501,7 @@ class DocumentWorkflowController
         // Validar campos obrigatórios
         if (empty($data['project_id']) || empty($data['name'])) {
             $message = 'Projeto e nome do documento são obrigatórios';
+            error_log($message . ': project_id=' . $data['project_id'] . ', name=' . $data['name']);
             if ($isAjax) {
                 header('Content-Type: application/json');
                 echo json_encode(['success' => false, 'message' => $message]);
@@ -448,7 +511,13 @@ class DocumentWorkflowController
             exit;
         }
 
-        $documentId = $this->db->insert('documents', $data);
+        // Adicionar um ID único para o documento se não existir
+        if (!isset($data['id'])) {
+            $data['id'] = uniqid('doc_');
+        }
+        
+        $documentId = $this->db->insert('project_documents', $data);
+        error_log('Document created with ID: ' . $documentId);
 
         // Criar notificação para analistas
         $project = $this->db->find('projects', $data['project_id']);
@@ -465,7 +534,15 @@ class DocumentWorkflowController
         $message = 'Documento enviado com sucesso!';
         if ($isAjax) {
             header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'message' => $message]);
+            echo json_encode([
+                'success' => true, 
+                'message' => $message,
+                'document' => [
+                    'id' => $documentId,
+                    'name' => $data['name'],
+                    'filename' => $filename
+                ]
+            ]);
             exit;
         }
         
@@ -861,6 +938,284 @@ class DocumentWorkflowController
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Erro interno do servidor']);
         }
+    }
+    
+    /**
+     * Handle drag and drop file uploads from page-functions.js
+     */
+    public function handleDragDropUpload(): void
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            // Log request information for debugging
+            error_log('Drag-drop upload - REQUEST: ' . json_encode($_SERVER['REQUEST_METHOD']));
+            error_log('Drag-drop upload - FILES: ' . json_encode($_FILES));
+            error_log('Drag-drop upload - POST: ' . json_encode($_POST));
+            
+            // Check authentication
+            if (!Auth::check()) {
+                echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+                exit;
+            }
+            
+            // Check permission
+            if (!Auth::hasPermission('documents.upload')) {
+                echo json_encode(['success' => false, 'message' => 'Sem permissão para upload de documentos']);
+                exit;
+            }
+            
+            // Check file upload
+            $fileKey = isset($_FILES['document']) ? 'document' : (isset($_FILES['file']) ? 'file' : null);
+            
+            if (!$fileKey) {
+                echo json_encode(['success' => false, 'message' => 'Nenhum arquivo foi enviado']);
+                exit;
+            }
+            
+            $file = $_FILES[$fileKey];
+            
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $errorMessages = [
+                    UPLOAD_ERR_INI_SIZE => 'Arquivo muito grande (limite do servidor)',
+                    UPLOAD_ERR_FORM_SIZE => 'Arquivo muito grande (limite do formulário)',
+                    UPLOAD_ERR_PARTIAL => 'Upload incompleto',
+                    UPLOAD_ERR_NO_FILE => 'Nenhum arquivo selecionado',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Diretório temporário não encontrado',
+                    UPLOAD_ERR_CANT_WRITE => 'Erro ao escrever arquivo',
+                    UPLOAD_ERR_EXTENSION => 'Upload bloqueado por extensão'
+                ];
+                
+                $message = $errorMessages[$file['error']] ?? 'Erro desconhecido no upload';
+                echo json_encode(['success' => false, 'message' => $message]);
+                exit;
+            }
+            
+            // Create upload directory if it doesn't exist
+            $originalName = $file['name'];
+            $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $extension;
+            $uploadPath = __DIR__ . '/../../public/uploads/projects/';
+            
+            error_log('Drag-drop upload path: ' . $uploadPath);
+            
+            if (!is_dir($uploadPath)) {
+                if (!mkdir($uploadPath, 0777, true)) {
+                    echo json_encode(['success' => false, 'message' => 'Erro ao criar diretório de upload']);
+                    exit;
+                }
+            }
+            
+            // Move uploaded file
+            if (!move_uploaded_file($file['tmp_name'], $uploadPath . $filename)) {
+                echo json_encode(['success' => false, 'message' => 'Erro ao mover arquivo para destino final']);
+                exit;
+            }
+            
+            // Get project ID from POST or try to extract from URL
+            $projectId = $_POST['project_id'] ?? '';
+            if (empty($projectId)) {
+                $referer = $_SERVER['HTTP_REFERER'] ?? '';
+                if (preg_match('/\/projects\/([^\/]+)/', $referer, $matches)) {
+                    $projectId = $matches[1];
+                    error_log('Extracted project ID from referer: ' . $projectId);
+                }
+            }
+            
+            if (empty($projectId)) {
+                echo json_encode(['success' => false, 'message' => 'ID do projeto não foi fornecido']);
+                exit;
+            }
+            
+            // Prepare data to save
+            $data = [
+                'id' => uniqid('doc_'),
+                'project_id' => $projectId,
+                'name' => $originalName,
+                'description' => $_POST['description'] ?? '',
+                'document_type' => $_POST['document_type'] ?? 'Upload Manual',
+                'type' => $_POST['type'] ?? 'Outros',
+                'category' => $_POST['category'] ?? 'Documento',
+                'original_name' => $originalName,
+                'filename' => $filename,
+                'size' => $file['size'],
+                'mime_type' => $file['type'],
+                'uploaded_by' => Auth::id(),
+                'status' => 'pendente',
+                'stage' => $_POST['stage'] ?? 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            // Save document to database
+            $documentId = $this->db->insert('project_documents', $data);
+            
+            // Create notification for analysts
+            $project = $this->db->find('projects', $data['project_id']);
+            if ($project && !empty($project['analyst_id'])) {
+                $this->notificationService->createDocumentNotification('document_uploaded', [
+                    'user_id' => $project['analyst_id'],
+                    'project_id' => $data['project_id'],
+                    'document_id' => $documentId,
+                    'document_name' => $data['name'],
+                    'project_name' => $project['name'] ?? 'Projeto'
+                ]);
+            }
+            
+            // Return success response
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Documento enviado com sucesso!',
+                'document' => [
+                    'id' => $documentId,
+                    'name' => $data['name'],
+                    'filename' => $filename
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('Error in drag-drop upload: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro no upload: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+    
+    /**
+     * Method specifically for handling drag-and-drop file uploads from page-functions.js
+     */
+    public function uploadProjectFile(): void
+    {
+        header('Content-Type: application/json');
+        error_log("Upload project file via AJAX called");
+        
+        // Check authentication
+        if (!Auth::check()) {
+            echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+            exit;
+        }
+        
+        // Check permission
+        if (!Auth::hasPermission('documents.upload')) {
+            echo json_encode(['success' => false, 'message' => 'Permission denied']);
+            exit;
+        }
+        
+        // Debugging received data
+        error_log("POST data: " . json_encode($_POST));
+        error_log("FILES data: " . json_encode($_FILES));
+        
+        // Check if file is present
+        if (!isset($_FILES['document'])) {
+            // Try alternate field name used in drag-and-drop
+            if (isset($_FILES['file'])) {
+                $_FILES['document'] = $_FILES['file'];
+            } else {
+                echo json_encode(['success' => false, 'message' => 'No file uploaded']);
+                exit;
+            }
+        }
+        
+        // Validate the file
+        $file = $_FILES['document'];
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $errorMessages = [
+                UPLOAD_ERR_INI_SIZE => 'File too large (server limit)',
+                UPLOAD_ERR_FORM_SIZE => 'File too large (form limit)',
+                UPLOAD_ERR_PARTIAL => 'File uploaded partially',
+                UPLOAD_ERR_NO_FILE => 'No file uploaded',
+                UPLOAD_ERR_NO_TMP_DIR => 'Temporary folder missing',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file',
+                UPLOAD_ERR_EXTENSION => 'File upload stopped by extension'
+            ];
+            
+            $message = $errorMessages[$file['error']] ?? 'Unknown upload error';
+            echo json_encode(['success' => false, 'message' => $message]);
+            exit;
+        }
+        
+        // Get project ID
+        $projectId = $_POST['project_id'] ?? '';
+        if (empty($projectId)) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? '';
+            if (preg_match('/\/projects\/([^\/]+)/', $referer, $matches)) {
+                $projectId = $matches[1];
+                error_log('Extracted project ID from referer: ' . $projectId);
+            }
+        }
+        
+        if (empty($projectId)) {
+            echo json_encode(['success' => false, 'message' => 'Project ID is required']);
+            exit;
+        }
+        
+        // Process the file
+        $originalName = $file['name'];
+        $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+        $filename = uniqid() . '.' . $extension;
+        $uploadPath = __DIR__ . '/../../public/uploads/projects/';
+        
+        error_log('Project file upload path: ' . $uploadPath);
+        
+        // Create directory if it doesn't exist
+        if (!is_dir($uploadPath)) {
+            if (!mkdir($uploadPath, 0777, true)) {
+                echo json_encode(['success' => false, 'message' => 'Failed to create upload directory']);
+                exit;
+            }
+        }
+        
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $uploadPath . $filename)) {
+            echo json_encode(['success' => false, 'message' => 'Failed to move uploaded file']);
+            exit;
+        }
+        
+        // Prepare document data
+        $data = [
+            'id' => uniqid('doc_'),
+            'project_id' => $projectId,
+            'name' => $originalName,
+            'description' => $_POST['description'] ?? 'Uploaded via drag and drop',
+            'document_type' => $_POST['document_type'] ?? 'Manual Upload',
+            'type' => $_POST['type'] ?? 'Other',
+            'category' => $_POST['category'] ?? 'Document',
+            'original_name' => $originalName,
+            'filename' => $filename,
+            'size' => $file['size'],
+            'mime_type' => $file['type'],
+            'uploaded_by' => Auth::id(),
+            'status' => 'pendente',
+            'stage' => $_POST['stage'] ?? 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Save document to database
+        $documentId = $this->db->insert('project_documents', $data);
+        
+        // Create notification for analysts
+        $project = $this->db->find('projects', $projectId);
+        if ($project && !empty($project['analyst_id'])) {
+            $this->notificationService->createDocumentNotification('document_uploaded', [
+                'user_id' => $project['analyst_id'],
+                'project_id' => $projectId,
+                'document_id' => $documentId,
+                'document_name' => $data['name'],
+                'project_name' => $project['name'] ?? 'Project'
+            ]);
+        }
+        
+        // Return success response
+        echo json_encode([
+            'success' => true,
+            'message' => 'Document uploaded successfully!',
+            'document' => [
+                'id' => $documentId,
+                'name' => $data['name'],
+                'filename' => $filename
+            ]
+        ]);
+        exit;
     }
     
     // MÉTODOS AJAX PARA APROVAÇÃO DE DOCUMENTOS

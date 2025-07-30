@@ -121,16 +121,30 @@ function handleFileUpload(file, area) {
     showLoader();
     
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('document', file); // Changed from 'file' to 'document' to match server expectations
     formData.append('project_id', getProjectIdFromUrl());
     formData.append('stage', getCurrentStage());
     
+    console.log('Uploading file:', file.name);
+    console.log('Project ID:', getProjectIdFromUrl());
+    console.log('Current stage:', getCurrentStage());
+    
     fetch('/documents/upload-project-file', {
         method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            console.error('Server response not OK:', response.status, response.statusText);
+            throw new Error('Network response was not ok: ' + response.status);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Upload response:', data);
         if (data.success) {
             showAlert('success', 'Arquivo enviado com sucesso!');
             setTimeout(() => {
@@ -142,7 +156,7 @@ function handleFileUpload(file, area) {
     })
     .catch(error => {
         console.error('Upload error:', error);
-        showAlert('error', 'Erro de conexão');
+        showAlert('error', 'Erro de conexão: ' + error.message);
     })
     .finally(() => {
         hideLoader();
