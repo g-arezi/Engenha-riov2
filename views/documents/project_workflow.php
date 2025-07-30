@@ -805,12 +805,89 @@ function deleteDocument(documentId) {
 }
 
 function showDocumentInfo(documentId) {
-    // Abrir modal
-    const modal = new bootstrap.Modal(document.getElementById('documentInfoModal'));
-    modal.show();
+    try {
+        console.log('showDocumentInfo called for document:', documentId);
+        
+        // Obter o modal usando querySelector (mais confiável)
+        const modalElement = document.querySelector('#documentInfoModal');
+        if (!modalElement) {
+            console.error('Modal element not found with ID: documentInfoModal');
+            alert('Erro: Modal não encontrado. Contate o suporte técnico.');
+            return;
+        }
+        
+        // Definir a variável global infoContent
+        window.infoContent = document.querySelector('#documentInfoContent');
+        if (!window.infoContent) {
+            console.error('Modal content element not found with ID: documentInfoContent');
+            alert('Erro: Conteúdo do modal não encontrado. Contate o suporte técnico.');
+            return;
+        }
+        
+        // Mostrar o modal manualmente se bootstrap não estiver disponível
+        if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal !== 'function') {
+            console.warn('Bootstrap não encontrado ou bootstrap.Modal não é uma função, usando alternativa manual');
+            
+            // Exibir o modal manualmente
+            modalElement.classList.add('show');
+            modalElement.style.display = 'block';
+            document.body.classList.add('modal-open');
+            
+            // Criar overlay
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+            
+            // Adicionar evento de fechamento nos botões de fechar
+            const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modalElement.classList.remove('show');
+                    modalElement.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    backdrop.remove();
+                });
+            });
+        } else {
+            // Usar Bootstrap normalmente
+            console.log('Usando bootstrap.Modal para exibir o modal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+        
+        // Atualizar conteúdo para loading
+        infoContent.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2">Carregando informações...</p>
+            </div>
+        `;
+        
+        // Buscar informações do documento
+        loadDocumentInfo(documentId);
+        
+    } catch (error) {
+        console.error('Erro ao mostrar modal:', error);
+        alert('Erro ao exibir informações do documento: ' + error.message);
+    }
+}
+
+function loadDocumentInfo(documentId) {
+    console.log('Carregando informações para o documento:', documentId);
     
-    // Resetar conteúdo para loading
-    document.getElementById('documentInfoContent').innerHTML = `
+    // Verificar se window.infoContent já está definido
+    if (!window.infoContent) {
+        window.infoContent = document.querySelector('#documentInfoContent');
+        if (!window.infoContent) {
+            console.error('Element not found: documentInfoContent');
+            alert('Erro: Elemento de conteúdo não encontrado');
+            return;
+        }
+    }
+    
+    window.infoContent.innerHTML = `
         <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Carregando...</span>
@@ -830,18 +907,18 @@ function showDocumentInfo(documentId) {
     })
         .then(response => {
             console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.text();
         })
         .then(text => {
-            console.log('Raw response:', text);
+            console.log('Raw response length:', text.length);
             
             try {
+                // Tenta fazer o parse do JSON
                 const data = JSON.parse(text.trim());
-                console.log('Parsed data:', data);
+                console.log('Parsed data successfully');
                 
                 if (data.success && data.document) {
                     displayDocumentInfo(data.document);
@@ -850,34 +927,79 @@ function showDocumentInfo(documentId) {
                 }
             } catch (parseError) {
                 console.error('JSON parse error:', parseError);
-                console.error('Response text:', text);
-                document.getElementById('documentInfoContent').innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Erro ao processar resposta do servidor.
-                        <br><small>Detalhes: ${parseError.message}</small>
-                    </div>
-                `;
+                console.error('Response text (first 100 chars):', text.substring(0, 100));
+                
+                // Obter elemento de conteúdo do modal usando querySelector
+                if (!window.infoContent) {
+                    window.infoContent = document.querySelector('#documentInfoContent');
+                }
+                
+                if (window.infoContent) {
+                    window.infoContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Erro ao processar resposta do servidor.
+                            <br><small>Detalhes: ${parseError.message}</small>
+                        </div>
+                    `;
+                } else {
+                    console.error('Elemento #documentInfoContent não encontrado');
+                }
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('documentInfoContent').innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Erro ao carregar informações do documento: ${error.message}
-                </div>
-            `;
+            
+            // Obter elemento de conteúdo do modal usando querySelector
+            if (!window.infoContent) {
+                window.infoContent = document.querySelector('#documentInfoContent');
+            }
+            
+            if (window.infoContent) {
+                window.infoContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Erro ao carregar informações do documento: ${error.message}
+                    </div>
+                `;
+            } else {
+                console.error('Elemento #documentInfoContent não encontrado no catch block');
+                alert('Erro ao carregar dados do documento: ' + error.message);
+            }
         });
 }
 
-function displayDocumentInfo(document) {
+function displayDocumentInfo(docData) {
+    try {
+        console.log('Exibindo informações do documento:', docData);
+        
+        // Verificar se o docData tem todas as propriedades necessárias
+        if (!docData || !docData.id) {
+            console.error('Objeto docData inválido:', docData);
+            alert('Erro: Dados do documento inválidos');
+            return;
+        }
+        
+        // Usar a variável global window.infoContent
+        if (!window.infoContent) {
+            window.infoContent = document.querySelector('#documentInfoContent');
+            if (!window.infoContent) {
+                console.error('Element not found: documentInfoContent');
+                alert('Erro ao exibir informações: Elemento não encontrado');
+                return;
+            }
+        }
+    } catch (e) {
+        console.error('Erro ao iniciar displayDocumentInfo:', e);
+        return;
+    }
+
     const content = `
         <div class="row">
             <div class="col-md-8">
                 <h6 class="text-primary mb-3">
                     <i class="fas fa-file-alt me-2"></i>
-                    ${document.name}
+                    ${docData.name || 'Sem nome'}
                 </h6>
                 
                 <div class="row mb-3">
@@ -885,7 +1007,7 @@ function displayDocumentInfo(document) {
                         <strong>Arquivo original:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.original_name}
+                        ${docData.original_name || 'N/A'}
                     </div>
                 </div>
                 
@@ -894,7 +1016,7 @@ function displayDocumentInfo(document) {
                         <strong>Tamanho:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.size_formatted}
+                        ${docData.size_formatted || 'N/A'}
                     </div>
                 </div>
                 
@@ -903,7 +1025,7 @@ function displayDocumentInfo(document) {
                         <strong>Tipo de arquivo:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.mime_type}
+                        ${docData.mime_type || 'N/A'}
                     </div>
                 </div>
                 
@@ -912,7 +1034,7 @@ function displayDocumentInfo(document) {
                         <strong>Enviado por:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.uploader}
+                        ${docData.uploader || 'N/A'}
                     </div>
                 </div>
                 
@@ -921,7 +1043,7 @@ function displayDocumentInfo(document) {
                         <strong>Data de envio:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.created_at_formatted}
+                        ${docData.created_at_formatted || 'N/A'}
                     </div>
                 </div>
                 
@@ -930,17 +1052,17 @@ function displayDocumentInfo(document) {
                         <strong>Projeto:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.project_name}
+                        ${docData.project_name || 'N/A'}
                     </div>
                 </div>
                 
-                ${document.description ? `
+                ${docData.description ? `
                 <div class="row mb-3">
                     <div class="col-sm-4">
                         <strong>Descrição:</strong>
                     </div>
                     <div class="col-sm-8">
-                        ${document.description}
+                        ${docData.description}
                     </div>
                 </div>
                 ` : ''}
@@ -950,34 +1072,34 @@ function displayDocumentInfo(document) {
                 <div class="card bg-light">
                     <div class="card-body text-center">
                         <h6 class="card-title">Status</h6>
-                        <span class="badge fs-6 bg-${getStatusColor(document.status)}">
-                            ${document.status_label}
+                        <span class="badge fs-6 bg-${getStatusColor(docData.status || 'pendente')}">
+                            ${docData.status_label || 'Pendente'}
                         </span>
                         
-                        ${document.approved_by ? `
+                        ${docData.approved_by ? `
                         <hr>
                         <small class="text-muted">
                             <strong>Aprovado por:</strong><br>
-                            ${document.approved_by}<br>
-                            ${document.approved_at ? new Date(document.approved_at).toLocaleString('pt-BR') : ''}
+                            ${docData.approved_by}<br>
+                            ${docData.approved_at ? new Date(docData.approved_at).toLocaleString('pt-BR') : 'N/A'}
                         </small>
                         ` : ''}
                         
-                        ${document.rejected_by ? `
+                        ${docData.rejected_by ? `
                         <hr>
                         <small class="text-muted">
                             <strong>Rejeitado por:</strong><br>
-                            ${document.rejected_by}<br>
-                            ${document.rejected_at ? new Date(document.rejected_at).toLocaleString('pt-BR') : ''}
+                            ${docData.rejected_by}<br>
+                            ${docData.rejected_at ? new Date(docData.rejected_at).toLocaleString('pt-BR') : 'N/A'}
                         </small>
-                        ${document.rejection_reason ? `<br><br><strong>Motivo:</strong><br>${document.rejection_reason}` : ''}
+                        ${docData.rejection_reason ? `<br><br><strong>Motivo:</strong><br>${docData.rejection_reason}` : ''}
                         ` : ''}
                         
-                        ${document.comments ? `
+                        ${docData.comments ? `
                         <hr>
                         <small class="text-muted">
                             <strong>Comentários:</strong><br>
-                            ${document.comments}
+                            ${docData.comments}
                         </small>
                         ` : ''}
                     </div>
@@ -986,12 +1108,24 @@ function displayDocumentInfo(document) {
         </div>
     `;
     
-    document.getElementById('documentInfoContent').innerHTML = content;
+    window.infoContent.innerHTML = content;
     
     // Mostrar botão de download
-    const downloadBtn = document.getElementById('downloadFromModal');
-    downloadBtn.style.display = 'inline-block';
-    downloadBtn.onclick = () => downloadDocument(document.id);
+    try {
+        const downloadBtn = document.querySelector('#downloadFromModal');
+        if (downloadBtn) {
+            console.log('Download button found, setting up click handler for document ID:', docData.id);
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = function() {
+                console.log('Download button clicked for document ID:', docData.id);
+                downloadDocument(docData.id);
+            };
+        } else {
+            console.error('Element not found: downloadFromModal');
+        }
+    } catch (err) {
+        console.error('Error setting up download button:', err);
+    }
 }
 
 function getStatusColor(status) {
@@ -1003,8 +1137,15 @@ function getStatusColor(status) {
     }
 }
 
+// Função de download movida para download-helper.js
+// Esta função permanece aqui para compatibilidade, mas chama a implementação global
 function downloadDocument(documentId) {
-    window.open(`/documents/project/${documentId}/download`, '_blank');
+    if (window.downloadDocument) {
+        window.downloadDocument(documentId);
+    } else {
+        console.error('Função de download global não encontrada');
+        showAlert('Erro: função de download não disponível', 'error');
+    }
 }
 
 function showAlert(message, type) {
@@ -1024,6 +1165,6 @@ function showAlert(message, type) {
 
 <?php
 $content = ob_get_clean();
-$scripts = '<script src="/assets/js/workflow-stages.js"></script>';
+$scripts = '<script src="/assets/js/workflow-stages.js"></script><script src="/assets/js/download-helper.js"></script>';
 include __DIR__ . '/../layouts/app.php';
 ?>

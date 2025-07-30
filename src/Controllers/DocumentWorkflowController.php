@@ -321,28 +321,186 @@ class DocumentWorkflowController
 
     public function downloadDocument(string $documentId): void
     {
-        if (!Auth::check() || !Auth::hasPermission('documents.download')) {
-            header('Location: /dashboard');
+        // Detalhado log para diagnóstico
+        error_log('=== INICIANDO DOWNLOAD DE DOCUMENTO ===');
+        error_log('ID do documento: ' . $documentId);
+        
+        // Verificação de autenticação
+        if (!Auth::check()) {
+            error_log('Download falhou: Usuário não autenticado');
+            if ($this->isAjaxRequest()) {
+                $this->sendJsonError('Usuário não autenticado', 401);
+            } else {
+                header('Location: /login');
+            }
+            exit;
+        }
+        
+        // Verificação de permissão
+        if (!Auth::hasPermission('documents.download')) {
+            error_log('Download falhou: Usuário sem permissão');
+            if ($this->isAjaxRequest()) {
+                $this->sendJsonError('Sem permissão para baixar documentos', 403);
+            } else {
+                header('Location: /dashboard');
+            }
             exit;
         }
 
+        // Busca do documento
         $document = $this->db->find('project_documents', $documentId);
         if (!$document) {
-            header('Location: /documents');
+            error_log('Download falhou: Documento não encontrado no banco - ID: ' . $documentId);
+            if ($this->isAjaxRequest()) {
+                $this->sendJsonError('Documento não encontrado', 404);
+            } else {
+                header('Location: /documents');
+            }
             exit;
         }
 
-        $filePath = __DIR__ . '/../../public/uploads/projects/' . $document['filename'];
-        if (!file_exists($filePath)) {
-            header('Location: /documents/project/' . $document['project_id']);
-            exit;
+        error_log('Documento encontrado: ' . json_encode($document));
+        
+        // Lista de possíveis localizações para o arquivo
+        $possiblePaths = [
+            __DIR__ . '/../../public/uploads/projects/' . $document['filename'],
+            __DIR__ . '/../../public/uploads/' . $document['filename'],
+            __DIR__ . '/../../public/uploads/' . $documentId . '.pdf',
+            __DIR__ . '/../../public/uploads/projects/' . $documentId . '.pdf'
+        ];
+        
+        // Tentar todos os caminhos possíveis
+        $filePath = null;
+        foreach ($possiblePaths as $path) {
+            error_log('Verificando caminho: ' . $path);
+            if (file_exists($path)) {
+                $filePath = $path;
+                error_log('Arquivo encontrado em: ' . $path);
+                break;
+            }
+        }
+        
+        // Se não encontrou o arquivo
+        if (!$filePath) {
+            error_log('Download falhou: Arquivo não encontrado em nenhum caminho');
+            
+            // Como último recurso, tentar encontrar qualquer arquivo no diretório com nome similar
+            $alternativePath = $this->findAlternativeFile($documentId);
+            if ($alternativePath) {
+                error_log('Encontrado arquivo alternativo: ' . $alternativePath);
+                $filePath = $alternativePath;
+            } else {
+                if ($this->isAjaxRequest()) {
+                    $this->sendJsonError('Arquivo não encontrado. Possível problema no upload.', 404);
+                } else {
+                    header('Content-Type: text/html');
+                    echo '<h1>Erro ao baixar documento</h1>';
+                    echo '<p>O arquivo não foi encontrado no servidor. Possível problema no upload ou na configuração do sistema.</p>';
+                    echo '<p><a href="/documents/project/' . $document['project_id'] . '">Voltar para a lista de documentos</a></p>';
+                }
+                exit;
+            }
         }
 
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $document['original_name'] . '"');
-        header('Content-Length: ' . filesize($filePath));
-        readfile($filePath);
-        exit;
+        // Enviar o arquivo
+        try {
+            error_log('Iniciando envio do arquivo: ' . $filePath);
+            
+            // Verificar tamanho do arquivo
+            $fileSize = filesize($filePath);
+            if ($fileSize === false || $fileSize === 0) {
+                throw new \Exception('Arquivo vazio ou inacessível');
+            }
+            
+            error_log('Tamanho do arquivo: ' . $fileSize . ' bytes');
+            
+            // Desativar buffer de saída para evitar problemas com arquivos grandes
+            if (ob_get_level()) ob_end_clean();
+            
+            // Configurar cabeçalhos para download
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . ($document['original_name'] ?? 'documento.pdf') . '"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . $fileSize);
+            
+            // Enviar o arquivo em partes para evitar problemas de memória
+            $handle = fopen($filePath, 'rb');
+            if ($handle === false) {
+                throw new \Exception('Não foi possível abrir o arquivo');
+            }
+            
+            // Enviar em blocos de 1MB
+            $chunkSize = 1024 * 1024;
+            while (!feof($handle)) {
+                $buffer = fread($handle, $chunkSize);
+                echo $buffer;
+                flush();
+            }
+            fclose($handle);
+            
+            error_log('Download concluído com sucesso');
+            exit;
+        } catch (\Exception $e) {
+            error_log('Erro crítico ao enviar arquivo: ' . $e->getMessage());
+            if ($this->isAjaxRequest()) {
+                $this->sendJsonError('Erro ao processar download: ' . $e->getMessage(), 500);
+            } else {
+                header('Content-Type: text/html');
+                echo '<h1>Erro ao baixar documento</h1>';
+                echo '<p>Ocorreu um erro durante o download: ' . $e->getMessage() . '</p>';
+                echo '<p><a href="/documents/project/' . $document['project_id'] . '">Voltar para a lista de documentos</a></p>';
+            }
+            exit;
+        }
+    }
+    
+    // Função auxiliar para detectar requisições AJAX
+    private function isAjaxRequest(): bool
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+    
+    // Função auxiliar para enviar erros JSON
+    private function sendJsonError(string $message, int $statusCode = 400): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => $message]);
+    }
+    
+    // Função para encontrar um arquivo alternativo como último recurso
+    private function findAlternativeFile(string $documentId): ?string
+    {
+        // Procurar em uploads/projects
+        $projectsDir = __DIR__ . '/../../public/uploads/projects/';
+        if (is_dir($projectsDir)) {
+            $files = scandir($projectsDir);
+            foreach ($files as $file) {
+                if ($file !== '.' && $file !== '..' && is_file($projectsDir . $file)) {
+                    error_log('Arquivo encontrado em projects/: ' . $file);
+                    return $projectsDir . $file;
+                }
+            }
+        }
+        
+        // Procurar em uploads
+        $uploadsDir = __DIR__ . '/../../public/uploads/';
+        if (is_dir($uploadsDir)) {
+            $files = scandir($uploadsDir);
+            foreach ($files as $file) {
+                if ($file !== '.' && $file !== '..' && is_file($uploadsDir . $file) && !is_dir($uploadsDir . $file)) {
+                    error_log('Arquivo encontrado em uploads/: ' . $file);
+                    return $uploadsDir . $file;
+                }
+            }
+        }
+        
+        return null;
     }
 
     private function storeProjectDocument(): void
@@ -1366,61 +1524,85 @@ class DocumentWorkflowController
 
     public function getDocumentInfo(string $documentId): void
     {
+        // Log detalhado para diagnóstico
+        error_log('=== OBTENDO INFO DO DOCUMENTO ===');
+        error_log('ID do documento: ' . $documentId);
+        
+        // Garantir que os cabeçalhos de JSON sejam enviados corretamente
+        header('Content-Type: application/json; charset=utf-8');
+        
         if (!Auth::check()) {
-            header('Content-Type: application/json');
+            error_log('Erro: Usuário não autenticado');
             echo json_encode(['success' => false, 'message' => 'Não autenticado']);
             exit;
         }
 
-        $documents = $this->db->findAll('project_documents');
-        
-        if (!isset($documents[$documentId])) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Documento não encontrado']);
+        try {
+            $document = $this->db->find('project_documents', $documentId);
+            
+            if (!$document) {
+                error_log('Erro: Documento não encontrado - ID: ' . $documentId);
+                echo json_encode(['success' => false, 'message' => 'Documento não encontrado']);
+                exit;
+            }
+            
+            error_log('Documento encontrado: ' . json_encode($document));
+            
+            // Buscar informações do usuário que fez upload
+            $uploader = null;
+            if (!empty($document['uploaded_by'])) {
+                $uploader = $this->db->find('users', $document['uploaded_by']);
+            }
+            
+            // Buscar projeto
+            $project = null;
+            if (!empty($document['project_id'])) {
+                $project = $this->db->find('projects', $document['project_id']);
+            }
+
+            // Montar dados de resposta
+            $response = [
+                'success' => true,
+                'document' => [
+                    'id' => $document['id'],
+                    'name' => $document['name'] ?? 'Sem nome',
+                    'description' => $document['description'] ?? '',
+                    'original_name' => $document['original_name'] ?? $document['name'] ?? 'documento.pdf',
+                    'size' => $document['size'] ?? 0,
+                    'size_formatted' => isset($document['size']) ? $this->formatFileSize($document['size']) : 'N/A',
+                    'mime_type' => $document['mime_type'] ?? 'application/pdf',
+                    'status' => $document['status'] ?? 'pendente',
+                    'status_label' => ucfirst(str_replace('_', ' ', $document['status'] ?? 'pendente')),
+                    'created_at' => $document['created_at'] ?? date('Y-m-d H:i:s'),
+                    'created_at_formatted' => isset($document['created_at']) ? date('d/m/Y H:i', strtotime($document['created_at'])) : date('d/m/Y H:i'),
+                    'uploader' => $uploader ? $uploader['name'] : 'Usuário não encontrado',
+                    'project_name' => $project ? $project['name'] : 'Projeto não encontrado',
+                    'document_type' => $document['document_type'] ?? 'Outro',
+                    'version' => $document['version'] ?? 1,
+                    'comments' => $document['comments'] ?? '',
+                    'approved_by' => $document['approved_by'] ?? null,
+                    'approved_at' => $document['approved_at'] ?? null,
+                    'rejected_by' => $document['rejected_by'] ?? null,
+                    'rejected_at' => $document['rejected_at'] ?? null,
+                    'rejection_reason' => $document['rejection_reason'] ?? null
+                ]
+            ];
+            
+            error_log('Enviando resposta: ' . json_encode($response));
+            
+            // Usar json_encode com opções corretas para evitar problemas de UTF-8
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            exit;
+        } 
+        catch (\Exception $e) {
+            error_log('Erro ao obter informações do documento: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Erro ao processar informações do documento',
+                'error' => $e->getMessage()
+            ]);
             exit;
         }
-
-        $document = $documents[$documentId];
-        
-        // Buscar informações do usuário que fez upload
-        $users = $this->db->findAll('users');
-        $uploader = $users[$document['uploaded_by']] ?? null;
-        
-        // Buscar projeto
-        $projects = $this->db->findAll('projects');
-        $project = $projects[$document['project_id']] ?? null;
-
-        // Montar dados de resposta
-        $response = [
-            'success' => true,
-            'document' => [
-                'id' => $document['id'],
-                'name' => $document['name'],
-                'description' => $document['description'],
-                'original_name' => $document['original_name'],
-                'size' => $document['size'],
-                'size_formatted' => $this->formatFileSize($document['size']),
-                'mime_type' => $document['mime_type'],
-                'status' => $document['status'],
-                'status_label' => ucfirst(str_replace('_', ' ', $document['status'])),
-                'created_at' => $document['created_at'],
-                'created_at_formatted' => date('d/m/Y H:i', strtotime($document['created_at'])),
-                'uploader' => $uploader ? $uploader['name'] : 'Usuário não encontrado',
-                'project_name' => $project ? $project['name'] : 'Projeto não encontrado',
-                'document_type' => $document['document_type'],
-                'version' => $document['version'] ?? 1,
-                'comments' => $document['comments'] ?? '',
-                'approved_by' => $document['approved_by'],
-                'approved_at' => $document['approved_at'],
-                'rejected_by' => $document['rejected_by'],
-                'rejected_at' => $document['rejected_at'],
-                'rejection_reason' => $document['rejection_reason']
-            ]
-        ];
-
-        header('Content-Type: application/json');
-        echo json_encode($response);
-        exit;
     }
 
     private function formatFileSize(int $bytes): string

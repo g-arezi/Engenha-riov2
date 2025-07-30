@@ -224,5 +224,18 @@
         "id": "688a4edf4b77d4.48266452",
         "created_at": "2025-07-30 16:57:03",
         "updated_at": "2025-07-30 16:57:03"
+    },
+    "688a55c7ca8fe7.82362984": {
+        "type": "document_uploaded",
+        "title": "Documento Enviado",
+        "message": "Novo documento 'Manual do Hacker Iniciante.pdf' foi enviado para o projeto 'Teste criaçao com tamplate modificado'",
+        "user_id": "rafael",
+        "project_id": "proj_1753892536_9899",
+        "document_id": "doc_688a55c7ca4fc",
+        "is_read": false,
+        "priority": "normal",
+        "id": "688a55c7ca8fe7.82362984",
+        "created_at": "2025-07-30 17:26:31",
+        "updated_at": "2025-07-30 17:26:31"
     }
 }
