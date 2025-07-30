@@ -96,19 +96,6 @@ ob_start();
             </div>
             <div class="card-body">
                 <div class="replies-list">
-                    <?php 
-                    // Buscar respostas do ticket
-                    $replies = [];
-                    if (file_exists(__DIR__ . '/../../data/support_replies.json')) {
-                        $repliesData = json_decode(file_get_contents(__DIR__ . '/../../data/support_replies.json'), true) ?: [];
-                        foreach ($repliesData as $reply) {
-                            if ($reply['ticket_id'] === $ticket['id']) {
-                                $replies[] = $reply;
-                            }
-                        }
-                    }
-                    ?>
-                    
                     <?php if (empty($replies)): ?>
                         <div class="text-center py-4 text-muted">
                             <i class="fas fa-comments fa-2x mb-3"></i>
@@ -143,7 +130,7 @@ ob_start();
                 <!-- Reply Form -->
                 <?php if ($ticket['status'] !== 'fechado'): ?>
                     <div class="reply-form mt-4">
-                        <form method="POST" action="/support/<?= $ticket['id'] ?>/reply">
+                        <form method="POST" action="/reply-ticket.php?id=<?= $ticket['id'] ?>">
                             <div class="mb-3">
                                 <label for="message" class="form-label">Sua Resposta</label>
                                 <textarea class="form-control" id="message" name="message" rows="4" 

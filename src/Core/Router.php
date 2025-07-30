@@ -41,24 +41,51 @@ class Router
     {
         $path = parse_url($requestUri, PHP_URL_PATH);
         
-        // Primeiro, tentar encontrar rotas exatas (sem parâmetros)
+        // Add debugging log
+        error_log("Trying to match path: " . $path . " with method: " . $requestMethod);
+        
+        // First, try to find exact matches (routes without parameters)
         foreach ($this->routes as $route) {
-            // Se é uma rota exata (sem parâmetros {})
-            if ($route['method'] === $requestMethod && !preg_match('/\{([^}]+)\}/', $route['path']) && $route['path'] === $path) {
-                $this->executeRoute($route, $path);
-                return;
+            if ($route['method'] === $requestMethod && !preg_match('/\{([^}]+)\}/', $route['path'])) {
+                if ($route['path'] === $path) {
+                    error_log("Exact match found: " . $route['path']);
+                    $this->executeRoute($route, $path);
+                    return;
+                }
+            }
+        }
+        
+        // Sort routes to ensure more specific routes are checked first
+        usort($this->routes, function($a, $b) {
+            // Count segments (parts separated by /)
+            $aSegments = substr_count($a['path'], '/');
+            $bSegments = substr_count($b['path'], '/');
+            
+            // More segments = more specific route
+            if ($aSegments !== $bSegments) {
+                return $bSegments - $aSegments; // Descending order
+            }
+            
+            // Count parameters (parts like {id})
+            $aParams = substr_count($a['path'], '{');
+            $bParams = substr_count($b['path'], '{');
+            
+            // Fewer parameters = more specific route
+            return $aParams - $bParams; // Ascending order
+        });
+        
+        // Then check parameterized routes
+        foreach ($this->routes as $route) {
+            if ($route['method'] === $requestMethod && preg_match('/\{([^}]+)\}/', $route['path'])) {
+                if ($this->matchRoute($route, $path, $requestMethod)) {
+                    error_log("Parameterized match found: " . $route['path'] . " for " . $path);
+                    $this->executeRoute($route, $path);
+                    return;
+                }
             }
         }
 
-        // Depois, procurar por rotas com parâmetros
-        foreach ($this->routes as $route) {
-            if ($this->matchRoute($route, $path, $requestMethod)) {
-                $this->executeRoute($route, $path);
-                return;
-            }
-        }
-
-        // Registrar em log o erro 404 para debug
+        // Log the 404 error
         error_log("404 Not Found: " . $path);
         
         // 404 Not Found
@@ -72,34 +99,19 @@ class Router
             return false;
         }
 
-        // Não fazer match em rotas exatas
-        if (!preg_match('/\{([^}]+)\}/', $route['path'])) {
-            return false;
-        }
-
-        // Converter partes variáveis da rota para regex
-        $routeParts = explode('/', trim($route['path'], '/'));
-        $pathParts = explode('/', trim($path, '/'));
+        // Convert route path to regex pattern
+        $routePath = $route['path'];
+        $pattern = preg_replace('/\{([^}]+)\}/', '([^/]+)', $routePath);
+        $pattern = str_replace('/', '\\/', $pattern);
+        $pattern = '/^' . $pattern . '$/';
         
-        // Se o número de partes não corresponde, não é match
-        if (count($routeParts) !== count($pathParts)) {
-            return false;
+        // Check if path matches pattern
+        if (preg_match($pattern, $path)) {
+            error_log("Route matched: " . $routePath . " => " . $path);
+            return true;
         }
         
-        // Verificar cada parte da rota
-        foreach ($routeParts as $index => $routePart) {
-            if (strpos($routePart, '{') === 0 && strpos($routePart, '}') === strlen($routePart) - 1) {
-                // Esta é uma parte variável, pular
-                continue;
-            }
-            
-            // Esta é uma parte fixa, deve corresponder exatamente
-            if ($routePart !== $pathParts[$index]) {
-                return false;
-            }
-        }
-        
-        return true;
+        return false;
     }
 
     private function executeRoute(array $route, string $path): void
@@ -127,24 +139,20 @@ class Router
 
     private function extractParams(string $routePath, string $actualPath): array
     {
-        // Dividir as partes da rota e do caminho real
-        $routeParts = explode('/', ltrim($routePath, '/'));
-        $pathParts = explode('/', ltrim($actualPath, '/'));
+        // Convert route path to regex pattern with capturing groups
+        $pattern = preg_replace('/\{([^}]+)\}/', '([^/]+)', $routePath);
+        $pattern = str_replace('/', '\\/', $pattern);
+        $pattern = '/^' . $pattern . '$/';
         
-        $params = [];
+        $matches = [];
+        preg_match($pattern, $actualPath, $matches);
         
-        // Iterar sobre cada parte da rota para encontrar parâmetros
-        foreach ($routeParts as $index => $part) {
-            // Se é um parâmetro (dentro de { })
-            if (preg_match('/^\{([^}]+)\}$/', $part)) {
-                // Verificar se existe um valor correspondente no caminho real
-                if (isset($pathParts[$index])) {
-                    // Decodificar o valor do parâmetro da URL
-                    $params[] = urldecode($pathParts[$index]);
-                }
-            }
-        }
+        // First match is the full string, remove it
+        array_shift($matches);
         
-        return $params;
+        // Log the parameters
+        error_log("Extracted parameters: " . json_encode($matches));
+        
+        return $matches;
     }
 }

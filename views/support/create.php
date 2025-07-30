@@ -116,23 +116,53 @@ function validateTicketForm(form) {
     const description = form.querySelector('#description').value.trim();
     
     if (subject === '') {
-        alert('Por favor, preencha o assunto do ticket.');
+        showAlert('error', 'Por favor, preencha o assunto do ticket.');
+        form.querySelector('#subject').focus();
         return false;
     }
     
     if (description === '') {
-        alert('Por favor, preencha a descrição do ticket.');
+        showAlert('error', 'Por favor, preencha a descrição do ticket.');
+        form.querySelector('#description').focus();
         return false;
     }
     
-    // Debug: log form data
-    console.log('Enviando ticket:', {
-        subject: subject,
-        description: description,
-        priority: form.querySelector('#priority').value
-    });
+    // Check if description is too short
+    if (description.length < 20) {
+        showAlert('warning', 'A descrição do ticket é muito curta. Por favor, forneça mais detalhes para ajudarmos a resolver seu problema.');
+        form.querySelector('#description').focus();
+        return false;
+    }
+    
+    // Show loading message
+    showAlert('info', 'Enviando ticket, aguarde...');
     
     return true;
+}
+
+function showAlert(type, message) {
+    const alertClass = type === 'error' ? 'danger' : type;
+    const alertIcon = {
+        'success': 'check-circle',
+        'info': 'info-circle',
+        'warning': 'exclamation-triangle',
+        'danger': 'exclamation-circle'
+    }[alertClass];
+    
+    const alertHtml = `
+        <div class="alert alert-${alertClass} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${alertIcon} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove any existing alerts
+    document.querySelectorAll('.alert').forEach(alert => alert.remove());
+    
+    // Insert new alert
+    const formElement = document.querySelector('form');
+    formElement.insertAdjacentHTML('beforebegin', alertHtml);
 }
 </script>
 

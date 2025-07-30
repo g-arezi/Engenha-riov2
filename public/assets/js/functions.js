@@ -488,13 +488,13 @@ function updateUserStatus(userId, status) {
 // ===============================
 
 function viewTicket(ticketId) {
-    window.location.href = `/support/view/${ticketId}`;
+    window.location.href = `/view-ticket.php?id=${ticketId}`;
 }
 
 function updateTicketStatus(ticketId, newStatus) {
     showLoader();
     
-    fetch(`/support/update-status/${ticketId}`, {
+    fetch(`/update-ticket-status.php?id=${ticketId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

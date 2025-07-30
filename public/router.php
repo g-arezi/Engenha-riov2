@@ -144,14 +144,52 @@ $router->post('/document-workflow/reject-document-ajax', [DocumentWorkflowContro
 $router->post('/documents/upload-project-file', [DocumentWorkflowController::class, 'uploadProjectFile'], [AuthMiddleware::class]);
 $router->post('/documents/handle-drag-drop', [DocumentWorkflowController::class, 'handleDragDropUpload'], [AuthMiddleware::class]);
 
-// Support routes
+// Support routes - IMPORTANTE: Rotas específicas primeiro
 $router->get('/support', [SupportController::class, 'index'], [AuthMiddleware::class]);
 $router->get('/support/create', [SupportController::class, 'create'], [AuthMiddleware::class]);
 $router->post('/support/create', [SupportController::class, 'create'], [AuthMiddleware::class]);
-$router->get('/support/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
+// Removendo a rota /support/{id} pois está causando conflito com /support/view/{id}
+// $router->get('/support/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
 $router->get('/support/view/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
+$router->post('/support/update-status', function() {
+    $id = $_GET['id'] ?? null;
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'ID não fornecido']);
+        exit;
+    }
+    
+    // Create support controller and call updateStatus method
+    $controller = new App\Controllers\SupportController();
+    $controller->updateStatus($id);
+}, [AuthMiddleware::class]);
 $router->post('/support/{id}/reply', [SupportController::class, 'reply'], [AuthMiddleware::class]);
-$router->post('/support/update-status/{id}', [SupportController::class, 'updateStatus'], [AuthMiddleware::class]);
+
+// Route for direct ticket access via query string
+$router->get('/support-ticket', function() {
+    $id = $_GET['id'] ?? null;
+    if (!$id) {
+        header('Location: /support');
+        exit;
+    }
+    
+    // Create support controller and call show method
+    $controller = new App\Controllers\SupportController();
+    $controller->show($id);
+}, [AuthMiddleware::class]);
+
+// Route for replying to a ticket via query string
+$router->post('/support/reply', function() {
+    $id = $_GET['id'] ?? null;
+    if (!$id) {
+        header('Location: /support');
+        exit;
+    }
+    
+    // Create support controller and call reply method
+    $controller = new App\Controllers\SupportController();
+    $controller->reply($id);
+}, [AuthMiddleware::class]);
 
 // Search and Export routes
 $router->get('/search', [DocumentController::class, 'search'], [AuthMiddleware::class]);

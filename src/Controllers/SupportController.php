@@ -24,7 +24,27 @@ class SupportController
             exit;
         }
 
-        $tickets = $this->db->findAll('support_tickets');
+        // Fetch tickets based on user role
+        if (Auth::hasPermission('admin.view') || Auth::hasPermission('support.manage')) {
+            // Admin, coordinator, and analyst can see all tickets
+            $tickets = $this->db->findAll('support_tickets');
+        } else {
+            // Regular users can only see their own tickets
+            $tickets = $this->db->findAll('support_tickets', ['user_id' => Auth::id()]);
+        }
+        
+        // Count tickets by status
+        $openCount = 0;
+        $closedCount = 0;
+        
+        foreach ($tickets as $ticket) {
+            if ($ticket['status'] === 'fechado') {
+                $closedCount++;
+            } else {
+                $openCount++;
+            }
+        }
+        
         require_once __DIR__ . '/../../views/support/index.php';
     }
 
@@ -50,11 +70,44 @@ class SupportController
             exit;
         }
 
+        // Log the ticket ID for debugging
+        error_log("SupportController::show - Looking for ticket with ID: " . $id);
+        
         $ticket = $this->db->find('support_tickets', $id);
+        
         if (!$ticket) {
             $_SESSION['error'] = 'Ticket não encontrado.';
+            error_log("SupportController::show - Ticket not found: " . $id);
+            
+            // Debug: Let's look at what tickets we have
+            $allTickets = $this->db->findAll('support_tickets');
+            error_log("Available tickets: " . json_encode(array_keys($allTickets)));
+            
             header('Location: /support');
             exit;
+        }
+
+        error_log("SupportController::show - Ticket found: " . json_encode($ticket));
+
+        // Check if user has permission to view this ticket
+        if (!Auth::hasPermission('admin.view') && 
+            !Auth::hasPermission('support.manage') && 
+            $ticket['user_id'] !== Auth::id()) {
+            $_SESSION['error'] = 'Você não tem permissão para visualizar este ticket.';
+            error_log("SupportController::show - Permission denied for user: " . Auth::id());
+            header('Location: /support');
+            exit;
+        }
+
+        // Get replies for this ticket
+        $replies = [];
+        if (file_exists(__DIR__ . '/../../data/support_replies.json')) {
+            $repliesData = json_decode(file_get_contents(__DIR__ . '/../../data/support_replies.json'), true) ?: [];
+            foreach ($repliesData as $reply) {
+                if ($reply['ticket_id'] === $ticket['id']) {
+                    $replies[] = $reply;
+                }
+            }
         }
 
         require_once __DIR__ . '/../../views/support/show.php';

@@ -32,7 +32,7 @@ ob_start();
                             <div class="d-flex align-items-center justify-content-center">
                                 <i class="fas fa-clock fa-lg me-2"></i>
                                 <div>
-                                    <h6 class="mb-0">Tickets em Aberto (0)</h6>
+                                    <h6 class="mb-0">Tickets em Aberto (<?= $openCount ?>)</h6>
                                 </div>
                             </div>
                         </div>
@@ -42,7 +42,7 @@ ob_start();
                             <div class="d-flex align-items-center justify-content-center">
                                 <i class="fas fa-history fa-lg me-2"></i>
                                 <div>
-                                    <h6 class="mb-0">Histórico (0)</h6>
+                                    <h6 class="mb-0">Histórico (<?= $closedCount ?>)</h6>
                                 </div>
                             </div>
                         </div>
@@ -102,11 +102,13 @@ ob_start();
                         </a>
                     </div>
                 <?php else: ?>
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush ticket-list">
                         <?php foreach ($tickets as $ticket): ?>
-                            <a href="/support/view/<?= $ticket['id'] ?>" 
-                               class="list-group-item list-group-item-action ticket-item" 
-                               data-ticket-id="<?= $ticket['id'] ?>">>
+                            <a href="/view-ticket.php?id=<?= $ticket['id'] ?>" 
+                               class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
+                               data-ticket-id="<?= $ticket['id'] ?>"
+                               data-status="<?= $ticket['status'] ?>"
+                               style="<?= $ticket['status'] === 'fechado' ? 'display: none;' : '' ?>">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h6 class="mb-1"><?= htmlspecialchars($ticket['subject']) ?></h6>
                                     <small class="text-muted"><?= date('d/m/Y', strtotime($ticket['created_at'])) ?></small>
@@ -144,6 +146,35 @@ ob_start();
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle tab switching
+    const tabs = document.querySelectorAll('.support-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            const tabType = this.getAttribute('data-tab');
+            
+            // Show/hide tickets based on the selected tab
+            const ticketItems = document.querySelectorAll('.ticket-item');
+            ticketItems.forEach(item => {
+                if (tabType === 'open') {
+                    // Show only open tickets
+                    item.style.display = item.classList.contains('history-ticket') ? 'none' : '';
+                } else if (tabType === 'history') {
+                    // Show only history tickets
+                    item.style.display = item.classList.contains('open-ticket') ? 'none' : '';
+                }
+            });
+        });
+    });
+});
+</script>
 
 <?php
 $content = ob_get_clean();

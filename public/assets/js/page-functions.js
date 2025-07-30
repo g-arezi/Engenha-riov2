@@ -283,6 +283,58 @@ function markAllNotificationsAsRead() {
     .catch(error => console.error('Notification error:', error));
 }
 
+// Support ticket functions
+function updateTicketStatus(ticketId, status) {
+    fetch(`/update-ticket-status.php?id=${ticketId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Status do ticket atualizado para: ${status.replace('_', ' ')}`);
+            
+            // Update UI to reflect the new status
+            const statusBadges = document.querySelectorAll('.ticket-meta .badge');
+            statusBadges.forEach(badge => {
+                if (badge.classList.contains('bg-success') || 
+                    badge.classList.contains('bg-warning') || 
+                    badge.classList.contains('bg-secondary')) {
+                    
+                    // Remove existing status classes
+                    badge.classList.remove('bg-success', 'bg-warning', 'bg-secondary');
+                    
+                    // Add new status class
+                    if (status === 'aberto') {
+                        badge.classList.add('bg-success');
+                        badge.textContent = 'Aberto';
+                    } else if (status === 'em_andamento') {
+                        badge.classList.add('bg-warning');
+                        badge.textContent = 'Em Andamento';
+                    } else if (status === 'fechado') {
+                        badge.classList.add('bg-secondary');
+                        badge.textContent = 'Fechado';
+                    }
+                }
+            });
+            
+            // Reload page after a short delay to reflect all changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('error', data.message || 'Erro ao atualizar status');
+        }
+    })
+    .catch(error => {
+        console.error('Support ticket error:', error);
+        showAlert('error', 'Erro de conexão');
+    });
+}
+
 // Export/Import functions
 function exportData(type) {
     showLoader();
