@@ -80,13 +80,19 @@ function deleteDocument(documentId) {
     if (confirm('Tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.')) {
         showLoader();
         
-        fetch(`/documents/delete/${documentId}`, {
+        // A URL correta é /documents/project/{id} conforme definido nas rotas
+        fetch(`/documents/project/${documentId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro de servidor: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 showAlert('success', 'Documento excluído com sucesso!');
@@ -99,7 +105,7 @@ function deleteDocument(documentId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            showAlert('error', 'Erro de conexão');
+            showAlert('error', 'Erro ao excluir documento. Tente novamente mais tarde.');
         })
         .finally(() => {
             hideLoader();

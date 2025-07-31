@@ -22,17 +22,17 @@ class Database
         $filePath = $this->dataPath . $table . '.json';
         
         // Verificação extra para debug
-        echo "<!-- DEBUG Database::getAllData - Reading from: {$filePath} -->\n";
+        error_log("Database::getAllData - Reading from: {$filePath}");
         
         if (!file_exists($filePath)) {
-            echo "<!-- DEBUG Database::getAllData - File does not exist! -->\n";
+            error_log("Database::getAllData - File does not exist!");
             return [];
         }
         
         $content = file_get_contents($filePath);
         $data = json_decode($content, true) ?: [];
         
-        echo "<!-- DEBUG Database::getAllData - Records found: " . count($data) . " -->\n";
+        error_log("Database::getAllData - Records found: " . count($data));
         
         return $data;
     }
@@ -151,17 +151,18 @@ class Database
     {
         $filePath = $this->dataPath . $table . '.json';
         
-        echo "<!-- DEBUG Database::getTable - Reading from: {$filePath} -->\n";
+        // Usar error_log em vez de echo para debug
+        error_log("Database::getTable - Reading from: {$filePath}");
         
         if (!file_exists($filePath)) {
-            echo "<!-- DEBUG Database::getTable - File does not exist! -->\n";
+            error_log("Database::getTable - File does not exist!");
             return [];
         }
 
         $content = file_get_contents($filePath);
         $data = json_decode($content, true) ?: [];
         
-        echo "<!-- DEBUG Database::getTable - Records found: " . count($data) . " -->\n";
+        error_log("Database::getTable - Records found: " . count($data));
         
         return $data;
     }

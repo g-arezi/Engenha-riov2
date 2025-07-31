@@ -1,28 +1,4 @@
 {
-    "doc_688a55c7ca4fc": {
-        "id": "doc_688a55c7ca4fc",
-        "project_id": "proj_1753892536_9899",
-        "name": "Manual do Hacker Iniciante.pdf",
-        "description": "Uploaded via drag and drop",
-        "document_type": "Manual Upload",
-        "type": "Other",
-        "category": "Document",
-        "original_name": "Manual do Hacker Iniciante.pdf",
-        "filename": "688a55c7c7677.pdf",
-        "size": 2821277,
-        "mime_type": "application\/pdf",
-        "uploaded_by": "admin",
-        "status": "aprovado",
-        "stage": "documentos",
-        "created_at": "2025-07-30 17:26:31",
-        "updated_at": "2025-07-31 15:02:20",
-        "approved_by": "admin",
-        "approved_at": "2025-07-31 15:02:20",
-        "comments": "",
-        "rejected_by": null,
-        "rejected_at": null,
-        "rejection_reason": null
-    },
     "doc_688b94e453fed": {
         "id": "doc_688b94e453fed",
         "project_id": "upload",

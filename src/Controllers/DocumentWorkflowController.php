@@ -1485,40 +1485,53 @@ class DocumentWorkflowController
             exit;
         }
 
-        $documents = $this->db->findAll('project_documents');
+        // Usar o método find do objeto database
+        $document = $this->db->find('project_documents', $documentId);
         
-        if (!isset($documents[$documentId])) {
+        if (!$document) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Documento não encontrado']);
             exit;
         }
-
-        $document = $documents[$documentId];
         
         // Deletar arquivo físico se existir
-        $uploadPath = __DIR__ . '/../../public/uploads/';
-        $filePath = $uploadPath . $document['filename'];
-        if (file_exists($filePath)) {
-            unlink($filePath);
+        $possiblePaths = [
+            __DIR__ . '/../../public/uploads/projects/' . $document['filename'],
+            __DIR__ . '/../../public/uploads/' . $document['filename'],
+            __DIR__ . '/../../public/uploads/projects/' . $documentId . '.pdf',
+            __DIR__ . '/../../public/uploads/' . $documentId . '.pdf'
+        ];
+        
+        foreach ($possiblePaths as $filePath) {
+            if (file_exists($filePath)) {
+                error_log("Deletando arquivo: " . $filePath);
+                unlink($filePath);
+                break;
+            }
         }
 
-        // Remover do banco de dados
-        unset($documents[$documentId]);
+        // Remover do banco de dados usando o método do Database
+        $deleted = $this->db->delete('project_documents', $documentId);
         
-        // Salvar alterações
-        $documentsFile = __DIR__ . '/../../data/project_documents.json';
-        file_put_contents($documentsFile, json_encode($documents, JSON_PRETTY_PRINT));
+        if ($deleted) {
+            // Adicionar notificação
+            $this->notificationService->createDocumentNotification(
+                'document_deleted',
+                [
+                    'user_id' => $document['uploaded_by'],
+                    'project_id' => $document['project_id'],
+                    'document_id' => $documentId,
+                    'document_name' => $document['name'],
+                    'project_name' => 'Projeto'
+                ]
+            );
 
-        // Adicionar notificação
-        $this->notificationService->addNotification(
-            $document['uploaded_by'],
-            'Documento excluído',
-            "O documento '{$document['name']}' foi excluído.",
-            'document_deleted'
-        );
-
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => 'Documento excluído com sucesso']);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'Documento excluído com sucesso']);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Falha ao excluir o documento do banco de dados']);
+        }
         exit;
     }
 
