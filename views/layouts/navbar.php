@@ -49,7 +49,10 @@ $unreadCount = count(array_filter($notifications, fn($n) => !($n['is_read'] ?? f
             <!-- Usuário -->
             <div class="dropdown">
                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="/assets/images/avatar-default.svg" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+                    <div class="avatar-container rounded-circle me-2" style="width: 32px; height: 32px; overflow: hidden;">
+                        <img src="<?= !empty($user['avatar']) ? '/uploads/avatars/' . $user['avatar'] : '/assets/images/avatar-default.svg' ?>" 
+                             alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
+                    </div>
                     <span><?= htmlspecialchars($user['name']) ?></span>
                     <i class="fas fa-chevron-down ms-2"></i>
                 </a>

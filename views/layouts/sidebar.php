@@ -7,7 +7,17 @@ $user = Auth::user();
     <div class="sidebar-header">
         <div class="brand d-flex align-items-center px-3 py-3">
             <img src="/assets/images/engenhario-logo.png" alt="Engenha Rio" class="me-2" style="height: 32px;">
-           
+        </div>
+        
+        <div class="user-profile d-flex align-items-center p-3 text-white">
+            <div class="avatar-container me-2" style="width: 40px; height: 40px; overflow: hidden; border-radius: 50%;">
+                <img src="<?= !empty($user['avatar']) ? '/uploads/avatars/' . $user['avatar'] : '/assets/images/avatar-default.svg' ?>" 
+                     alt="Avatar" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div class="user-info">
+                <div class="user-name"><?= htmlspecialchars($user['name']) ?></div>
+                <small class="text-light-50"><?= ucfirst($user['role']) ?></small>
+            </div>
         </div>
     </div>
     

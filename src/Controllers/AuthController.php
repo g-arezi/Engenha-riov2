@@ -104,6 +104,7 @@ class AuthController
         $data = [
             'name' => $_POST['name'] ?? '',
             'email' => $_POST['email'] ?? '',
+            'bio' => $_POST['bio'] ?? '',
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
@@ -111,8 +112,56 @@ class AuthController
         if (!empty($_POST['password'])) {
             $data['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
         }
+        
+        // Processar upload da foto de perfil
+        if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['avatar'];
+            
+            // Validar tipo do arquivo
+            $allowedTypes = ['image/jpeg', 'image/png'];
+            if (!in_array($file['type'], $allowedTypes)) {
+                header('Location: /profile?error=avatar_type');
+                exit;
+            }
+            
+            // Validar tamanho do arquivo (2MB máximo)
+            if ($file['size'] > 2 * 1024 * 1024) {
+                header('Location: /profile?error=avatar_size');
+                exit;
+            }
+            
+            // Gerar nome único para o arquivo
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = $userId . '_' . uniqid() . '.' . $extension;
+            $uploadPath = __DIR__ . '/../../public/uploads/avatars/';
+            
+            // Verificar se o diretório existe, caso não, criar
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+            
+            // Mover o arquivo
+            if (move_uploaded_file($file['tmp_name'], $uploadPath . $filename)) {
+                // Remover avatar antigo se existir
+                $user = $db->find('users', $userId);
+                if (!empty($user['avatar']) && file_exists($uploadPath . $user['avatar'])) {
+                    unlink($uploadPath . $user['avatar']);
+                }
+                
+                // Atualizar o caminho do avatar no banco de dados
+                $data['avatar'] = $filename;
+            } else {
+                // Erro ao mover o arquivo
+                header('Location: /profile?error=avatar_upload');
+                exit;
+            }
+        }
 
+        // Atualizar dados do usuário
         $db->update('users', $userId, $data);
+        
+        // Atualizar a sessão com os novos dados
+        $_SESSION['user_updated'] = true;
         
         header('Location: /profile?success=profile_updated');
         exit;

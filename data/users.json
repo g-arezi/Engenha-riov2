@@ -59,9 +59,11 @@
         "status": "ativo",
         "requested_role": "cliente",
         "created_at": "2025-07-28 21:21:19",
-        "updated_at": "2025-07-28 21:57:28",
+        "updated_at": "2025-07-31 16:07:33",
         "id": "6887cdaf0cf3a8.51328972",
         "approved_at": "2025-07-28 21:57:28",
-        "approved_by": "admin"
+        "approved_by": "admin",
+        "bio": "descrição teste.",
+        "avatar": "6887cdaf0cf3a8.51328972_688b94c5bf9a8.png"
     }
 }

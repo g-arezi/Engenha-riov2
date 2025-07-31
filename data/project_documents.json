@@ -22,5 +22,23 @@
         "rejected_by": null,
         "rejected_at": null,
         "rejection_reason": null
+    },
+    "doc_688b94e453fed": {
+        "id": "doc_688b94e453fed",
+        "project_id": "upload",
+        "name": "e8bc8837a32f620ff034aea13da6a79e.png",
+        "description": "Uploaded via drag and drop",
+        "document_type": "Manual Upload",
+        "type": "Other",
+        "category": "Document",
+        "original_name": "e8bc8837a32f620ff034aea13da6a79e.png",
+        "filename": "688b94e450f54.png",
+        "size": 1133258,
+        "mime_type": "image\/png",
+        "uploaded_by": "6887cdaf0cf3a8.51328972",
+        "status": "pendente",
+        "stage": "documentos",
+        "created_at": "2025-07-31 16:08:04",
+        "updated_at": "2025-07-31 16:08:04"
     }
 }

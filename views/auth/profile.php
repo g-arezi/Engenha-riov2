@@ -27,6 +27,21 @@ ob_start();
     </div>
 <?php endif; ?>
 
+<?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?php
+        $errorMessage = match($_GET['error']) {
+            'avatar_type' => 'Tipo de arquivo inválido! Use apenas formatos JPG ou PNG.',
+            'avatar_size' => 'Arquivo muito grande! O tamanho máximo permitido é 2MB.',
+            'avatar_upload' => 'Erro ao fazer upload da imagem. Tente novamente.',
+            default => 'Ocorreu um erro ao processar sua solicitação.'
+        };
+        echo $errorMessage;
+        ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card">
@@ -34,7 +49,7 @@ ob_start();
                 <h5 class="mb-0">Informações Pessoais</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="/profile">
+                <form method="POST" action="/profile" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -67,6 +82,29 @@ ob_start();
                                         <?= ucfirst($user['status']) ?>
                                     </span>
                                 </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Descrição / Biografia</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3" 
+                                 placeholder="Escreva uma breve descrição sobre você..."><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+                        <div class="form-text">Esta descrição será visível para outros usuários do sistema</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="avatar" class="form-label">Foto de Perfil</label>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="avatar-preview rounded-circle overflow-hidden" style="width: 100px; height: 100px; background-color: #e9ecef;">
+                                    <img src="<?= !empty($user['avatar']) ? '/uploads/avatars/' . $user['avatar'] : '/assets/images/avatar-default.svg' ?>" 
+                                         alt="Avatar" class="img-fluid" id="avatarPreview">
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                                <div class="form-text">Formatos aceitos: JPG, PNG. Tamanho máximo: 2MB.</div>
                             </div>
                         </div>
                     </div>
@@ -112,10 +150,23 @@ ob_start();
             </div>
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <img src="/assets/images/avatar-default.svg" alt="Avatar" class="rounded-circle mb-2" width="80" height="80">
+                    <div class="avatar-container mx-auto mb-2" style="width: 100px; height: 100px; overflow: hidden; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.16);">
+                        <img src="<?= !empty($user['avatar']) ? '/uploads/avatars/' . $user['avatar'] : '/assets/images/avatar-default.svg' ?>" 
+                             alt="Avatar" class="img-fluid" width="100%" height="100%" style="object-fit: cover;">
+                    </div>
                     <h6><?= htmlspecialchars($user['name']) ?></h6>
                     <small class="text-muted"><?= htmlspecialchars($user['email']) ?></small>
                 </div>
+                
+                <?php if (!empty($user['bio'])): ?>
+                <div class="card bg-light mb-3">
+                    <div class="card-body py-2">
+                        <small class="text-muted fst-italic">
+                            "<?= htmlspecialchars($user['bio']) ?>"
+                        </small>
+                    </div>
+                </div>
+                <?php endif; ?>
                 
                 <hr>
                 
@@ -146,6 +197,38 @@ document.addEventListener('DOMContentLoaded', function() {
     
     passwordField.addEventListener('input', validatePasswords);
     confirmField.addEventListener('input', validatePasswords);
+    
+    // Preview de imagem ao selecionar avatar
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+    
+    if (avatarInput && avatarPreview) {
+        avatarInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                // Verificar tamanho (2MB máximo)
+                if (this.files[0].size > 2 * 1024 * 1024) {
+                    alert('Arquivo muito grande! O tamanho máximo permitido é 2MB.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Verificar tipo
+                const fileType = this.files[0].type;
+                if (fileType !== 'image/jpeg' && fileType !== 'image/png') {
+                    alert('Formato inválido! Use apenas arquivos JPG ou PNG.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Mostrar preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
 });
 </script>
 

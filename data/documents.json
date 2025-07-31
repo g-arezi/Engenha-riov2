@@ -63,5 +63,23 @@
         "approval_status": "pending",
         "created_at": "2025-07-27 02:33:21",
         "updated_at": "2025-07-27 02:33:21"
+    },
+    "doc_688b950248c0d": {
+        "id": "doc_688b950248c0d",
+        "name": "imgteste",
+        "description": "teste",
+        "category": "Outros",
+        "project_id": "proj_1753892536_9899",
+        "original_name": "e8bc8837a32f620ff034aea13da6a79e.png",
+        "filename": "688b9502487db.png",
+        "size": 1133258,
+        "mime_type": "image\/png",
+        "uploaded_by": "6887cdaf0cf3a8.51328972",
+        "uploaded_at": "2025-07-31 16:08:34",
+        "status": "ativo",
+        "workflow_stage": "documentos",
+        "approval_status": "pending",
+        "created_at": "2025-07-31 16:08:34",
+        "updated_at": "2025-07-31 16:08:34"
     }
 }
