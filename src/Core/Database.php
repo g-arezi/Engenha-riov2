@@ -147,7 +147,7 @@ class Database
         return true;
     }
 
-    private function getTable(string $table): array
+    public function getTable(string $table): array
     {
         $filePath = $this->dataPath . $table . '.json';
         

@@ -116,6 +116,7 @@ ob_start();
                             <tr>
                                 <th>Nome</th>
                                 <th>Cliente</th>
+                                <th>Nº Orçamento</th>
                                 <th>Status</th>
                                 <th>Prioridade</th>
                                 <th>Criado em</th>
@@ -129,6 +130,7 @@ ob_start();
                                     <strong><?= htmlspecialchars($project['name']) ?></strong>
                                 </td>
                                 <td><?= htmlspecialchars($project['client_name'] ?? 'N/A') ?></td>
+                                <td><?= htmlspecialchars($project['budget_number'] ?? 'N/A') ?></td>
                                 <td>
                                     <span class="badge bg-<?= $project['status'] === 'ativo' ? 'success' : ($project['status'] === 'pendente' ? 'warning' : 'secondary') ?>">
                                         <?= ucfirst($project['status']) ?>

@@ -346,5 +346,27 @@
         "is_read": false,
         "created_at": "2025-07-31 15:49:37",
         "updated_at": "2025-07-31 15:49:37"
+    },
+    "688b990e9fcd79.09164474": {
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "type": "project_created",
+        "title": "Novo Projeto Criado",
+        "message": "O projeto \"Projeto Teste \" foi criado e está aguardando documentos.",
+        "data": "{\"project_id\":\"proj_1753979150_9736\"}",
+        "is_read": false,
+        "created_at": "2025-07-31 16:25:50",
+        "id": "688b990e9fcd79.09164474",
+        "updated_at": "2025-07-31 16:25:50"
+    },
+    "688b990ea295a2.27445248": {
+        "user_id": "6887cb7c384b75.22527396",
+        "type": "project_assigned",
+        "title": "Projeto Atribuído",
+        "message": "Você foi designado como analista do projeto \"Projeto Teste \".",
+        "data": "{\"project_id\":\"proj_1753979150_9736\"}",
+        "is_read": false,
+        "created_at": "2025-07-31 16:25:50",
+        "id": "688b990ea295a2.27445248",
+        "updated_at": "2025-07-31 16:25:50"
     }
 }

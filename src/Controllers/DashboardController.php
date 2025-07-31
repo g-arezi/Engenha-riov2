@@ -59,6 +59,22 @@ class DashboardController
             return strtotime($b['created_at']) - strtotime($a['created_at']);
         });
 
+        // Carregar dados de usuários
+        $users = $this->db->findAll('users');
+        
+        // Adicionar nomes de clientes e analistas aos projetos
+        foreach ($projects as &$project) {
+            // Adicionar nome do cliente
+            if (!empty($project['client_id']) && isset($users[$project['client_id']])) {
+                $project['client_name'] = $users[$project['client_id']]['name'];
+            }
+            
+            // Adicionar nome do analista
+            if (!empty($project['analyst_id']) && isset($users[$project['analyst_id']])) {
+                $project['analyst_name'] = $users[$project['analyst_id']]['name'];
+            }
+        }
+
         return array_slice($projects, 0, 10); // Últimos 10 projetos
     }
 }

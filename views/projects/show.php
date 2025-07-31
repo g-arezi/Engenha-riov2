@@ -191,7 +191,12 @@ ob_start();
                 
                 <div class="mb-3">
                     <strong>Cliente Atribuído:</strong>
-                    <p><?= htmlspecialchars($project['client_id'] ?? 'Não atribuído') ?></p>
+                    <p><?= htmlspecialchars($project['client_name'] ?? $project['client_id'] ?? 'Não atribuído') ?></p>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Nº Orçamento:</strong>
+                    <p><?= htmlspecialchars($project['budget_number'] ?? 'Não definido') ?></p>
                 </div>
             </div>
         </div>

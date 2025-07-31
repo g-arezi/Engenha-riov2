@@ -39,22 +39,6 @@ class ProjectController
         else {
             $projects = [];
         }
-        
-        // Carregar dados de usuários
-        $users = $this->db->findAll('users');
-        
-        // Adicionar nomes de clientes e analistas aos projetos
-        foreach ($projects as &$project) {
-            // Adicionar nome do cliente
-            if (!empty($project['client_id']) && isset($users[$project['client_id']])) {
-                $project['client_name'] = $users[$project['client_id']]['name'];
-            }
-            
-            // Adicionar nome do analista
-            if (!empty($project['analyst_id']) && isset($users[$project['analyst_id']])) {
-                $project['analyst_name'] = $users[$project['analyst_id']]['name'];
-            }
-        }
 
         require_once __DIR__ . '/../../views/projects/index.php';
     }
@@ -216,9 +200,9 @@ class ProjectController
             exit;
         }
         
-        // Validar formato do número de orçamento - exatamente 1111.1111.V1
-        if (!preg_match('/^\d{4}\.\d{4}\.V\d$/', $data['budget_number'])) {
-            $_SESSION['error'] = 'O número de orçamento deve seguir exatamente o formato: 1111.1111.V1 (4 dígitos, ponto, 4 dígitos, ponto, letra V, 1 dígito).';
+        // Validar formato do número de orçamento
+        if (!preg_match('/^\d{4}\.\d{4}\.[A-Z]\d$/', $data['budget_number'])) {
+            $_SESSION['error'] = 'O número de orçamento deve seguir o formato: 9 dígitos e uma letra (ex: 2025.0162.V2).';
             header('Location: /projects/create');
             exit;
         }
@@ -301,9 +285,9 @@ class ProjectController
             exit;
         }
         
-        // Validar formato do número de orçamento - exatamente 1111.1111.V1
-        if (!preg_match('/^\d{4}\.\d{4}\.V\d$/', $data['budget_number'])) {
-            $_SESSION['error'] = 'O número de orçamento deve seguir exatamente o formato: 1111.1111.V1 (4 dígitos, ponto, 4 dígitos, ponto, letra V, 1 dígito).';
+        // Validar formato do número de orçamento
+        if (!preg_match('/^\d{4}\.\d{4}\.[A-Z]\d$/', $data['budget_number'])) {
+            $_SESSION['error'] = 'O número de orçamento deve seguir o formato: 9 dígitos e uma letra (ex: 2025.0162.V2).';
             header('Location: /projects/' . $id . '/edit');
             exit;
         }

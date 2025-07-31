@@ -46,6 +46,26 @@ ob_start();
                                   placeholder="Descreva detalhadamente o projeto, incluindo objetivos, especificações e requisitos..." required></textarea>
                     </div>
                     
+                    <!-- Número de Orçamento -->
+                    <div class="mb-3">
+                        <label for="budget_number" class="form-label">
+                            <i class="fas fa-hashtag me-1 text-primary"></i>
+                            Número de Orçamento <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="budget_number" name="budget_number" 
+                                   placeholder="Ex: 1111.1111.V1" pattern="^\d{4}\.\d{4}\.V\d$" 
+                                   oninput="this.value = this.value.toUpperCase()" required>
+                            <span class="input-group-text bg-light text-muted">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                        </div>
+                        <div class="form-text">Formato obrigatório: <strong>1111.1111.V1</strong> (4 dígitos, ponto, 4 dígitos, ponto, letra V, 1 dígito)</div>
+                        <div id="budget_number_feedback" class="invalid-feedback">
+                            Formato inválido. Use exatamente o formato: 1111.1111.V1
+                        </div>
+                    </div>
+
                     <div class="row">
                         <!-- Tipo de Projeto -->
                         <div class="col-md-6">
@@ -255,10 +275,51 @@ function showTemplateDescription() {
     }
 }
 
+// Validar número de orçamento em tempo real
+function validateBudgetNumber() {
+    const budgetNumberField = document.getElementById('budget_number');
+    if (!budgetNumberField) return;
+    
+    const value = budgetNumberField.value.trim().toUpperCase();
+    const budgetPattern = /^\d{4}\.\d{4}\.V\d$/;
+    
+    // Verificar o padrão
+    if (value && !budgetPattern.test(value)) {
+        budgetNumberField.classList.add('is-invalid');
+        document.getElementById('budget_number_feedback').style.display = 'block';
+    } else {
+        budgetNumberField.classList.remove('is-invalid');
+        document.getElementById('budget_number_feedback').style.display = 'none';
+    }
+    
+    // Formato automaticamente enquanto o usuário digita
+    if (value.length >= 1) {
+        // Inserir ponto após 4 dígitos
+        if (value.length === 4 && !value.includes('.')) {
+            budgetNumberField.value = value + '.';
+        }
+        // Inserir ponto após 4 dígitos + ponto + 4 dígitos
+        else if (value.length === 9 && value.charAt(4) === '.' && !value.includes('.', 5)) {
+            budgetNumberField.value = value + '.';
+        }
+        // Garantir que após o segundo ponto seja 'V'
+        else if (value.length === 10 && value.charAt(9) !== 'V') {
+            budgetNumberField.value = value.substring(0, 9) + 'V';
+        }
+    }
+}
+
 // Event listener para mudanças no template
 document.addEventListener('DOMContentLoaded', function() {
     const templateSelect = document.getElementById('document_template');
     templateSelect.addEventListener('change', showTemplateDescription);
+    
+    // Adicionar validação em tempo real para o número de orçamento
+    const budgetNumberField = document.getElementById('budget_number');
+    if (budgetNumberField) {
+        budgetNumberField.addEventListener('input', validateBudgetNumber);
+        budgetNumberField.addEventListener('blur', validateBudgetNumber);
+    }
     
     // Validação de formulário aprimorada
     const form = document.querySelector('form[data-validate="true"]');
@@ -276,9 +337,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
+            // Validação específica para o número de orçamento
+            const budgetNumberField = document.getElementById('budget_number');
+            if (budgetNumberField && budgetNumberField.value.trim()) {
+                // Formato específico: 1111.1111.V1
+                const budgetPattern = /^\d{4}\.\d{4}\.V\d$/;
+                const value = budgetNumberField.value.trim().toUpperCase();
+                
+                if (!budgetPattern.test(value)) {
+                    budgetNumberField.classList.add('is-invalid');
+                    isValid = false;
+                    document.getElementById('budget_number_feedback').style.display = 'block';
+                    alert('O número de orçamento deve seguir exatamente o formato: 1111.1111.V1 (4 dígitos, ponto, 4 dígitos, ponto, V, 1 dígito)');
+                } else {
+                    budgetNumberField.classList.remove('is-invalid');
+                    document.getElementById('budget_number_feedback').style.display = 'none';
+                }
+                
+                // Garantir que esteja sempre em maiúsculo
+                budgetNumberField.value = value;
+            }
+            
             if (!isValid) {
                 e.preventDefault();
-                alert('Por favor, preencha todos os campos obrigatórios, incluindo o template de documentos.');
+                if (!document.querySelector('.is-invalid[id="budget_number"]')) {
+                    alert('Por favor, preencha todos os campos obrigatórios, incluindo o template de documentos.');
+                }
             }
         });
     }
