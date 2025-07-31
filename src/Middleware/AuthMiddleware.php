@@ -8,11 +8,25 @@ class AuthMiddleware
 {
     public function handle(): bool
     {
+        // Iniciar sessão se ainda não estiver iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+            error_log('AuthMiddleware: Iniciando sessão - Session ID: ' . session_id());
+        }
+
+        // Verificação de debug
+        error_log('AuthMiddleware: Verificando autenticação - Session data: ' . json_encode($_SESSION));
+        
+        // Verificar autenticação
         if (!Auth::check()) {
+            error_log('AuthMiddleware: Usuário não autenticado - redirecionando');
+            
             // Verificar se é uma requisição AJAX
             if ($this->isAjaxRequest()) {
+                error_log('AuthMiddleware: Requisição AJAX - retornando código 401');
                 http_response_code(401);
-                echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
                 exit;
             }
             
@@ -20,6 +34,7 @@ class AuthMiddleware
             exit;
         }
         
+        error_log('AuthMiddleware: Usuário autenticado com sucesso');
         return true;
     }
     

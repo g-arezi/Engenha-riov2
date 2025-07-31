@@ -267,6 +267,12 @@ function rejectDocument(documentId) {
 }
 
 function updateDocumentStatus(documentId, status, additionalData = {}) {
+    // Verificar se o documentId não é um objeto
+    if (typeof documentId === 'object') {
+        console.error('Erro: documentId é um objeto e não uma string');
+        return;
+    }
+    
     showLoader();
     
     fetch(`/update-document-status.php?id=${documentId}`, {

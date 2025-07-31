@@ -248,7 +248,7 @@ ob_start();
                             <td>
                                 <?php if (Auth::hasPermission('documents.approve')): ?>
                                 <div class="status-controls">
-                                    <select class="form-select form-select-sm status-select" data-document-id="<?= $document['id'] ?>" onchange="updateDocumentStatus(this)">
+                                    <select class="form-select form-select-sm status-select" data-document-id="<?= $document['id'] ?>" onchange="updateDocumentStatus(this.getAttribute('data-document-id'), this.value, this)">
                                         <option value="em_analise" <?= $document['status'] === 'em_analise' ? 'selected' : '' ?>>Em análise</option>
                                         <option value="aprovado" <?= $document['status'] === 'aprovado' ? 'selected' : '' ?>>Aprovado</option>
                                         <option value="rejeitado" <?= $document['status'] === 'rejeitado' ? 'selected' : '' ?>>Rejeitado</option>
@@ -659,13 +659,20 @@ function rejectDocument(documentId) {
     }
 }
 
-function updateDocumentStatus(selectElement) {
-    const documentId = selectElement.getAttribute('data-document-id');
-    const newStatus = selectElement.value;
+function updateDocumentStatus(documentId, newStatus, selectElement) {
+    // Verificar se o ID é válido
+    if (!documentId || documentId === 'undefined') {
+        console.error('ID do documento inválido:', documentId);
+        alert('Erro: ID do documento não encontrado. Por favor, recarregue a página e tente novamente.');
+        return;
+    }
+    
     const originalValue = selectElement.getAttribute('data-original-value') || selectElement.options[0].value;
     
     let additionalData = {};
     let confirmMessage = '';
+    
+    console.log('Atualizando documento ID:', documentId, 'para status:', newStatus);
     
     // Preparar dados específicos baseados no status
     switch (newStatus) {

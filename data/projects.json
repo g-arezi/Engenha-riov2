@@ -9,10 +9,10 @@
         "status": "ativo",
         "priority": "media",
         "deadline": "2025-07-31",
-        "workflow_stage": 2,
+        "workflow_stage": 1,
         "created_by": "admin",
         "created_at": "2025-07-30 16:22:16",
-        "updated_at": "2025-07-31 15:49:37",
+        "updated_at": "2025-07-31 17:41:58",
         "id": "proj_1753892536_9899"
     },
     "proj_1753979150_9736": {
@@ -20,7 +20,7 @@
         "description": "esse é um projeto teste com numero de orçamento.",
         "budget_number": "1111.1111.V2",
         "project_type": "residencial",
-        "document_template": "teste",
+        "document_template": "rg_teste___teste",
         "client_id": "6887cdaf0cf3a8.51328972",
         "analyst_id": "6887cb7c384b75.22527396",
         "status": "pendente",
@@ -29,7 +29,7 @@
         "workflow_stage": "documentos",
         "created_by": "admin",
         "created_at": "2025-07-31 16:25:50",
-        "updated_at": "2025-07-31 16:25:50",
+        "updated_at": "2025-07-31 17:03:05",
         "id": "proj_1753979150_9736"
     }
 }

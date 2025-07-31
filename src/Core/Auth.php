@@ -34,22 +34,48 @@ class Auth
 
     public static function user(): ?array
     {
+        // Iniciar a sessão se ainda não foi iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         if (self::$user !== null) {
             return self::$user;
         }
 
         if (!isset($_SESSION['user_id'])) {
+            error_log('Auth::user() - user_id not set in session');
             return null;
         }
 
+        error_log('Auth::user() - Buscando usuário com ID: ' . $_SESSION['user_id']);
         $db = new Database();
         self::$user = $db->find('users', $_SESSION['user_id']);
+        
+        if (!self::$user) {
+            error_log('Auth::user() - Usuário não encontrado no banco para ID: ' . $_SESSION['user_id']);
+        }
         
         return self::$user;
     }
 
     public static function check(): bool
     {
+        // Iniciar a sessão se ainda não foi iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Log para debug
+        error_log('Auth::check() - Session ID: ' . session_id());
+        error_log('Auth::check() - $_SESSION: ' . json_encode($_SESSION));
+        
+        // Verificação direta de $_SESSION['user_id'] antes de chamar self::user()
+        if (!isset($_SESSION['user_id'])) {
+            error_log('Auth::check() - user_id not set in session');
+            return false;
+        }
+        
         return self::user() !== null;
     }
 

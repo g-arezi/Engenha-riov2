@@ -381,5 +381,42 @@
         "id": "688ba0f5bbebc4.95347740",
         "created_at": "2025-07-31 16:59:33",
         "updated_at": "2025-07-31 16:59:33"
+    },
+    "688ba14a3877a4.24312682": {
+        "type": "document_uploaded",
+        "title": "Documento Enviado",
+        "message": "Novo documento 'DASH2[1].pdf' foi enviado para o projeto 'Teste criaçao com tamplate modificado'",
+        "user_id": "rafael",
+        "project_id": "proj_1753892536_9899",
+        "document_id": "doc_688ba14a0fbc2",
+        "is_read": false,
+        "priority": "normal",
+        "id": "688ba14a3877a4.24312682",
+        "created_at": "2025-07-31 17:00:58",
+        "updated_at": "2025-07-31 17:00:58"
+    },
+    "688ba1e8a4f69": {
+        "id": "688ba1e8a4f69",
+        "user_id": null,
+        "project_id": "proj_1753892536_9899",
+        "title": "Etapa do projeto atualizada",
+        "message": "O projeto foi movido para a etapa: Documentos",
+        "type": "workflow_updated",
+        "is_read": false,
+        "created_at": "2025-07-31 17:03:36",
+        "updated_at": "2025-07-31 17:03:36"
+    },
+    "688babd668d231.23529653": {
+        "type": "document_approved",
+        "title": "Documento Aprovado",
+        "message": "Documento 'DASH2[1].pdf' foi aprovado",
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "project_id": "proj_1753892536_9899",
+        "document_id": "doc_688ba14a0fbc2",
+        "is_read": false,
+        "priority": "normal",
+        "id": "688babd668d231.23529653",
+        "created_at": "2025-07-31 17:45:58",
+        "updated_at": "2025-07-31 17:45:58"
     }
 }

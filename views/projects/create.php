@@ -174,6 +174,9 @@ ob_start();
                         </select>
                     </div>
                     
+                    <!-- Status (campo oculto) -->
+                    <input type="hidden" name="status" value="pendente">
+                    
                     <!-- Informações Importantes -->
                     <div class="alert alert-info">
                         <h6><i class="fas fa-info-circle me-1"></i> Informações Importantes</h6>

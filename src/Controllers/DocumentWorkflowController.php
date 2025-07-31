@@ -1537,16 +1537,41 @@ class DocumentWorkflowController
 
     public function getDocumentInfo(string $documentId): void
     {
+        // Iniciar a sessão se ainda não foi iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         // Log detalhado para diagnóstico
         error_log('=== OBTENDO INFO DO DOCUMENTO ===');
         error_log('ID do documento: ' . $documentId);
+        error_log('Session ID: ' . session_id());
+        error_log('Session conteúdo: ' . json_encode($_SESSION));
         
         // Garantir que os cabeçalhos de JSON sejam enviados corretamente
         header('Content-Type: application/json; charset=utf-8');
         
-        if (!Auth::check()) {
-            error_log('Erro: Usuário não autenticado');
-            echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+        // Verificar se estamos em uma requisição AJAX
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                 strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        
+        // Log dos cabeçalhos HTTP para debugging
+        error_log('HTTP Headers: ' . json_encode(getallheaders()));
+        error_log('Is AJAX: ' . ($isAjax ? 'Yes' : 'No'));
+        
+        // Verificar autenticação de múltiplas maneiras
+        $isAuthenticated = isset($_SESSION['user_id']);
+        
+        // Tentar usar Auth::check diretamente (deve iniciar sessão internamente)
+        if (!$isAuthenticated) {
+            error_log('Tentando Auth::check() como alternativa');
+            $isAuthenticated = Auth::check();
+            error_log('Auth::check() retornou: ' . ($isAuthenticated ? 'true' : 'false'));
+        }
+        
+        if (!$isAuthenticated) {
+            error_log('Erro: Usuário não autenticado (session user_id não existe e Auth::check() falhou)');
+            echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
             exit;
         }
 
