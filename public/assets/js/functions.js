@@ -260,6 +260,49 @@ function rejectDocument(documentId) {
     updateDocumentWorkflowStatus(documentId, 'rejected', reason);
 }
 
+function updateDocumentStatus(documentId, status, additionalData = {}) {
+    showLoader();
+    
+    fetch(`/update-document-status.php?id=${documentId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            status: status,
+            ...additionalData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Status do documento atualizado com sucesso!');
+            // Atualizar interface, se necessário
+            const statusElement = document.querySelector(`[data-document-id="${documentId}"]`);
+            if (statusElement) {
+                // Remover classes anteriores de status
+                statusElement.classList.remove('status-em-analise', 'status-aprovado', 'status-rejeitado');
+                // Adicionar nova classe de status
+                statusElement.classList.add(`status-${status}`);
+                // Atualizar valor do select
+                if (statusElement.tagName === 'SELECT') {
+                    statusElement.value = status;
+                }
+            }
+        } else {
+            showAlert('error', data.message || 'Erro ao atualizar status do documento');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', 'Erro de conexão');
+    })
+    .finally(() => {
+        hideLoader();
+    });
+}
+
 function updateDocumentWorkflowStatus(documentId, status, reason = null) {
     showLoader();
     
@@ -292,6 +335,110 @@ function updateDocumentWorkflowStatus(documentId, status, reason = null) {
     .finally(() => {
         hideLoader();
     });
+}
+
+function advanceProjectWorkflow(projectId) {
+    if (confirm('Tem certeza que deseja avançar o projeto para a próxima etapa?')) {
+        showLoader();
+        
+        fetch('/advance-workflow.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                project_id: projectId
+            })
+        })
+        .then(response => {
+            // Verificar status da resposta
+            if (!response.ok) {
+                throw new Error('Resposta do servidor não foi OK: ' + response.status);
+            }
+            
+            // Verificar o Content-Type da resposta
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Se não for JSON, tentar obter texto para debug
+                return response.text().then(text => {
+                    console.error('Resposta não é JSON:', text.substring(0, 200));
+                    throw new Error('Resposta não é JSON: ' + text.substring(0, 100));
+                });
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showAlert('success', 'Projeto avançado para a próxima etapa!');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('error', data.message || 'Erro ao avançar etapa');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', 'Erro de conexão: ' + error.message);
+        })
+        .finally(() => {
+            hideLoader();
+        });
+    }
+}
+
+function revertProjectWorkflow(projectId) {
+    if (confirm('Tem certeza que deseja retroceder o projeto para a etapa anterior?')) {
+        showLoader();
+        
+        fetch('/revert-workflow.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                project_id: projectId
+            })
+        })
+        .then(response => {
+            // Verificar status da resposta
+            if (!response.ok) {
+                throw new Error('Resposta do servidor não foi OK: ' + response.status);
+            }
+            
+            // Verificar o Content-Type da resposta
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Se não for JSON, tentar obter texto para debug
+                return response.text().then(text => {
+                    console.error('Resposta não é JSON:', text.substring(0, 200));
+                    throw new Error('Resposta não é JSON: ' + text.substring(0, 100));
+                });
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showAlert('success', 'Projeto retrocedido para a etapa anterior!');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showAlert('error', data.message || 'Erro ao retroceder etapa');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', 'Erro de conexão: ' + error.message);
+        })
+        .finally(() => {
+            hideLoader();
+        });
+    }
 }
 
 function moveToNextStage(documentId) {

@@ -21,7 +21,79 @@ class DocumentController
             exit;
         }
 
-        $documents = $this->db->findAll('documents');
+        // Obter o usuário atual e seu papel
+        $currentUser = Auth::user();
+        $userId = Auth::id();
+        $userRole = $currentUser['role'] ?? '';
+        
+        // Se for administrador, analista ou coordenador, pode ver todos os documentos ou filtrados por projeto
+        $isAdmin = in_array($userRole, ['administrador', 'analista', 'coordenador']);
+        
+        // Inicialmente, buscamos todos os documentos
+        $documents = [];
+        
+        if ($isAdmin) {
+            // Administradores, analistas e coordenadores veem:
+            // 1. Seus próprios documentos
+            // 2. Documentos dos projetos a que estão vinculados
+            // 3. (Opcional) Se um projeto específico for selecionado via query string, apenas documentos desse projeto
+
+            // Verificar se está filtrando por projeto específico
+            $filterProjectId = $_GET['project_id'] ?? null;
+            
+            if ($filterProjectId) {
+                // Filtra por projeto específico se solicitado
+                $documents = $this->db->findAll('documents', ['project_id' => $filterProjectId]);
+            } else {
+                // Buscar projetos vinculados ao usuário (como analista, coordenador ou criador)
+                $userProjects = $this->db->findAll('projects', [
+                    'OR' => [
+                        'analyst_id' => $userId,
+                        'created_by' => $userId
+                    ]
+                ]);
+                
+                $projectIds = array_column($userProjects, 'id');
+                
+                // Buscar documentos vinculados aos projetos do usuário ou enviados pelo usuário
+                if (!empty($projectIds)) {
+                    $allDocs = $this->db->findAll('documents');
+                    foreach ($allDocs as $doc) {
+                        // Incluir documentos enviados pelo usuário
+                        if ($doc['uploaded_by'] === $userId) {
+                            $documents[] = $doc;
+                            continue;
+                        }
+                        
+                        // Incluir documentos vinculados aos projetos do usuário
+                        if (!empty($doc['project_id']) && in_array($doc['project_id'], $projectIds)) {
+                            $documents[] = $doc;
+                        }
+                    }
+                } else {
+                    // Se não tiver projetos, mostrar apenas os documentos enviados pelo próprio usuário
+                    $documents = $this->db->findAll('documents', ['uploaded_by' => $userId]);
+                }
+            }
+        } else {
+            // Clientes comuns veem apenas seus próprios documentos
+            $documents = $this->db->findAll('documents', ['uploaded_by' => $userId]);
+        }
+        
+        // Buscar os projetos para exibir nomes em vez de IDs
+        $projects = [];
+        $allProjects = $this->db->findAll('projects');
+        foreach ($allProjects as $project) {
+            $projects[$project['id']] = $project;
+        }
+        
+        // Buscar nomes de usuários para exibição
+        $users = [];
+        $allUsers = $this->db->findAll('users');
+        foreach ($allUsers as $user) {
+            $users[$user['id']] = $user;
+        }
+        
         require_once __DIR__ . '/../../views/documents/index.php';
     }
 

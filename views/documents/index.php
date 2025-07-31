@@ -7,8 +7,13 @@ $showSidebar = true;
 $showNavbar = true;
 $db = new Database();
 
-$documents = $db->findAll('documents');
+// Filtros selecionados
 $selectedCategory = $_GET['category'] ?? 'all';
+$selectedProjectId = $_GET['project_id'] ?? null;
+
+// A variável $documents já vem preenchida pelo controlador
+// A variável $projects também já vem preenchida pelo controlador
+// A variável $users também já vem preenchida pelo controlador
 
 ob_start();
 ?>
@@ -49,7 +54,7 @@ ob_start();
 
 <!-- Search and Filter -->
 <div class="row mb-4">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <div class="input-group">
             <span class="input-group-text">
                 <i class="fas fa-search"></i>
@@ -58,7 +63,7 @@ ob_start();
                    onkeyup="performAdvancedSearch(this.value, 'documents')">
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" 
                     data-bs-toggle="dropdown">
@@ -67,10 +72,60 @@ ob_start();
                 <i class="fas fa-chevron-down ms-auto"></i>
             </button>
             <ul class="dropdown-menu w-100">
-                <li><a class="dropdown-item" href="?category=all">Todas as categorias</a></li>
-                <li><a class="dropdown-item" href="?category=procedimento">Procedimento</a></li>
-                <li><a class="dropdown-item" href="?category=template">Template</a></li>
-                <li><a class="dropdown-item" href="?category=manual">Manual</a></li>
+                <li><a class="dropdown-item" href="?<?= http_build_query(array_merge($_GET, ['category' => 'all'])) ?>">Todas as categorias</a></li>
+                <li><a class="dropdown-item" href="?<?= http_build_query(array_merge($_GET, ['category' => 'procedimento'])) ?>">Procedimento</a></li>
+                <li><a class="dropdown-item" href="?<?= http_build_query(array_merge($_GET, ['category' => 'template'])) ?>">Template</a></li>
+                <li><a class="dropdown-item" href="?<?= http_build_query(array_merge($_GET, ['category' => 'manual'])) ?>">Manual</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" 
+                    data-bs-toggle="dropdown">
+                <i class="fas fa-project-diagram me-2"></i>
+                <?php 
+                $selectedProject = $_GET['project_id'] ?? null;
+                if ($selectedProject && isset($projects[$selectedProject])) {
+                    echo htmlspecialchars(substr($projects[$selectedProject]['name'], 0, 15)) . (strlen($projects[$selectedProject]['name']) > 15 ? '...' : '');
+                } else {
+                    echo 'Filtrar por Projeto';
+                }
+                ?>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li><a class="dropdown-item" href="?<?= http_build_query(array_merge($_GET, ['project_id' => null])) ?>">Todos os Projetos</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <?php 
+                // Mostrar apenas projetos vinculados ao usuário
+                $userProjects = [];
+                $currentUser = Auth::user();
+                $userId = Auth::id();
+                
+                if (in_array($currentUser['role'], ['administrador', 'analista', 'coordenador'])) {
+                    // Admin/analista/coordenador - projetos que estão vinculados a ele
+                    foreach ($projects as $project) {
+                        if ($project['analyst_id'] == $userId || $project['created_by'] == $userId) {
+                            $userProjects[] = $project;
+                        }
+                    }
+                } else {
+                    // Cliente - projetos onde é cliente
+                    foreach ($projects as $project) {
+                        if ($project['client_id'] == $userId) {
+                            $userProjects[] = $project;
+                        }
+                    }
+                }
+                
+                // Mostrar lista de projetos para filtrar
+                foreach ($userProjects as $project): 
+                ?>
+                    <li><a class="dropdown-item" href="?<?= http_build_query(array_merge($_GET, ['project_id' => $project['id']])) ?>">
+                        <?= htmlspecialchars($project['name']) ?>
+                    </a></li>
+                <?php endforeach; ?>
             </ul>
         </div>
     </div>
@@ -84,6 +139,11 @@ ob_start();
             // Filtrar por categoria se selecionada
             if ($selectedCategory !== 'all' && 
                 strtolower($doc['category'] ?? '') !== strtolower($selectedCategory)) {
+                continue;
+            }
+            
+            // O filtro por projeto já é feito no controller, mas podemos adicionar uma verificação extra
+            if ($selectedProjectId && $doc['project_id'] != $selectedProjectId) {
                 continue;
             }
             
@@ -143,12 +203,26 @@ ob_start();
                                 Enviado em <?= date('d/m/Y', strtotime($doc['uploaded_at'] ?? $doc['created_at'])) ?>
                             </small>
                             <small class="text-muted d-block">
-                                Por <?= htmlspecialchars($doc['uploaded_by'] ?? 'N/A') ?>
+                                Por <?php 
+                                    $uploaderId = $doc['uploaded_by'] ?? 'N/A';
+                                    if (isset($users[$uploaderId])) {
+                                        echo htmlspecialchars($users[$uploaderId]['name']);
+                                    } else {
+                                        echo htmlspecialchars($uploaderId);
+                                    }
+                                ?>
                             </small>
                             <?php if (!empty($doc['project_id'])): ?>
                                 <small class="text-info d-block">
                                     <i class="fas fa-project-diagram me-1"></i>
-                                    Projeto: <?= htmlspecialchars($doc['project_id']) ?>
+                                    Projeto: <?php 
+                                        $projectId = $doc['project_id'];
+                                        if (isset($projects[$projectId])) {
+                                            echo htmlspecialchars($projects[$projectId]['name']);
+                                        } else {
+                                            echo htmlspecialchars($projectId);
+                                        }
+                                    ?>
                                 </small>
                             <?php endif; ?>
                         </div>

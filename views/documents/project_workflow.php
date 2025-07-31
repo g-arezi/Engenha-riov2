@@ -160,7 +160,7 @@ ob_start();
                     <div class="row">
                         <?php if (($project['workflow_stage'] ?? 1) < 5): ?>
                         <div class="col-auto">
-                            <button class="btn btn-success btn-sm" onclick="advanceWorkflow('<?= $project['id'] ?>')">
+                            <button class="btn btn-success btn-sm" onclick="advanceProjectWorkflow('<?= $project['id'] ?>')">
                                 <i class="fas fa-arrow-right me-1"></i>
                                 Avançar Etapa
                             </button>
@@ -176,7 +176,7 @@ ob_start();
                         <?php endif; ?>
                         <?php if (($project['workflow_stage'] ?? 1) > 1): ?>
                         <div class="col-auto">
-                            <button class="btn btn-warning btn-sm" onclick="revertWorkflow('<?= $project['id'] ?>')">
+                            <button class="btn btn-warning btn-sm" onclick="revertProjectWorkflow('<?= $project['id'] ?>')">
                                 <i class="fas fa-arrow-left me-1"></i>
                                 Voltar Etapa
                             </button>
@@ -518,7 +518,7 @@ function updateProjectStatus(projectId, status) {
 
 function advanceWorkflow(projectId) {
     if (confirm('Tem certeza que deseja avançar o projeto para a próxima etapa?')) {
-        fetch('/document-workflow/advance', {
+        fetch('/advance-workflow.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -546,7 +546,7 @@ function advanceWorkflow(projectId) {
 
 function revertWorkflow(projectId) {
     if (confirm('Tem certeza que deseja retroceder o projeto para a etapa anterior?')) {
-        fetch('/document-workflow/revert', {
+        fetch('/revert-workflow.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -715,14 +715,13 @@ function updateDocumentStatus(selectElement) {
     selectElement.disabled = true;
     
     // Fazer a requisição
-    fetch('/documents/update-status', {
+    fetch(`/update-document-status.php?id=${documentId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
-            document_id: documentId,
             status: newStatus,
             ...additionalData
         })

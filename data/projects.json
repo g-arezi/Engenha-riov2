@@ -6,13 +6,13 @@
         "document_template": "teste",
         "client_id": "6887cdaf0cf3a8.51328972",
         "analyst_id": "rafael",
-        "status": "pendente",
+        "status": "ativo",
         "priority": "media",
         "deadline": "2025-07-31",
-        "workflow_stage": 1,
+        "workflow_stage": 2,
         "created_by": "admin",
         "created_at": "2025-07-30 16:22:16",
-        "updated_at": "2025-07-30 16:25:47",
+        "updated_at": "2025-07-31 15:49:37",
         "id": "proj_1753892536_9899"
     }
 }
