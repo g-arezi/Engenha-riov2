@@ -68,5 +68,15 @@
         "id": "688a6d545c6fb0.23210933",
         "created_at": "2025-07-30 19:07:00",
         "updated_at": "2025-07-30 19:07:00"
+    },
+    "688d32aabcf7e7.36780490": {
+        "ticket_id": "688a689fa15ee7.57357003",
+        "message": "teste",
+        "user_id": "admin",
+        "user_name": "Administrador",
+        "is_staff": true,
+        "id": "688d32aabcf7e7.36780490",
+        "created_at": "2025-08-01 21:33:30",
+        "updated_at": "2025-08-01 21:33:30"
     }
 }

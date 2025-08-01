@@ -3,10 +3,10 @@
         "subject": "testes",
         "description": "testando sistemaatestando sistemaatestando sistemaa",
         "priority": "alta",
-        "status": "aberto",
+        "status": "fechado",
         "user_id": "6887cdaf0cf3a8.51328972",
         "id": "688a689fa15ee7.57357003",
         "created_at": "2025-07-30 18:46:55",
-        "updated_at": "2025-07-30 18:46:55"
+        "updated_at": "2025-08-01 21:33:30"
     }
 }
