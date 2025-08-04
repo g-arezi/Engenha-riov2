@@ -1,7 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Session should already be started in index.php, no need to start it again here
 $title = 'Login - Engenha Rio';
 ?>
 <!DOCTYPE html>

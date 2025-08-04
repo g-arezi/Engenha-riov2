@@ -20,7 +20,24 @@ use App\Controllers\SupportController;
 use App\Controllers\NotificationController;
 use App\Middleware\AuthMiddleware;
 
-// Start session
+// Configure and start session
+$config = require_once __DIR__ . '/../config/app.php';
+session_name($config['session']['name']);
+session_set_cookie_params(
+    $config['session']['lifetime'],
+    '/',
+    '',
+    $config['session']['secure'],
+    $config['session']['httponly']
+);
+
+// Set a custom session path in the project directory
+$sessionPath = __DIR__ . '/../data/sessions';
+if (!is_dir($sessionPath)) {
+    mkdir($sessionPath, 0777, true);
+}
+session_save_path($sessionPath);
+
 session_start();
 
 // Auto login has been completely disabled for testing
