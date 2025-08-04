@@ -9,6 +9,7 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 
 use App\Core\Router;
 use App\Core\Auth;
+use App\Core\HostingerHelper;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\AdminController;
@@ -20,8 +21,16 @@ use App\Controllers\SupportController;
 use App\Controllers\NotificationController;
 use App\Middleware\AuthMiddleware;
 
-// Configure and start session
+// Load configuration
 $config = require_once __DIR__ . '/../config/app.php';
+
+// Configure for Hostinger if needed
+App\Core\HostingerHelper::setupUrlHandling();
+
+// Adjust configuration for Hostinger if needed
+$config = App\Core\HostingerHelper::configureForHostinger($config);
+
+// Configure session
 session_name($config['session']['name']);
 session_set_cookie_params(
     $config['session']['lifetime'],
@@ -31,14 +40,20 @@ session_set_cookie_params(
     $config['session']['httponly']
 );
 
-// Set a custom session path in the project directory
-$sessionPath = __DIR__ . '/../data/sessions';
-if (!is_dir($sessionPath)) {
-    mkdir($sessionPath, 0777, true);
+// Use default session path or custom path if specified in config
+if (isset($config['session']['save_path']) && !empty($config['session']['save_path'])) {
+    $sessionPath = $config['session']['save_path'];
+} else {
+    // Default to a directory in our application that should be writable
+    $sessionPath = __DIR__ . '/../data/sessions';
+    if (!is_dir($sessionPath)) {
+        mkdir($sessionPath, 0755, true);
+    }
 }
 session_save_path($sessionPath);
 
-session_start();
+// Start the session with error suppression to avoid warnings on shared hosting
+@session_start();
 
 // Auto login has been completely disabled for testing
 // No auto-login is used anymore

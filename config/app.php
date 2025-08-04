@@ -22,6 +22,11 @@ return [
         'name' => 'engenha_rio_session',
         'lifetime' => 86400, // 24 horas
         'secure' => false,
-        'httponly' => true
+        'httponly' => true,
+        'save_path' => '' // Will be auto-detected or use default
+    ],
+    'hostinger' => [
+        'environment' => true,
+        'base_path' => '' // Leave empty for auto-detection
     ]
 ];
