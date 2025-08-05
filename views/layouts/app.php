@@ -116,6 +116,7 @@
     <script src="/assets/js/page-functions.js"></script>
     <script src="/assets/js/notifications.js"></script>
     <script src="/assets/js/session-keeper.js"></script>
+    <script src="/assets/js/ticket-list-refresh.js"></script>
     <script>
         // Chat widget functions
         function openWhatsapp() {

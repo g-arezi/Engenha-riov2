@@ -119,6 +119,16 @@ $router->get('/admin/templates/{id}/edit', [TemplateController::class, 'edit'], 
 $router->post('/admin/templates/{id}/edit', [TemplateController::class, 'edit'], [AuthMiddleware::class]);
 $router->delete('/admin/templates/{id}/delete', [TemplateController::class, 'delete'], [AuthMiddleware::class]);
 
+// Login slide management routes
+$router->get('/admin/login-slides', [App\Controllers\LoginSlideController::class, 'index'], [AuthMiddleware::class]);
+$router->get('/admin/login-slides/create', [App\Controllers\LoginSlideController::class, 'create'], [AuthMiddleware::class]);
+$router->post('/admin/login-slides/create', [App\Controllers\LoginSlideController::class, 'store'], [AuthMiddleware::class]);
+$router->get('/admin/login-slides/edit/{id}', [App\Controllers\LoginSlideController::class, 'edit'], [AuthMiddleware::class]);
+$router->post('/admin/login-slides/edit/{id}', [App\Controllers\LoginSlideController::class, 'update'], [AuthMiddleware::class]);
+$router->post('/admin/login-slides/delete/{id}', [App\Controllers\LoginSlideController::class, 'delete'], [AuthMiddleware::class]);
+$router->post('/admin/login-slides/order', [App\Controllers\LoginSlideController::class, 'updateOrder'], [AuthMiddleware::class]);
+$router->post('/admin/login-slides/toggle/{id}', [App\Controllers\LoginSlideController::class, 'toggleStatus'], [AuthMiddleware::class]);
+
 // Project routes - IMPORTANTE: Rotas mais específicas primeiro, depois as mais gerais com parâmetros
 $router->get('/projects', [ProjectController::class, 'index'], [AuthMiddleware::class]);
 $router->get('/projects/create', [ProjectController::class, 'create'], [AuthMiddleware::class]);

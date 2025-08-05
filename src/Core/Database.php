@@ -112,8 +112,20 @@ class Database
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
         
+        // Debug para verificar o que está sendo salvo
+        error_log("Database::insert - Tabela: {$table}, ID: {$id}");
+        error_log("Database::insert - Dados: " . json_encode($data));
+        
         $tableData[$id] = $data;
         $this->saveTable($table, $tableData);
+        
+        // Verificar se o dado foi salvo corretamente
+        $savedData = $this->getTable($table);
+        if (isset($savedData[$id])) {
+            error_log("Database::insert - Registro salvo com sucesso");
+        } else {
+            error_log("Database::insert - ERRO: Registro não foi salvo!");
+        }
         
         return $id;
     }
@@ -158,11 +170,32 @@ class Database
             error_log("Database::getTable - File does not exist!");
             return [];
         }
-
+        
+        // Limpar cache do arquivo para garantir dados atualizados
+        clearstatcache(true, $filePath);
+        
         $content = file_get_contents($filePath);
-        $data = json_decode($content, true) ?: [];
+        if (!$content) {
+            error_log("Database::getTable - Empty or unreadable file: {$filePath}");
+            return [];
+        }
+        
+        $data = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("Database::getTable - JSON decode error: " . json_last_error_msg());
+            $data = [];
+        } else {
+            $data = $data ?: [];
+        }
         
         error_log("Database::getTable - Records found: " . count($data));
+        
+        // Garantir que todos os registros tenham o ID correto
+        foreach ($data as $id => &$record) {
+            if (!isset($record['id'])) {
+                $record['id'] = $id;
+            }
+        }
         
         return $data;
     }

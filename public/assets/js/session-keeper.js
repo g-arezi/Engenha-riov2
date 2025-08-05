@@ -1,6 +1,6 @@
 /**
  * Session Keeper - Mantém a sessão PHP ativa com solicitações periódicas
- */
+ 
 (function() {
     // Intervalo em milissegundos (5 minutos = 300000ms)
     const pingInterval = 300000;
@@ -39,7 +39,7 @@
         console.log('Session Keeper iniciado');
         
         // Enviar ping inicial após 1 segundo
-        setTimeout(pingSession, 1000);
+        setTimeout(pingSession, 100000000);
         
         // Configurar ping periódico
         setInterval(pingSession, pingInterval);
@@ -50,3 +50,4 @@
         }, { passive: true });
     }
 })();
+*/

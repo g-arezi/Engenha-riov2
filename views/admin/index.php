@@ -7,6 +7,9 @@ $showSidebar = true;
 $showNavbar = true;
 $db = new Database();
 
+// Definir a aba ativa (usar 'usuarios_ativos' como padrão se não especificado)
+$activeTab = $activeTab ?? 'usuarios_ativos';
+
 // Buscar dados para as abas
 $activeUsers = $db->findAll('users', ['status' => 'ativo']);
 $pendingUsers = $db->findAll('users', ['status' => 'pendente']);
@@ -97,6 +100,13 @@ ob_start();
                 id="perfis-acesso-tab" data-bs-toggle="tab" data-bs-target="#perfis-acesso" 
                 type="button" role="tab">
             Perfis de Acesso
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link <?= $activeTab === 'login_slides' ? 'active' : '' ?>" 
+                id="login-slides-tab" data-bs-toggle="tab" data-bs-target="#login-slides" 
+                type="button" role="tab">
+            Slides de Login
         </button>
     </li>
 </ul>
@@ -658,7 +668,132 @@ ob_start();
             </div>
         </div>
     </div>
+    
+    <!-- Login Slides -->
+    <div class="tab-pane fade <?= $activeTab === 'login_slides' ? 'show active' : '' ?>" 
+         id="login-slides" role="tabpanel">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Slides da Tela de Login</h5>
+                <a href="/admin/login-slides" class="btn btn-primary btn-sm">
+                    <i class="fas fa-cog me-1"></i>
+                    Gerenciar Slides
+                </a>
+            </div>
+            <div class="card-body">
+                <p>
+                    Configure os slides e imagens que serão exibidos na tela de login do sistema. 
+                    Personalize a experiência visual dos usuários ao acessarem a plataforma.
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-images fa-3x text-primary"></i>
+                                </div>
+                                <h6>Gerenciar Slides</h6>
+                                <p class="text-muted small mb-3">Configure imagens ou cores de fundo com mensagens personalizadas</p>
+                                <a href="/admin/login-slides" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-cog me-1"></i> Gerenciar Slides
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-plus-circle fa-3x text-success"></i>
+                                </div>
+                                <h6>Adicionar Novo Slide</h6>
+                                <p class="text-muted small mb-3">Crie um novo slide para a tela de login</p>
+                                <a href="/admin/login-slides/create" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus me-1"></i> Adicionar Slide
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6>Funcionalidades:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Imagens personalizadas para a tela de login</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Cores de fundo personalizadas</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Mensagens e títulos configuráveis</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Organização e ordenação dos slides</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Ativação/desativação de slides específicos</li>
+                    </ul>
+                </div>
+                
+                <div class="card mb-4 mt-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Prévia da Tela de Login</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="login-preview-container">
+                            <div class="login-preview">
+                                <div class="login-form-preview">
+                                    <div class="login-logo-preview">
+                                        <img src="/assets/images/engenhario-logo.png" alt="Logo" height="50">
+                                        <h5>Engenha Rio</h5>
+                                    </div>
+                                    <div class="login-fields-preview">
+                                        <div class="form-preview-field"></div>
+                                        <div class="form-preview-field"></div>
+                                        <div class="form-preview-button"></div>
+                                    </div>
+                                </div>
+                                <div class="login-slide-preview">
+                                    <div class="login-slide-image">
+                                        <div class="login-slide-content">
+                                            <h3>Bem-vindo ao Engenha Rio</h3>
+                                            <p>Sistema de Gestão de Documentos e Projetos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Estilos para prévia de slide de login */
+    .login-slide-preview {
+        flex: 1;
+        background-image: url('/assets/images/login/default.jpg');
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .login-slide-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .login-slide-content {
+        padding: 20px;
+        text-align: center;
+        color: white;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        max-width: 80%;
+    }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

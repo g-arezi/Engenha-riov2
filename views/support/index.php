@@ -94,6 +94,14 @@ ob_start();
                 </a>
             </div>
             <div class="card-body p-0">
+                <?php 
+                // Debugging information
+                error_log("View: Total de tickets recebidos do controller: " . count($tickets ?? []));
+                if (!empty($tickets)) {
+                    error_log("View: Tickets disponíveis: " . print_r($tickets, true));
+                }
+                ?>
+                
                 <?php if (empty($tickets)): ?>
                     <div class="text-center py-4">
                         <i class="fas fa-ticket-alt fa-2x text-muted mb-3"></i>
@@ -105,7 +113,14 @@ ob_start();
                     </div>
                 <?php else: ?>
                     <div class="list-group list-group-flush ticket-list">
-                        <?php foreach ($tickets as $ticket): ?>
+                        <?php foreach ($tickets as $id => $ticket): ?>
+                            <?php 
+                            error_log("Renderizando ticket ID: " . $id); 
+                            // Garantir que o ID está presente no ticket
+                            if (!isset($ticket['id'])) {
+                                $ticket['id'] = $id;
+                            }
+                            ?>
                             <a href="/view-ticket.php?id=<?= $ticket['id'] ?>" 
                                class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
                                data-ticket-id="<?= $ticket['id'] ?>"
@@ -159,61 +174,51 @@ ob_start();
 document.addEventListener('DOMContentLoaded', function() {
     // Debug: Mostrar todos os tickets disponíveis na página
     const allTickets = document.querySelectorAll('.ticket-item');
-    console.log("DEBUG - Total de tickets no DOM antes de qualquer filtro: " + allTickets.length);
+    console.log("DEBUG - Total de tickets no DOM: " + allTickets.length);
+    
+    if (allTickets.length === 0) {
+        console.warn("NENHUM TICKET ENCONTRADO NO DOM - VERIFICAR RENDERIZAÇÃO");
+    }
     
     // Lista todos os tickets e seus atributos para debug
     allTickets.forEach(item => {
+        // Garantir que todos os tickets estão visíveis inicialmente
+        item.style.display = 'block';
+        
         console.log("TICKET DISPONÍVEL: " + 
-                    "ID=" + item.getAttribute('data-ticket-id') + 
-                    ", Status=" + item.getAttribute('data-status') + 
-                    ", User=" + item.getAttribute('data-user'));
+                   "ID=" + item.getAttribute('data-ticket-id') + 
+                   ", Status=" + item.getAttribute('data-status') + 
+                   ", User=" + item.getAttribute('data-user'));
     });
     
     // Handle tab switching
     const tabs = document.querySelectorAll('.support-tab');
     
-    // IMPORTANTE: Remover qualquer estilo display:none que possa estar aplicado
-    allTickets.forEach(item => {
-        if (item.style.display === 'none') {
-            console.log("Corrigindo visibilidade do ticket: " + item.getAttribute('data-ticket-id'));
-        }
-        item.style.display = '';
-    });
-    
-    console.log("Total de tickets no DOM após correção: " + allTickets.length);
-    
-    // Função para filtrar tickets baseado na aba ativa
+    // Função de filtro aprimorada
     function filterTickets(tabType) {
         console.log("Filtrando tickets por: " + tabType);
         
-        // Primeiro mostre TODOS os tickets para garantir que nenhum esteja escondido
         document.querySelectorAll('.ticket-item').forEach(item => {
-            // Sempre reset primeiro
-            item.style.display = '';
+            // Garantir que cada ticket está visível antes da filtragem
+            item.style.display = 'block';
             
-            console.log("Verificando ticket para filtro: " + 
-                      "ID=" + item.getAttribute('data-ticket-id') + 
-                      ", Status=" + item.getAttribute('data-status'));
+            const status = item.getAttribute('data-status');
+            console.log("Verificando ticket: ID=" + item.getAttribute('data-ticket-id') + ", Status=" + status);
             
-            // Então aplica o filtro
-            if (tabType === 'open') {
-                // Show only open tickets
-                if (item.getAttribute('data-status') === 'fechado') {
-                    item.style.display = 'none';
-                    console.log("Ocultando ticket fechado: " + item.getAttribute('data-ticket-id'));
-                }
-            } else if (tabType === 'history') {
-                // Show only history tickets
-                if (item.getAttribute('data-status') !== 'fechado') {
-                    item.style.display = 'none';
-                    console.log("Ocultando ticket aberto: " + item.getAttribute('data-ticket-id'));
-                }
+            // Aplicar filtragem apenas se o status corresponder ao critério
+            if (tabType === 'open' && status === 'fechado') {
+                item.style.display = 'none';
+            }
+            else if (tabType === 'history' && status !== 'fechado') {
+                item.style.display = 'none';
             }
         });
     }
     
-    // Aplicar filtragem inicial (tickets abertos devem ser mostrados por padrão)
-    filterTickets('open');    tabs.forEach(tab => {
+    // Aplicar filtragem inicial para mostrar tickets abertos
+    filterTickets('open');
+    
+    tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             // Remove active class from all tabs
             tabs.forEach(t => t.classList.remove('active'));

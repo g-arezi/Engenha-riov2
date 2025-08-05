@@ -148,9 +148,8 @@ $router->post('/documents/handle-drag-drop', [DocumentWorkflowController::class,
 $router->get('/support', [SupportController::class, 'index'], [AuthMiddleware::class]);
 $router->get('/support/create', [SupportController::class, 'create'], [AuthMiddleware::class]);
 $router->post('/support/create', [SupportController::class, 'create'], [AuthMiddleware::class]);
-// Removendo a rota /support/{id} pois está causando conflito com /support/view/{id}
-// $router->get('/support/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
-$router->get('/support/view/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
+// Rota para visualizar ticket individual - precisa estar depois de rotas específicas
+$router->get('/support/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
 $router->post('/support/update-status', function() {
     $id = $_GET['id'] ?? null;
     if (!$id) {

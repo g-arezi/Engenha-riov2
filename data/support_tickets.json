@@ -8,5 +8,45 @@
         "id": "688a689fa15ee7.57357003",
         "created_at": "2025-07-30 18:46:55",
         "updated_at": "2025-08-01 21:33:30"
+    },
+    "689204c0755146.67552053": {
+        "subject": "testes",
+        "description": "teste de sistema de ticket. testando o ticket.",
+        "priority": "media",
+        "status": "aberto",
+        "user_id": "admin",
+        "id": "689204c0755146.67552053",
+        "created_at": "2025-08-05 13:18:56",
+        "updated_at": "2025-08-05 13:18:56"
+    },
+    "68920660c65683.50614491": {
+        "subject": "teste de sistema de ticket",
+        "description": "usuarioteste2 solicitando suporte ao projeto.",
+        "priority": "media",
+        "status": "aberto",
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "id": "68920660c65683.50614491",
+        "created_at": "2025-08-05 13:25:52",
+        "updated_at": "2025-08-05 13:25:52"
+    },
+    "689207c4059626.30107545": {
+        "subject": "teste de sistema de ticket",
+        "description": "asfgasdasdoasdoasdjasdjasdasdasdasd",
+        "priority": "media",
+        "status": "aberto",
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "id": "689207c4059626.30107545",
+        "created_at": "2025-08-05 13:31:48",
+        "updated_at": "2025-08-05 13:31:48"
+    },
+    "6892094d66a610.88880137": {
+        "subject": "um teste simples de ticket",
+        "description": "um teste simples de ticketum teste simples de ticket",
+        "priority": "media",
+        "status": "aberto",
+        "user_id": "6887cdaf0cf3a8.51328972",
+        "id": "6892094d66a610.88880137",
+        "created_at": "2025-08-05 13:38:21",
+        "updated_at": "2025-08-05 13:38:21"
     }
 }

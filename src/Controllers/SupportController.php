@@ -27,24 +27,67 @@ class SupportController
         // Debug para verificar permissões
         error_log("Current user: " . Auth::id() . ", Has admin.view: " . (Auth::hasPermission('admin.view') ? 'Yes' : 'No') . ", Has support.manage: " . (Auth::hasPermission('support.manage') ? 'Yes' : 'No'));
         
-        // Buscar todos os tickets
-        $raw_tickets = $this->db->getTable('support_tickets');
-        error_log("Raw tickets from JSON: " . count($raw_tickets));
-        
-        // Fetch tickets based on user role
-        if (Auth::hasPermission('admin.view') || Auth::hasPermission('support.manage')) {
-            // Admin, coordinator, and analyst can see all tickets
-            $tickets = $this->db->getAllData('support_tickets'); // Use getAllData to ensure we get all tickets
-            error_log("User has admin permissions. Total tickets found: " . count($tickets));
-            
-            // Debug: Print all ticket IDs
-            $ticketIds = array_keys($tickets);
-            error_log("Admin tickets IDs: " . implode(", ", $ticketIds));
-        } else {
-            // Regular users can only see their own tickets
-            $tickets = $this->db->findAll('support_tickets', ['user_id' => Auth::id()]);
-            error_log("Regular user. Tickets found for this user: " . count($tickets));
+        // Verificar se é uma requisição para atualização via AJAX
+        $isAjaxRequest = isset($_GET['format']) && $_GET['format'] === 'json';
+        if ($isAjaxRequest) {
+            error_log("Requisição AJAX para atualização da lista de tickets");
         }
+        
+        // Carregar diretamente do arquivo JSON para evitar problemas com cache
+        $tickets = [];
+        $jsonFile = __DIR__ . '/../../data/support_tickets.json';
+        
+        if (file_exists($jsonFile)) {
+            // Limpar cache de arquivo antes de ler
+            clearstatcache(true, $jsonFile);
+            
+            $jsonContent = file_get_contents($jsonFile);
+            error_log("JSON content: " . substr($jsonContent, 0, 100) . "...");
+            
+            $ticketsData = json_decode($jsonContent, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error: " . json_last_error_msg());
+                $ticketsData = [];
+            } else {
+                $ticketsData = $ticketsData ?: [];
+            }
+            
+            error_log("Tickets carregados diretamente do JSON: " . count($ticketsData));
+            
+            // Garantir que cada ticket tenha seu ID incluído
+            foreach ($ticketsData as $id => $ticket) {
+                if (!isset($ticket['id'])) {
+                    $ticketsData[$id]['id'] = $id;
+                }
+                // Garantir que temos todos os campos necessários
+                $tickets[$id] = $ticket;
+            }
+            
+            // Log de todos os IDs de tickets carregados
+            $ticketIds = array_keys($tickets);
+            error_log("IDs de tickets carregados: " . implode(', ', $ticketIds));
+        } else {
+            error_log("ERRO: Arquivo de tickets não encontrado!");
+        }
+        
+        // Filtrar tickets para usuários regulares
+        if (!Auth::hasPermission('admin.view') && !Auth::hasPermission('support.manage')) {
+            // Regular users can only see their own tickets
+            $userTickets = [];
+            foreach ($tickets as $id => $ticket) {
+                if (isset($ticket['user_id']) && $ticket['user_id'] === Auth::id()) {
+                    $userTickets[$id] = $ticket;
+                }
+            }
+            $tickets = $userTickets;
+            error_log("Regular user. Filtered tickets for this user: " . count($tickets));
+        } else {
+            error_log("Admin user. Total tickets: " . count($tickets));
+        }
+        
+        // Debug: Mostrar todos os IDs de tickets
+        $ticketIds = array_keys($tickets);
+        error_log("Tickets IDs disponíveis: " . implode(", ", $ticketIds));
         
         // If no tickets found, do a direct check
         if (empty($tickets)) {
@@ -56,13 +99,13 @@ class SupportController
         $closedCount = 0;
         
         foreach ($tickets as $ticket) {
-            if ($ticket['status'] === 'fechado') {
+            if (isset($ticket['status']) && $ticket['status'] === 'fechado') {
                 $closedCount++;
             } else {
                 $openCount++;
             }
             // Debug: Log each ticket
-            error_log("Ticket ID: " . $ticket['id'] . ", Subject: " . $ticket['subject'] . ", Status: " . $ticket['status'] . ", User: " . $ticket['user_id']);
+            error_log("Ticket ID: " . $ticket['id'] . ", Subject: " . ($ticket['subject'] ?? 'N/A') . ", Status: " . ($ticket['status'] ?? 'N/A') . ", User: " . ($ticket['user_id'] ?? 'N/A'));
         }
         
         // Get user data to display names
@@ -123,6 +166,12 @@ class SupportController
         // Log the ticket ID and user permissions for debugging
         error_log("SupportController::show - Looking for ticket with ID: " . $id);
         error_log("Current user: " . Auth::id() . ", Has admin.view: " . (Auth::hasPermission('admin.view') ? 'Yes' : 'No') . ", Has support.manage: " . (Auth::hasPermission('support.manage') ? 'Yes' : 'No'));
+        
+        // Handle ticket paths with additional slashes (bug fix for IDs with dots)
+        if (strpos($id, '/') !== false) {
+            $id = preg_replace('/\/+/', '', $id);
+            error_log("Cleaned ID: " . $id);
+        }
         
         $ticket = $this->db->find('support_tickets', $id);
         
@@ -253,15 +302,55 @@ class SupportController
                 'user_id' => Auth::id()
             ];
             
-            $id = $this->db->insert('support_tickets', $data);
+            error_log("Criando novo ticket com dados: " . json_encode($data));
             
-            if ($id) {
-                $_SESSION['success'] = 'Ticket criado com sucesso! ID: ' . substr($id, 0, 8);
-                header('Location: /support?success=ticket_created');
-            } else {
-                $_SESSION['error'] = 'Erro ao criar ticket. Tente novamente.';
-                header('Location: /support/create?error=creation_failed');
+            // Verificar tickets existentes antes da inserção
+            $existingTickets = [];
+            $jsonFile = __DIR__ . '/../../data/support_tickets.json';
+            
+            if (file_exists($jsonFile)) {
+                // Limpar cache do arquivo
+                clearstatcache(true, $jsonFile);
+                
+                $jsonContent = file_get_contents($jsonFile);
+                if (!empty($jsonContent)) {
+                    $existingTickets = json_decode($jsonContent, true) ?: [];
+                    error_log("Tickets existentes antes da inserção: " . count($existingTickets));
+                } else {
+                    error_log("Arquivo de tickets vazio ou ilegível");
+                    $existingTickets = [];
+                }
             }
+            
+            // Criar um ID único para o novo ticket
+            $id = uniqid('', true);
+            $data['id'] = $id;
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $data['updated_at'] = date('Y-m-d H:i:s');
+            
+            // Adicionar o novo ticket diretamente ao array
+            $existingTickets[$id] = $data;
+            
+            // Salvar todos os tickets de volta para o arquivo
+            file_put_contents($jsonFile, json_encode($existingTickets, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            
+            error_log("Novo ticket salvo manualmente com ID: " . $id);
+            
+            // Verificar se o ticket foi salvo com sucesso
+            clearstatcache(true, $jsonFile);
+            $newTickets = json_decode(file_get_contents($jsonFile), true) ?: [];
+            if (isset($newTickets[$id])) {
+                error_log("Novo ticket confirmado no arquivo JSON");
+            } else {
+                error_log("ERRO: Novo ticket NÃO encontrado no arquivo JSON após salvar manualmente");
+            }
+            
+            // Preparar uma mensagem de sucesso com parte do ID
+            $_SESSION['success'] = 'Ticket criado com sucesso! ID: ' . substr($id, 0, 8);
+            
+            // Redirecionar para a página de visualização direta
+            error_log("Redirecionando para a página de visualização direta do ticket: " . $id);
+            header('Location: /view-ticket.php?id=' . $id . '&nocache=' . time());
         } catch (\Exception $e) {
             error_log('Erro ao criar ticket: ' . $e->getMessage());
             $_SESSION['error'] = 'Erro interno. Contate o administrador.';

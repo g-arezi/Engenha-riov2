@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Session should already be started in index.php, no need to start it again here
 $title = 'Login - Engenha Rio';
 
@@ -330,11 +330,11 @@ $slideUrl = $slide['url'] ?? '#2c3e50';
             
             <!-- Rodapé -->
             <div class="footer-info">
-                 2025 ENGENHARIO. Todos os direitos reservados.
+                © 2025 ENGENHARIO. Todos os direitos reservados.
             </div>
         </div>
         
-        <!-- Slides Section (agora à direita) -->
+        <!-- Slides Section (moved to right side) -->
         <div class="slides-section">
             <?php if($slideType === 'image'): ?>
                 <div class="slide" style="background-image: url('<?= $slideUrl ?>')">
@@ -345,6 +345,67 @@ $slideUrl = $slide['url'] ?? '#2c3e50';
                     <h2><?= htmlspecialchars($slideTitle) ?></h2>
                     <p><?= htmlspecialchars($slideDescription) ?></p>
                 </div>
+            </div>
+        </div>
+            <!-- Logo e Título -->
+            <div class="logo-section">
+                <img src="/assets/images/engenhario-logo.png" alt="Engenha Rio" class="logo-image">
+                <p class="logo-subtitle">Sistema de Gestão de Documentos</p>
+            </div>
+            
+            <!-- Alertas de Erro -->
+            <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+            
+            <!-- Formulário de Login -->
+            <form method="POST" action="/login">
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i> Senha
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label class="form-check-label" for="remember">
+                        Lembrar-me
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt me-2"></i> Entrar
+                </button>
+            </form>
+            
+            <!-- Link Esqueci Senha -->
+            <div class="forgot-password">
+                <a href="#"><i class="fas fa-key"></i> Esqueci minha senha</a>
+            </div>
+            
+            <!-- Link Criar Conta -->
+            <div class="register-link">
+                <p>Não tem uma conta?</p>
+                <a href="/auth/register" class="btn-register">
+                    <i class="fas fa-user-plus me-2"></i> Criar Conta
+                </a>
+            </div>
+            
+            <!-- Rodapé -->
+            <div class="footer-info">
+                © 2025 ENGENHARIO. Todos os direitos reservados.
             </div>
         </div>
     </div>
