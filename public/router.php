@@ -148,8 +148,28 @@ $router->post('/documents/handle-drag-drop', [DocumentWorkflowController::class,
 $router->get('/support', [SupportController::class, 'index'], [AuthMiddleware::class]);
 $router->get('/support/create', [SupportController::class, 'create'], [AuthMiddleware::class]);
 $router->post('/support/create', [SupportController::class, 'create'], [AuthMiddleware::class]);
-// Rota para visualizar ticket individual - precisa estar depois de rotas específicas
+
+// Hack para lidar com problemas de roteamento de tickets
+$router->get('/support/:id', function() {
+    $id = $_SERVER['REQUEST_URI'];
+    $id = str_replace('/support/', '', $id);
+    
+    // Remove any query parameters
+    if (($pos = strpos($id, '?')) !== false) {
+        $id = substr($id, 0, $pos);
+    }
+    
+    error_log("Support ticket ID from custom router handler: " . $id);
+    
+    // Create support controller and call show method
+    $controller = new App\Controllers\SupportController();
+    $controller->show($id);
+}, [AuthMiddleware::class]);
+
+// Rota para visualizar ticket individual - mantido para compatibilidade
 $router->get('/support/{id}', [SupportController::class, 'show'], [AuthMiddleware::class]);
+
+// Rota para atualização de status
 $router->post('/support/update-status', function() {
     $id = $_GET['id'] ?? null;
     if (!$id) {
@@ -162,6 +182,8 @@ $router->post('/support/update-status', function() {
     $controller = new App\Controllers\SupportController();
     $controller->updateStatus($id);
 }, [AuthMiddleware::class]);
+
+// Rota para responder a tickets
 $router->post('/support/{id}/reply', [SupportController::class, 'reply'], [AuthMiddleware::class]);
 
 // Route for direct ticket access via query string

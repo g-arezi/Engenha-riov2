@@ -167,25 +167,27 @@ class SupportController
         error_log("SupportController::show - Looking for ticket with ID: " . $id);
         error_log("Current user: " . Auth::id() . ", Has admin.view: " . (Auth::hasPermission('admin.view') ? 'Yes' : 'No') . ", Has support.manage: " . (Auth::hasPermission('support.manage') ? 'Yes' : 'No'));
         
-        // Handle ticket paths with additional slashes (bug fix for IDs with dots)
+        // Handle ticket paths with additional slashes or characters (bug fix for IDs with dots)
         if (strpos($id, '/') !== false) {
             $id = preg_replace('/\/+/', '', $id);
-            error_log("Cleaned ID: " . $id);
+            error_log("Cleaned ID from slashes: " . $id);
         }
         
-        $ticket = $this->db->find('support_tickets', $id);
+        // If we still can't find the ticket, try loading all tickets and find by ID
+        $allTickets = $this->db->findAll('support_tickets');
+        error_log("Available tickets: " . implode(', ', array_keys($allTickets)));
+        
+        // Look directly for the ticket ID in our array of tickets
+        $ticket = $allTickets[$id] ?? null;
         
         if (!$ticket) {
-            $_SESSION['error'] = 'Ticket não encontrado.';
+            $_SESSION['error'] = 'Ticket não encontrado. ID: ' . $id;
             error_log("SupportController::show - Ticket not found: " . $id);
-            
-            // Debug: Let's look at what tickets we have
-            $allTickets = $this->db->findAll('support_tickets');
-            error_log("Available tickets: " . json_encode(array_keys($allTickets)));
-            
             header('Location: /support');
             exit;
         }
+        
+        error_log("Ticket found: " . $id);
 
         error_log("SupportController::show - Ticket found: " . json_encode($ticket));
 
@@ -348,9 +350,9 @@ class SupportController
             // Preparar uma mensagem de sucesso com parte do ID
             $_SESSION['success'] = 'Ticket criado com sucesso! ID: ' . substr($id, 0, 8);
             
-            // Redirecionar para a página de visualização direta
+            // Redirecionar para o arquivo de visualização direta
             error_log("Redirecionando para a página de visualização direta do ticket: " . $id);
-            header('Location: /view-ticket.php?id=' . $id . '&nocache=' . time());
+            header('Location: /support-view.php?id=' . $id . '&nocache=' . time());
         } catch (\Exception $e) {
             error_log('Erro ao criar ticket: ' . $e->getMessage());
             $_SESSION['error'] = 'Erro interno. Contate o administrador.';

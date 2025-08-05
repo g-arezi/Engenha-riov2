@@ -121,7 +121,7 @@ ob_start();
                                 $ticket['id'] = $id;
                             }
                             ?>
-                            <a href="/view-ticket.php?id=<?= $ticket['id'] ?>" 
+                            <a href="#" 
                                class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
                                data-ticket-id="<?= $ticket['id'] ?>"
                                data-status="<?= $ticket['status'] ?>"
@@ -159,11 +159,13 @@ ob_start();
     <!-- Main Content Area (Right Side) -->
     <div class="col-md-8">
         <div class="card">
-            <div class="card-body text-center py-5">
-                <div class="empty-state">
-                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Selecione um ticket</h5>
-                    <p class="text-muted">Escolha um ticket para ver os detalhes e responder</p>
+            <div id="ticket-detail-container" class="card-body">
+                <div class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Selecione um ticket</h5>
+                        <p class="text-muted">Escolha um ticket para ver os detalhes e responder</p>
+                    </div>
                 </div>
             </div>
         </div>

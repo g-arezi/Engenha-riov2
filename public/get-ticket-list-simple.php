@@ -1,66 +1,82 @@
 <?php
-// Endpoint para atualizar a lista de tickets via AJAX
-require_once __DIR__ .             <a href="/ticket-view.php?id=<?= $ticket['id'] ?>" 
-               class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
-               data-ticket-id="<?= $ticket['id'] ?>"
-               data-status="<?= $ticket['status'] ?>"
-               data-user="<?= $ticket['user_id'] ?>">autoload.php';
+// Simplified ticket list that doesn't use Auth class
+// Display all PHP errors for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Iniciar sessão
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Start session
+session_start();
 
-use App\Core\Auth;
-use App\Core\Database;
-
-// Verificar autenticação
-if (!Auth::check()) {
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Não autenticado']);
     exit;
 }
 
-// Carregar tickets diretamente do JSON
+// Load tickets directly from JSON
 header('Content-Type: text/html; charset=utf-8');
 
-$db = new Database();
-$tickets = [];
+// Get user role and ID
+$currentUserId = $_SESSION['user_id'];
+$isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['administrador', 'analista', 'coordenador']);
 
-// Obter todos os tickets
-$allTickets = $db->getAllData('support_tickets');
+// Load tickets
+$ticketsFile = __DIR__ . '/../data/support_tickets.json';
+$tickets = [];
 $openCount = 0;
 $closedCount = 0;
 
-// Filtrar tickets para usuários regulares
-if (!Auth::hasPermission('admin.view') && !Auth::hasPermission('support.manage')) {
-    $userTickets = [];
-    foreach ($allTickets as $id => $ticket) {
-        if (isset($ticket['user_id']) && $ticket['user_id'] === Auth::id()) {
-            $userTickets[$id] = $ticket;
+if (file_exists($ticketsFile)) {
+    $allTickets = json_decode(file_get_contents($ticketsFile), true) ?? [];
+    
+    // Filter tickets for regular users
+    if (!$isAdmin) {
+        $userTickets = [];
+        foreach ($allTickets as $id => $ticket) {
+            if (isset($ticket['user_id']) && $ticket['user_id'] === $currentUserId) {
+                // Make sure ID is included in the ticket data
+                if (!isset($ticket['id'])) {
+                    $ticket['id'] = $id;
+                }
+                $userTickets[$id] = $ticket;
+            }
+        }
+        $tickets = $userTickets;
+    } else {
+        // For admins, get all tickets but ensure IDs are set
+        foreach ($allTickets as $id => $ticket) {
+            if (!isset($ticket['id'])) {
+                $ticket['id'] = $id;
+            }
+            $tickets[$id] = $ticket;
         }
     }
-    $tickets = $userTickets;
-} else {
-    $tickets = $allTickets;
-}
-
-// Contar tickets por status
-foreach ($tickets as $ticket) {
-    if (isset($ticket['status']) && $ticket['status'] === 'fechado') {
-        $closedCount++;
-    } else {
-        $openCount++;
+    
+    // Count by status
+    foreach ($tickets as $ticket) {
+        if (isset($ticket['status']) && $ticket['status'] === 'fechado') {
+            $closedCount++;
+        } else {
+            $openCount++;
+        }
     }
 }
 
-// Obter dados de usuários
-$users = $db->getAllData('users');
+// Load users
+$usersFile = __DIR__ . '/../data/users.json';
+$users = [];
+if (file_exists($usersFile)) {
+    $users = json_decode(file_get_contents($usersFile), true) ?? [];
+}
 
-// Adicionar nomes de usuários aos tickets
+// Add user names to tickets
 foreach ($tickets as $id => &$ticket) {
+    // Default to user ID
     $ticket['user_name'] = $ticket['user_id'];
     
+    // Check if user exists in the users data
     if (isset($users[$ticket['user_id']])) {
         $ticket['user_name'] = $users[$ticket['user_id']]['name'];
     } else {
@@ -73,7 +89,7 @@ foreach ($tickets as $id => &$ticket) {
     }
 }
 
-// Renderizar apenas a lista de tickets
+// Render tickets list
 ob_start();
 ?>
 <div class="list-group list-group-flush ticket-list">
@@ -88,7 +104,7 @@ ob_start();
         </div>
     <?php else: ?>
         <?php foreach ($tickets as $id => $ticket): ?>
-            <a href="/ticket-view.php?id=<?= $ticket['id'] ?>" 
+            <a href="#" 
                class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
                data-ticket-id="<?= $ticket['id'] ?>"
                data-status="<?= $ticket['status'] ?>"

@@ -105,6 +105,9 @@ class Router
         $pattern = str_replace('/', '\\/', $pattern);
         $pattern = '/^' . $pattern . '$/';
         
+        // Log the pattern and path we're trying to match
+        error_log("Trying to match path: '$path' against pattern: '$pattern'");
+        
         // Check if path matches pattern
         if (preg_match($pattern, $path)) {
             error_log("Route matched: " . $routePath . " => " . $path);

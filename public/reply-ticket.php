@@ -1,24 +1,39 @@
 <?php
 // Direct route for ticket replies with fewer dependencies
+// Display all PHP errors for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once __DIR__ . '/../autoload.php';
 
-use App\Core\Auth;
-use App\Core\Database;
+// Verificar se é uma requisição AJAX
+$isAjax = isset($_GET['ajax']) && $_GET['ajax'] === '1';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Ensure user is logged in
-if (!Auth::check()) {
-    header('Location: /login');
+// Simplificada verificação de login sem Auth
+if (!isset($_SESSION['user_id'])) {
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Não autenticado']);
+    } else {
+        header('Location: /login');
+    }
     exit;
 }
 
 // Ensure this is a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /support');
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Método não permitido']);
+    } else {
+        header('Location: /support');
+    }
     exit;
 }
 
@@ -147,6 +162,6 @@ if (isset($_POST['status']) && !empty($_POST['status'])) {
 
 $_SESSION['success'] = 'Resposta enviada com sucesso!';
 
-// Redirecionamento corrigido: usar view-ticket.php diretamente
-header('Location: /view-ticket.php?id=' . $id);
+// Redirecionamento corrigido: usar o novo arquivo de visualização
+header('Location: /ticket-view.php?id=' . $id);
 exit;

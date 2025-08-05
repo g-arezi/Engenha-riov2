@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para atualizar a lista de tickets
     function updateTicketsList() {
-        fetch(`/support?refresh=true&timestamp=${Date.now()}`)
+        fetch(`/get-ticket-list-simple.php?timestamp=${Date.now()}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Falha ao obter tickets');
@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     const currentTicketList = document.querySelector('.ticket-list');
                     if (currentTicketList) {
                         currentTicketList.innerHTML = newTicketList.innerHTML;
+                        
+                        // Certificar-se de que todos os links estão com o caminho correto
+                        document.querySelectorAll('.ticket-item').forEach(ticketLink => {
+                            const ticketId = ticketLink.getAttribute('data-ticket-id');
+                            if (ticketId) {
+                                // Garantir que todos os links usam o ticket-simple-view.php
+                                ticketLink.href = `/ticket-simple-view.php?id=${ticketId}`;
+                                console.log(`Fixed ticket link for ID ${ticketId}`);
+                            }
+                        });
                         
                         // Reaplicar a filtragem atual
                         const activeTab = document.querySelector('.support-tab.active');

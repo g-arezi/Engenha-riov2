@@ -2,7 +2,6 @@
 // Direct route for updating ticket status
 require_once __DIR__ . '/../autoload.php';
 
-use App\Core\Auth;
 use App\Core\Database;
 
 // Start session if not already started
@@ -11,7 +10,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Ensure user is logged in and has permission
-if (!Auth::check() || !(Auth::hasPermission('admin.view') || Auth::hasPermission('support.manage'))) {
+$isLoggedIn = isset($_SESSION['user_id']);
+$isAdmin = isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['administrador', 'analista', 'coordenador']);
+
+if (!$isLoggedIn || !$isAdmin) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Acesso negado']);
     exit;

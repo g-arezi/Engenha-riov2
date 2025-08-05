@@ -1,7 +1,52 @@
 <?php
-use App\Core\Auth;
+// Custom Auth helper functions for simplified ticket view
+function hasPermission($permission) {
+    // Initialize permissions array
+    $userPermissions = [];
+    
+    // Get user role from session
+    $role = $_SESSION['user_role'] ?? 'cliente';
+    
+    // Define permissions based on role
+    switch ($role) {
+        case 'administrador':
+            $userPermissions = [
+                'dashboard.view',
+                'projects.view', 'projects.create', 'projects.edit', 'projects.delete', 'projects.manage_workflow',
+                'documents.view', 'documents.upload', 'documents.download', 'documents.delete', 'documents.approve', 'documents.reject',
+                'users.view', 'users.create', 'users.edit', 'users.delete',
+                'admin.view', 'admin.manage', 'admin.manage_permissions', 'admin.manage_documents', 'admin.manage_users',
+                'support.view', 'support.manage'
+            ];
+            break;
+        case 'analista':
+        case 'coordenador':
+            $userPermissions = [
+                'dashboard.view',
+                'projects.view', 'projects.create', 'projects.edit', 'projects.manage_workflow',
+                'documents.view', 'documents.upload', 'documents.download', 'documents.approve', 'documents.reject',
+                'admin.view', 'admin.manage_users',
+                'support.view', 'support.manage'
+            ];
+            break;
+        case 'cliente':
+            $userPermissions = [
+                'dashboard.view',
+                'projects.view',
+                'documents.view', 'documents.upload', 'documents.download',
+                'support.view'
+            ];
+            break;
+    }
+    
+    return in_array($permission, $userPermissions);
+}
 
-$title = 'Ticket #' . $ticket['id'] . ' - Engenha Rio';
+function getCurrentUserId() {
+    return $_SESSION['user_id'] ?? null;
+}
+
+$title = 'Ticket #' . substr($ticket['id'], 0, 8) . ' - Engenha Rio';
 $showSidebar = true;
 $showNavbar = true;
 
@@ -15,7 +60,7 @@ ob_start();
             <p class="text-muted mb-0"><?= htmlspecialchars($ticket['subject']) ?></p>
         </div>
         <div class="d-flex gap-2">
-            <?php if (Auth::hasPermission('support.manage')): ?>
+            <?php if (hasPermission('support.manage')): ?>
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
                             data-bs-toggle="dropdown">
@@ -154,7 +199,7 @@ ob_start();
                                 <div class="form-text">Formatos aceitos: JPG, JPEG, PNG, GIF - tamanho máximo 2MB</div>
                             </div>
                             
-                            <?php if (Auth::hasPermission('support.manage')): ?>
+                            <?php if (hasPermission('support.manage')): ?>
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Alterar Status</label>
                                     <select class="form-select" id="status" name="status">
@@ -306,5 +351,5 @@ echo '<script src="/assets/js/ticket-refresh.js?v=' . time() . '"></script>';
 echo '<script src="/assets/js/ticket-init.js?v=' . time() . '"></script>';
 
 $content = ob_get_clean();
-include __DIR__ . '/../layouts/app.php';
+include __DIR__ . '/../layouts/simple_app.php';
 ?>

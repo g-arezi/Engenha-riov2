@@ -8,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/css/app.css" rel="stylesheet">
     <link href="/assets/css/chat-widget.css" rel="stylesheet">
+    <link href="/assets/css/ticket-styles.css" rel="stylesheet">
 </head>
 <body>
     <div class="d-flex">
@@ -117,6 +118,7 @@
     <script src="/assets/js/notifications.js"></script>
     <script src="/assets/js/session-keeper.js"></script>
     <script src="/assets/js/ticket-list-refresh.js"></script>
+    <script src="/assets/js/ticket-detail-view.js"></script>
     <script>
         // Chat widget functions
         function openWhatsapp() {
