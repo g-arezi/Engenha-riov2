@@ -36,8 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Log para debug
                 console.log('Carregando detalhes para ticket ID:', ticketId);
                 
-                // Carregar os detalhes do ticket via AJAX com timestamp para evitar cache
-                fetch(`/get-ticket-detail.php?id=${encodeURIComponent(ticketId)}&_=${Date.now()}`)
+                // Carregar os detalhes do ticket via AJAX com timestamp para evitar cache e credentials para passar os cookies
+                fetch(`/get-ticket-detail.php?id=${encodeURIComponent(ticketId)}&_=${Date.now()}`, {
+                    credentials: 'same-origin' // Isso garante que os cookies são enviados
+                })
                     .then(response => {
                         console.log('Resposta recebida:', response.status, response.statusText);
                         if (!response.ok) {
@@ -56,11 +58,29 @@ document.addEventListener('DOMContentLoaded', function() {
                                 e.preventDefault();
                                 const formData = new FormData(this);
                                 
-                                fetch('/reply-ticket.php?id=' + encodeURIComponent(ticketId) + '&ajax=1', {
+                                // Mostrar indicador de carregamento
+                                const submitBtn = this.querySelector('[type="submit"]');
+                                const originalBtnHtml = submitBtn.innerHTML;
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+                                
+                                console.log('Enviando resposta para ticket ID:', ticketId);
+                                
+                                fetch('/reply-ticket-new.php?id=' + encodeURIComponent(ticketId) + '&ajax=1', {
                                     method: 'POST',
-                                    body: formData
+                                    body: formData,
+                                    credentials: 'same-origin' // Importante: envia cookies de sessão
                                 })
-                                .then(response => response.json())
+                                .then(response => {
+                                    console.log('Resposta recebida:', response.status, response.statusText);
+                                    if (!response.ok) {
+                                        return response.text().then(text => {
+                                            console.error('Erro detalhado:', text);
+                                            throw new Error(`Erro de resposta do servidor: ${response.status} ${response.statusText}`);
+                                        });
+                                    }
+                                    return response.json();
+                                })
                                 .then(data => {
                                     if (data.success) {
                                         // Recarregar os detalhes do ticket para mostrar a nova resposta
@@ -68,12 +88,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                         // Limpar o formulário
                                         replyForm.reset();
                                     } else {
-                                        alert('Erro ao enviar resposta: ' + data.message);
+                                        alert('Erro ao enviar resposta: ' + (data.message || 'Erro desconhecido'));
                                     }
                                 })
                                 .catch(error => {
                                     console.error('Erro ao enviar resposta:', error);
-                                    alert('Ocorreu um erro ao enviar sua resposta.');
+                                    alert(`Ocorreu um erro ao enviar sua resposta: ${error.message}`);
+                                })
+                                .finally(() => {
+                                    // Usar a função global para restaurar o botão
+                                    if (typeof window.restoreSubmitButton === 'function') {
+                                        window.restoreSubmitButton(submitBtn);
+                                    } else {
+                                        // Fallback para o método anterior
+                                        submitBtn.disabled = false;
+                                        submitBtn.innerHTML = originalBtnHtml;
+                                    }
+                                    submitBtn.innerHTML = originalBtnHtml;
                                 });
                             });
                         }
@@ -106,7 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadTicketDetail(ticketId) {
         console.log('Recarregando detalhes para ticket ID:', ticketId);
         
-        fetch(`/get-ticket-detail.php?id=${encodeURIComponent(ticketId)}&_=${Date.now()}`)
+        fetch(`/get-ticket-detail.php?id=${encodeURIComponent(ticketId)}&_=${Date.now()}`, {
+            credentials: 'same-origin' // Isso garante que os cookies são enviados
+        })
             .then(response => {
                 console.log('Resposta recebida:', response.status, response.statusText);
                 if (!response.ok) {

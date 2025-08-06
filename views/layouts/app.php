@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Engenha Rio' ?></title>
+    <?php 
+    // Incluir o helper de middleware para autenticação AJAX
+    if (file_exists(__DIR__ . '/../../public/middleware-helper.php')) {
+        include_once __DIR__ . '/../../public/middleware-helper.php';
+    }
+    ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/assets/css/app.css" rel="stylesheet">
@@ -119,6 +125,7 @@
     <script src="/assets/js/session-keeper.js"></script>
     <script src="/assets/js/ticket-list-refresh.js"></script>
     <script src="/assets/js/ticket-detail-view.js"></script>
+    <script src="/assets/js/ticket-utils.js"></script>
     <script>
         // Chat widget functions
         function openWhatsapp() {

@@ -39,14 +39,7 @@ $user = Auth::user();
             </li>
             <?php endif; ?>
             
-            <?php if (Auth::hasPermission('documents.view')): ?>
-            <li class="nav-item">
-                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/documents') === 0 ? 'active' : '' ?>" href="/documents">
-                    <i class="fas fa-file-alt me-2"></i>
-                    Documentos
-                </a>
-            </li>
-            <?php endif; ?>
+
             
             <?php if (Auth::hasPermission('support.view')): ?>
             <li class="nav-item">

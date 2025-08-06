@@ -1,10 +1,6 @@
 <?php
 // Endpoint para atualizar a lista de tickets via AJAX
-require_once __DIR__ .             <a href="/ticket-view.php?id=<?= $ticket['id'] ?>" 
-               class="list-group-item list-group-item-action ticket-item <?= $ticket['status'] === 'fechado' ? 'history-ticket' : 'open-ticket' ?>" 
-               data-ticket-id="<?= $ticket['id'] ?>"
-               data-status="<?= $ticket['status'] ?>"
-               data-user="<?= $ticket['user_id'] ?>">autoload.php';
+require_once __DIR__ . '/../autoload.php';
 
 // Iniciar sessão
 if (session_status() === PHP_SESSION_NONE) {

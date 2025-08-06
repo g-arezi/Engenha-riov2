@@ -23,12 +23,22 @@ class Auth
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_role'] = $user['role'];
         
+        // Define cookies para suportar requisições AJAX
+        $expiration = time() + 86400; // 24 horas
+        setcookie('user_id', $user['id'], $expiration, '/', '', false, false);
+        setcookie('user_role', $user['role'], $expiration, '/', '', false, false);
+        
         return true;
     }
 
     public static function logout(): void
     {
         self::$user = null;
+        
+        // Limpar cookies de autenticação
+        setcookie('user_id', '', time() - 3600, '/');
+        setcookie('user_role', '', time() - 3600, '/');
+        
         session_destroy();
     }
 
