@@ -132,16 +132,32 @@ class Database
 
     public function update(string $table, string $id, array $data): bool
     {
+        $this->logMessage("Database::update - Iniciando atualização - Tabela: {$table}, ID: {$id}");
+        $this->logMessage("Database::update - Dados para atualizar: " . json_encode($data));
+        
         $tableData = $this->getTable($table);
         
         if (!isset($tableData[$id])) {
+            $this->logMessage("Database::update - ERRO: Registro não encontrado para ID: {$id}");
             return false;
         }
 
+        $this->logMessage("Database::update - Registro encontrado. Dados atuais: " . json_encode($tableData[$id]));
+
         $data['updated_at'] = date('Y-m-d H:i:s');
         $tableData[$id] = array_merge($tableData[$id], $data);
+        
+        $this->logMessage("Database::update - Dados após merge: " . json_encode($tableData[$id]));
+        
         $this->saveTable($table, $tableData);
         
+        // Verificar se a atualização foi salva
+        $verificationData = $this->getTable($table);
+        if (isset($verificationData[$id])) {
+            $this->logMessage("Database::update - Verificação: workflow_stage = " . ($verificationData[$id]['workflow_stage'] ?? 'não definido'));
+        }
+        
+        $this->logMessage("Database::update - Atualização concluída com sucesso");
         return true;
     }
 
@@ -203,11 +219,34 @@ class Database
     private function saveTable(string $table, array $data): void
     {
         $filePath = $this->dataPath . $table . '.json';
-        file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $this->logMessage("Database::saveTable - Salvando em: {$filePath}");
+        $this->logMessage("Database::saveTable - Número de registros: " . count($data));
+        
+        $jsonContent = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        
+        if ($jsonContent === false) {
+            $this->logMessage("Database::saveTable - ERRO: Falha ao codificar JSON - " . json_last_error_msg());
+            return;
+        }
+        
+        $bytesWritten = file_put_contents($filePath, $jsonContent);
+        
+        if ($bytesWritten === false) {
+            $this->logMessage("Database::saveTable - ERRO: Falha ao escrever arquivo");
+        } else {
+            $this->logMessage("Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: {$bytesWritten}");
+        }
     }
 
     private function generateId(): string
     {
         return uniqid('', true);
+    }
+
+    private function logMessage(string $message): void
+    {
+        $logFile = dirname(__DIR__, 2) . '/database-debug.log';
+        $timestamp = date('Y-m-d H:i:s');
+        file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND);
     }
 }

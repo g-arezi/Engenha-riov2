@@ -525,11 +525,12 @@
         "user_id": "admin",
         "project_id": "proj_1753892536_9899",
         "document_id": "doc_68938656e3a16",
-        "is_read": false,
+        "is_read": true,
         "priority": "normal",
         "id": "68938663be65a3.24581055",
         "created_at": "2025-08-06 16:44:19",
-        "updated_at": "2025-08-06 16:44:19"
+        "updated_at": "2025-08-06 17:33:38",
+        "read_at": "2025-08-06 17:33:38"
     },
     "689388719868f4.57972743": {
         "user_id": "6887cdaf0cf3a8.51328972",
@@ -591,5 +592,60 @@
         "id": "68939037b5ebd0.89096805",
         "created_at": "2025-08-06 17:26:15",
         "updated_at": "2025-08-06 17:26:15"
+    },
+    "6893993d88a9c": {
+        "id": "6893993d88a9c",
+        "user_id": null,
+        "project_id": "proj_1753892536_9899",
+        "title": "Projeto avançou de etapa",
+        "message": "O projeto foi avançado para a etapa: Buildup",
+        "type": "workflow_advanced",
+        "is_read": false,
+        "created_at": "2025-08-06 18:04:45",
+        "updated_at": "2025-08-06 18:04:45"
+    },
+    "6893999dc302c": {
+        "id": "6893999dc302c",
+        "user_id": null,
+        "project_id": "proj_1753892536_9899",
+        "title": "Projeto avançou de etapa (Admin)",
+        "message": "O projeto foi avançado para a etapa: Aprovado",
+        "type": "workflow_advanced",
+        "is_read": false,
+        "created_at": "2025-08-06 18:06:21",
+        "updated_at": "2025-08-06 18:06:21"
+    },
+    "68939a1a0a3af": {
+        "id": "68939a1a0a3af",
+        "user_id": null,
+        "project_id": "proj_1753979150_9736",
+        "title": "Projeto avançou de etapa",
+        "message": "O projeto foi avançado para a etapa: Produção",
+        "type": "workflow_advanced",
+        "is_read": false,
+        "created_at": "2025-08-06 18:08:26",
+        "updated_at": "2025-08-06 18:08:26"
+    },
+    "68939a30c4765": {
+        "id": "68939a30c4765",
+        "user_id": null,
+        "project_id": "proj_1753979150_9736",
+        "title": "Projeto retrocedeu de etapa",
+        "message": "O projeto foi retrocedido para a etapa: Projeto",
+        "type": "workflow_reverted",
+        "is_read": false,
+        "created_at": "2025-08-06 18:08:48",
+        "updated_at": "2025-08-06 18:08:48"
+    },
+    "68939a356b788": {
+        "id": "68939a356b788",
+        "user_id": null,
+        "project_id": "proj_1753979150_9736",
+        "title": "Projeto retrocedeu de etapa",
+        "message": "O projeto foi retrocedido para a etapa: Documentos",
+        "type": "workflow_reverted",
+        "is_read": false,
+        "created_at": "2025-08-06 18:08:53",
+        "updated_at": "2025-08-06 18:08:53"
     }
 }

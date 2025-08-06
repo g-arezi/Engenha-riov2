@@ -1,0 +1,60 @@
+[2025-08-06 18:04:45] Database::update - Iniciando atualização - Tabela: projects, ID: proj_1753892536_9899
+[2025-08-06 18:04:45] Database::update - Dados para atualizar: {"workflow_stage":4,"updated_at":"2025-08-06 18:04:45"}
+[2025-08-06 18:04:45] Database::update - Registro encontrado. Dados atuais: {"name":"Teste cria\u00e7ao com tamplate modificado","description":"teste","project_type":"outros","document_template":"teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"rafael","status":"ativo","priority":"media","deadline":"2025-07-31","workflow_stage":3,"created_by":"admin","created_at":"2025-07-30 16:22:16","updated_at":"2025-08-06 17:56:34","id":"proj_1753892536_9899"}
+[2025-08-06 18:04:45] Database::update - Dados após merge: {"name":"Teste cria\u00e7ao com tamplate modificado","description":"teste","project_type":"outros","document_template":"teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"rafael","status":"ativo","priority":"media","deadline":"2025-07-31","workflow_stage":4,"created_by":"admin","created_at":"2025-07-30 16:22:16","updated_at":"2025-08-06 18:04:45","id":"proj_1753892536_9899"}
+[2025-08-06 18:04:45] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/projects.json
+[2025-08-06 18:04:45] Database::saveTable - Número de registros: 4
+[2025-08-06 18:04:45] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 2583
+[2025-08-06 18:04:45] Database::update - Verificação: workflow_stage = 4
+[2025-08-06 18:04:45] Database::update - Atualização concluída com sucesso
+[2025-08-06 18:04:45] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/notifications.json
+[2025-08-06 18:04:45] Database::saveTable - Número de registros: 51
+[2025-08-06 18:04:45] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 24604
+[2025-08-06 18:06:21] Database::update - Iniciando atualização - Tabela: projects, ID: proj_1753892536_9899
+[2025-08-06 18:06:21] Database::update - Dados para atualizar: {"workflow_stage":5,"updated_at":"2025-08-06 18:06:21","status":"ativo"}
+[2025-08-06 18:06:21] Database::update - Registro encontrado. Dados atuais: {"name":"Teste cria\u00e7ao com tamplate modificado","description":"teste","project_type":"outros","document_template":"teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"rafael","status":"ativo","priority":"media","deadline":"2025-07-31","workflow_stage":4,"created_by":"admin","created_at":"2025-07-30 16:22:16","updated_at":"2025-08-06 18:04:45","id":"proj_1753892536_9899"}
+[2025-08-06 18:06:21] Database::update - Dados após merge: {"name":"Teste cria\u00e7ao com tamplate modificado","description":"teste","project_type":"outros","document_template":"teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"rafael","status":"ativo","priority":"media","deadline":"2025-07-31","workflow_stage":5,"created_by":"admin","created_at":"2025-07-30 16:22:16","updated_at":"2025-08-06 18:06:21","id":"proj_1753892536_9899"}
+[2025-08-06 18:06:21] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/projects.json
+[2025-08-06 18:06:21] Database::saveTable - Número de registros: 4
+[2025-08-06 18:06:21] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 2583
+[2025-08-06 18:06:21] Database::update - Verificação: workflow_stage = 5
+[2025-08-06 18:06:21] Database::update - Atualização concluída com sucesso
+[2025-08-06 18:06:21] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/notifications.json
+[2025-08-06 18:06:21] Database::saveTable - Número de registros: 52
+[2025-08-06 18:06:21] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 25011
+[2025-08-06 18:08:25] Database::update - Iniciando atualização - Tabela: projects, ID: proj_1753979150_9736
+[2025-08-06 18:08:25] Database::update - Dados para atualizar: {"workflow_stage":3,"updated_at":"2025-08-06 18:08:25"}
+[2025-08-06 18:08:26] Database::update - Registro encontrado. Dados atuais: {"name":"Projeto Teste ","description":"esse \u00e9 um projeto teste com numero de or\u00e7amento.","budget_number":"1111.1111.V2","project_type":"residencial","document_template":"rg_teste___teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"6887cb7c384b75.22527396","status":"pendente","priority":"alta","deadline":"2025-08-09","workflow_stage":2,"created_by":"admin","created_at":"2025-07-31 16:25:50","updated_at":"2025-07-31 17:03:05","id":"proj_1753979150_9736"}
+[2025-08-06 18:08:26] Database::update - Dados após merge: {"name":"Projeto Teste ","description":"esse \u00e9 um projeto teste com numero de or\u00e7amento.","budget_number":"1111.1111.V2","project_type":"residencial","document_template":"rg_teste___teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"6887cb7c384b75.22527396","status":"pendente","priority":"alta","deadline":"2025-08-09","workflow_stage":3,"created_by":"admin","created_at":"2025-07-31 16:25:50","updated_at":"2025-08-06 18:08:26","id":"proj_1753979150_9736"}
+[2025-08-06 18:08:26] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/projects.json
+[2025-08-06 18:08:26] Database::saveTable - Número de registros: 4
+[2025-08-06 18:08:26] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 2572
+[2025-08-06 18:08:26] Database::update - Verificação: workflow_stage = 3
+[2025-08-06 18:08:26] Database::update - Atualização concluída com sucesso
+[2025-08-06 18:08:26] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/notifications.json
+[2025-08-06 18:08:26] Database::saveTable - Número de registros: 53
+[2025-08-06 18:08:26] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 25412
+[2025-08-06 18:08:48] Database::update - Iniciando atualização - Tabela: projects, ID: proj_1753979150_9736
+[2025-08-06 18:08:48] Database::update - Dados para atualizar: {"workflow_stage":2,"updated_at":"2025-08-06 18:08:48"}
+[2025-08-06 18:08:48] Database::update - Registro encontrado. Dados atuais: {"name":"Projeto Teste ","description":"esse \u00e9 um projeto teste com numero de or\u00e7amento.","budget_number":"1111.1111.V2","project_type":"residencial","document_template":"rg_teste___teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"6887cb7c384b75.22527396","status":"pendente","priority":"alta","deadline":"2025-08-09","workflow_stage":3,"created_by":"admin","created_at":"2025-07-31 16:25:50","updated_at":"2025-08-06 18:08:26","id":"proj_1753979150_9736"}
+[2025-08-06 18:08:48] Database::update - Dados após merge: {"name":"Projeto Teste ","description":"esse \u00e9 um projeto teste com numero de or\u00e7amento.","budget_number":"1111.1111.V2","project_type":"residencial","document_template":"rg_teste___teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"6887cb7c384b75.22527396","status":"pendente","priority":"alta","deadline":"2025-08-09","workflow_stage":2,"created_by":"admin","created_at":"2025-07-31 16:25:50","updated_at":"2025-08-06 18:08:48","id":"proj_1753979150_9736"}
+[2025-08-06 18:08:48] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/projects.json
+[2025-08-06 18:08:48] Database::saveTable - Número de registros: 4
+[2025-08-06 18:08:48] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 2572
+[2025-08-06 18:08:48] Database::update - Verificação: workflow_stage = 2
+[2025-08-06 18:08:48] Database::update - Atualização concluída com sucesso
+[2025-08-06 18:08:48] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/notifications.json
+[2025-08-06 18:08:48] Database::saveTable - Número de registros: 54
+[2025-08-06 18:08:48] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 25814
+[2025-08-06 18:08:53] Database::update - Iniciando atualização - Tabela: projects, ID: proj_1753979150_9736
+[2025-08-06 18:08:53] Database::update - Dados para atualizar: {"workflow_stage":1,"updated_at":"2025-08-06 18:08:53"}
+[2025-08-06 18:08:53] Database::update - Registro encontrado. Dados atuais: {"name":"Projeto Teste ","description":"esse \u00e9 um projeto teste com numero de or\u00e7amento.","budget_number":"1111.1111.V2","project_type":"residencial","document_template":"rg_teste___teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"6887cb7c384b75.22527396","status":"pendente","priority":"alta","deadline":"2025-08-09","workflow_stage":2,"created_by":"admin","created_at":"2025-07-31 16:25:50","updated_at":"2025-08-06 18:08:48","id":"proj_1753979150_9736"}
+[2025-08-06 18:08:53] Database::update - Dados após merge: {"name":"Projeto Teste ","description":"esse \u00e9 um projeto teste com numero de or\u00e7amento.","budget_number":"1111.1111.V2","project_type":"residencial","document_template":"rg_teste___teste","client_id":"6887cdaf0cf3a8.51328972","analyst_id":"6887cb7c384b75.22527396","status":"pendente","priority":"alta","deadline":"2025-08-09","workflow_stage":1,"created_by":"admin","created_at":"2025-07-31 16:25:50","updated_at":"2025-08-06 18:08:53","id":"proj_1753979150_9736"}
+[2025-08-06 18:08:53] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/projects.json
+[2025-08-06 18:08:53] Database::saveTable - Número de registros: 4
+[2025-08-06 18:08:53] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 2572
+[2025-08-06 18:08:53] Database::update - Verificação: workflow_stage = 1
+[2025-08-06 18:08:53] Database::update - Atualização concluída com sucesso
+[2025-08-06 18:08:53] Database::saveTable - Salvando em: C:\Users\conta\OneDrive\Área de Trabalho\Engenha-riov2\config/../data/notifications.json
+[2025-08-06 18:08:53] Database::saveTable - Número de registros: 55
+[2025-08-06 18:08:53] Database::saveTable - Arquivo salvo com sucesso. Bytes escritos: 26219

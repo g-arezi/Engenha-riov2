@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Definitivo do Workflow</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .button { background: #007cba; color: white; padding: 10px 20px; border: none; margin: 10px; cursor: pointer; }
+        .button:hover { background: #005a87; }
+        .result { margin: 20px 0; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+        .success { border-color: green; background: #e8f5e8; }
+        .error { border-color: red; background: #fee; }
+    </style>
+</head>
+<body>
+    <h1>Teste Definitivo de Avanço de Workflow</h1>
+    
+    <div>
+        <button class="button" onclick="testOriginalEndpoint()">Testar Endpoint Original</button>
+        <button class="button" onclick="testBypassEndpoint()">Testar Endpoint Bypass</button>
+        <button class="button" onclick="checkProjectStatus()">Verificar Status do Projeto</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        function addResult(title, content, success = true) {
+            const div = document.createElement('div');
+            div.className = 'result ' + (success ? 'success' : 'error');
+            div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        async function testOriginalEndpoint() {
+            try {
+                const response = await fetch('/advance-workflow.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        project_id: 'proj_1753892536_9899'
+                    }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                addResult('Endpoint Original', `Status: ${response.status}\nResposta: ${result}`, response.status === 200);
+            } catch (error) {
+                addResult('Endpoint Original - Erro', error.message, false);
+            }
+        }
+        
+        async function testBypassEndpoint() {
+            try {
+                const response = await fetch('/advance-workflow-bypass.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        project_id: 'proj_1753892536_9899'
+                    })
+                });
+                
+                const result = await response.text();
+                addResult('Endpoint Bypass', `Status: ${response.status}\nResposta: ${result}`, response.status === 200);
+            } catch (error) {
+                addResult('Endpoint Bypass - Erro', error.message, false);
+            }
+        }
+        
+        async function checkProjectStatus() {
+            try {
+                // Criar um endpoint para verificar status
+                const response = await fetch('/debug-workflow.php?action=check_project', {
+                    method: 'GET'
+                });
+                
+                const result = await response.text();
+                addResult('Status do Projeto', result, true);
+            } catch (error) {
+                addResult('Status do Projeto - Erro', error.message, false);
+            }
+        }
+    </script>
+</body>
+</html>

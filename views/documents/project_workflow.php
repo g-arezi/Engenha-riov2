@@ -298,7 +298,7 @@ ob_start();
             </div>
             
             <!-- Hidden input to store current stage for JavaScript -->
-            <input type="hidden" id="workflow-stage" value="<?= $project['workflow_stage'] ?? 1 ?>">
+            <input type="hidden" id="current-workflow-stage" value="<?= $project['workflow_stage'] ?? 1 ?>">
             
             <?php if (Auth::hasPermission('projects.manage_workflow')): ?>
             <!-- Workflow Controls for Admins, Coordinators, and Analysts -->
@@ -307,7 +307,7 @@ ob_start();
                 <div class="row">
                     <div class="col-md-6">
                         <label class="form-label">Etapa Atual</label>
-                        <select class="form-select" id="workflow-stage" onchange="updateWorkflowStage('<?= $project['id'] ?>', this.value)">
+                        <select class="form-select" id="workflow-stage-select" onchange="updateWorkflowStage('<?= $project['id'] ?>', this.value)">
                             <option value="1" <?= ($project['workflow_stage'] ?? 1) == 1 ? 'selected' : '' ?>>Documentos</option>
                             <option value="2" <?= ($project['workflow_stage'] ?? 1) == 2 ? 'selected' : '' ?>>Projeto</option>
                             <option value="3" <?= ($project['workflow_stage'] ?? 1) == 3 ? 'selected' : '' ?>>Produção</option>
@@ -838,7 +838,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Funções para avançar/retroceder workflow
 function advanceProjectWorkflow(projectId) {
     if (confirm('Tem certeza que deseja avançar o projeto para a próxima etapa?')) {
-        fetch('/document-workflow/advance', {
+        fetch('/advance-workflow.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -866,7 +866,7 @@ function advanceProjectWorkflow(projectId) {
 
 function revertProjectWorkflow(projectId) {
     if (confirm('Tem certeza que deseja retroceder o projeto para a etapa anterior?')) {
-        fetch('/document-workflow/revert', {
+        fetch('/revert-workflow.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -894,7 +894,7 @@ function revertProjectWorkflow(projectId) {
 
 // Controle do Workflow
 function updateWorkflowStage(projectId, stage) {
-    fetch('/document-workflow/update-stage', {
+    fetch('/update-stage.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -921,7 +921,7 @@ function updateWorkflowStage(projectId, stage) {
 }
 
 function updateProjectStatus(projectId, status) {
-    fetch('/document-workflow/update-status', {
+    fetch('/update-status.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1005,7 +1005,7 @@ function revertWorkflow(projectId) {
 
 function finalizeProject(projectId) {
     if (confirm('Tem certeza que deseja finalizar este projeto? Esta ação não pode ser desfeita.')) {
-        fetch('/document-workflow/finalize', {
+        fetch('/finalize-project.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

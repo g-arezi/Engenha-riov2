@@ -124,6 +124,12 @@ class Auth
     public static function hasPermission(string $permission): bool
     {
         $role = self::role();
+        
+        // Se não há role (usuário não autenticado), retorna false
+        if (!$role) {
+            return false;
+        }
+        
         $permissions = self::getRolePermissions($role);
         
         return in_array($permission, $permissions);

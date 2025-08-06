@@ -798,6 +798,11 @@ class DocumentWorkflowController
     {
         header('Content-Type: application/json');
         
+        if (!Auth::check()) {
+            echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+            return;
+        }
+        
         if (!Auth::hasPermission('projects.manage_workflow')) {
             echo json_encode(['success' => false, 'message' => 'Acesso negado']);
             return;
@@ -851,6 +856,11 @@ class DocumentWorkflowController
     public function updateStatus()
     {
         header('Content-Type: application/json');
+        
+        if (!Auth::check()) {
+            echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+            return;
+        }
         
         if (!Auth::hasPermission('projects.manage_workflow')) {
             echo json_encode(['success' => false, 'message' => 'Acesso negado']);
@@ -913,6 +923,12 @@ class DocumentWorkflowController
     public function advance()
     {
         header('Content-Type: application/json');
+        
+        // Verificar autenticação primeiro
+        if (!Auth::check()) {
+            echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+            return;
+        }
         
         if (!Auth::hasPermission('projects.manage_workflow')) {
             echo json_encode(['success' => false, 'message' => 'Acesso negado']);
@@ -982,6 +998,12 @@ class DocumentWorkflowController
     {
         header('Content-Type: application/json');
         
+        // Verificar autenticação primeiro
+        if (!Auth::check()) {
+            echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+            return;
+        }
+        
         if (!Auth::hasPermission('projects.manage_workflow')) {
             echo json_encode(['success' => false, 'message' => 'Acesso negado']);
             return;
@@ -1049,6 +1071,12 @@ class DocumentWorkflowController
     public function finalize()
     {
         header('Content-Type: application/json');
+        
+        // Verificar autenticação primeiro
+        if (!Auth::check()) {
+            echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+            return;
+        }
         
         if (!Auth::hasPermission('projects.manage_workflow')) {
             echo json_encode(['success' => false, 'message' => 'Acesso negado']);

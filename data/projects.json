@@ -9,10 +9,10 @@
         "status": "ativo",
         "priority": "media",
         "deadline": "2025-07-31",
-        "workflow_stage": 1,
+        "workflow_stage": 5,
         "created_by": "admin",
         "created_at": "2025-07-30 16:22:16",
-        "updated_at": "2025-08-06 16:42:35",
+        "updated_at": "2025-08-06 18:06:21",
         "id": "proj_1753892536_9899"
     },
     "proj_1753979150_9736": {
@@ -26,10 +26,10 @@
         "status": "pendente",
         "priority": "alta",
         "deadline": "2025-08-09",
-        "workflow_stage": "documentos",
+        "workflow_stage": 1,
         "created_by": "admin",
         "created_at": "2025-07-31 16:25:50",
-        "updated_at": "2025-07-31 17:03:05",
+        "updated_at": "2025-08-06 18:08:53",
         "id": "proj_1753979150_9736"
     },
     "proj_1754498260_4698": {

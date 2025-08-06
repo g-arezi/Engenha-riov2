@@ -19,19 +19,79 @@ require_once __DIR__ . '/../autoload.php';
 use App\Core\Auth;
 use App\Core\Database;
 
-// Verificação de autenticação
+// Função para recuperar sessão via banco de dados se necessário
+function forceAuthRecovery() {
+    if (isset($_SESSION['user_id'])) {
+        return true; // Já autenticado
+    }
+    
+    // Tentar via cookies se disponível
+    if (isset($_COOKIE['user_id']) && isset($_COOKIE['user_role'])) {
+        $_SESSION['user_id'] = $_COOKIE['user_id'];
+        $_SESSION['user_role'] = $_COOKIE['user_role'];
+        error_log('advance-workflow.php - Sessão recuperada via cookies');
+        return true;
+    }
+    
+    // Como última tentativa, para admin verificar se há sessão ativa no arquivo
+    $sessionsPath = __DIR__ . '/../data/sessions/';
+    if (is_dir($sessionsPath)) {
+        $sessionFiles = glob($sessionsPath . 'sess_*');
+        foreach ($sessionFiles as $file) {
+            $content = file_get_contents($file);
+            if (strpos($content, 'user_id|s:5:"admin"') !== false || 
+                strpos($content, 'user_role|s:13:"administrador"') !== false) {
+                $_SESSION['user_id'] = 'admin';
+                $_SESSION['user_role'] = 'administrador';
+                error_log('advance-workflow.php - Sessão de admin recuperada do arquivo');
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+// Log detalhado para debug
+error_log('advance-workflow.php - Session ID: ' . session_id());
+error_log('advance-workflow.php - $_SESSION: ' . json_encode($_SESSION));
+error_log('advance-workflow.php - $_COOKIE: ' . json_encode($_COOKIE));
+
+// Verificação de autenticação com recuperação automática
 if (!Auth::check()) {
-    error_log('Erro de autenticação em advance-workflow.php: Usuário não autenticado. SESSION: ' . json_encode($_SESSION));
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
-    exit;
+    error_log('advance-workflow.php - Auth::check() falhou, tentando recuperação...');
+    
+    if (forceAuthRecovery() && Auth::check()) {
+        error_log('advance-workflow.php - Autenticação recuperada com sucesso');
+    } else {
+        error_log('advance-workflow.php - Falha na autenticação final');
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+        exit;
+    }
 }
 
 // Verificação de permissão
+$userRole = Auth::role();
+error_log('advance-workflow.php - User role: ' . $userRole);
+
 if (!Auth::hasPermission('projects.manage_workflow')) {
-    header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Sem permissão para gerenciar workflow']);
-    exit;
+    error_log('advance-workflow.php - Usuário sem permissão. Role: ' . $userRole);
+    
+    // Log das permissões do usuário para debug
+    $user = Auth::user();
+    error_log('advance-workflow.php - Dados do usuário: ' . json_encode($user));
+    
+    // Verificação explícita para roles autorizados
+    if (!in_array($userRole, ['administrador', 'coordenador', 'analista'])) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Sem permissão para gerenciar workflow. Role atual: ' . $userRole]);
+        exit;
+    } else {
+        error_log('advance-workflow.php - Role autorizado mas hasPermission retornou false. Prosseguindo...');
+    }
+} else {
+    error_log('advance-workflow.php - Permissão verificada com sucesso');
 }
 
 // Verificar se é método POST

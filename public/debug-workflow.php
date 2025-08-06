@@ -1,6 +1,6 @@
 <?php
 /**
- * Arquivo para debugar as chamadas de API relacionadas ao workflow
+ * Debug do sistema de workflow
  */
 
 require_once __DIR__ . '/../autoload.php';
@@ -8,107 +8,85 @@ require_once __DIR__ . '/../autoload.php';
 use App\Core\Auth;
 use App\Core\Database;
 
-// Verificar autenticação
-if (!Auth::check()) {
+// Verificar se é uma requisição de status
+if (isset($_GET['action']) && $_GET['action'] === 'check_project') {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
-    exit;
-}
-
-// Log de acesso
-$logFile = __DIR__ . '/../logs/workflow-debug.log';
-$logDir = dirname($logFile);
-if (!is_dir($logDir)) {
-    mkdir($logDir, 0777, true);
-}
-
-// Dados para o log
-$timestamp = date('Y-m-d H:i:s');
-$user = Auth::user();
-$userId = Auth::id();
-$method = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
-$payload = file_get_contents('php://input');
-$headers = getallheaders();
-
-// Formatar o log
-$log = "[$timestamp] User: $userId ({$user['name']})\n";
-$log .= "Method: $method\n";
-$log .= "URI: $uri\n";
-$log .= "Headers: " . json_encode($headers) . "\n";
-$log .= "Payload: $payload\n";
-$log .= "-----------------------------------\n";
-
-// Escrever no arquivo de log
-file_put_contents($logFile, $log, FILE_APPEND);
-
-// Testar o endpoint de avançar etapa
-if ($_GET['action'] === 'test-advance') {
-    $projectId = $_GET['project_id'] ?? null;
-    
-    if (!$projectId) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'ID do projeto é obrigatório']);
-        exit;
-    }
     
     $db = new Database();
-    $project = $db->find('projects', $projectId);
+    $project = $db->find('projects', 'proj_1753892536_9899');
     
-    if (!$project) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'Projeto não encontrado']);
-        exit;
-    }
-    
-    $currentStage = $project['workflow_stage'] ?? 1;
-    
-    if ($currentStage >= 5) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'Projeto já está na etapa final']);
-        exit;
-    }
-    
-    $newStage = $currentStage + 1;
-    $updateData = [
-        'workflow_stage' => $newStage,
-        'updated_at' => date('Y-m-d H:i:s')
-    ];
-    
-    // Atualizar o projeto
-    $updated = $db->update('projects', $projectId, $updateData);
-    
-    if ($updated) {
-        header('Content-Type: application/json');
+    if ($project) {
         echo json_encode([
-            'success' => true, 
-            'message' => 'Projeto avançado para a próxima etapa!',
-            'old_stage' => $currentStage,
-            'new_stage' => $newStage
-        ]);
+            'success' => true,
+            'project' => [
+                'id' => $project['id'],
+                'title' => $project['title'],
+                'workflow_stage' => $project['workflow_stage'],
+                'status' => $project['status'],
+                'updated_at' => $project['updated_at']
+            ]
+        ], JSON_PRETTY_PRINT);
     } else {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar etapa do projeto']);
+        echo json_encode(['success' => false, 'message' => 'Projeto não encontrado']);
     }
     exit;
 }
 
-// Retornar informações para debug
-header('Content-Type: application/json');
-echo json_encode([
-    'success' => true,
-    'message' => 'Debug info captured',
-    'timestamp' => $timestamp,
-    'user' => [
-        'id' => $userId,
-        'name' => $user['name'],
-        'role' => $user['role']
-    ],
-    'request' => [
-        'method' => $method,
-        'uri' => $uri,
-        'headers' => $headers,
-        'payload' => json_decode($payload, true) ?? $payload
-    ]
-]);
+header('Content-Type: text/plain');
+
+echo "=== DEBUG WORKFLOW ===\n\n";
+
+// Inicializar
+$auth = new Auth();
+$db = new Database();
+
+echo "1. VERIFICAÇÃO DE AUTENTICAÇÃO:\n";
+echo "Usuário autenticado: " . ($auth->check() ? 'SIM' : 'NÃO') . "\n";
+
+if ($auth->check()) {
+    $user = $auth->user();
+    echo "ID do usuário: " . $user['id'] . "\n";
+    echo "Role do usuário: " . $user['role'] . "\n";
+    echo "Permissão manage_workflow: " . ($auth->hasPermission('projects.manage_workflow') ? 'SIM' : 'NÃO') . "\n";
+}
+
+echo "\n2. INFORMAÇÕES DA SESSÃO:\n";
+echo "Session ID: " . session_id() . "\n";
+echo "Session Status: " . session_status() . "\n";
+echo "Session Data: " . print_r($_SESSION, true) . "\n";
+
+echo "\n3. STATUS DO PROJETO:\n";
+$project = $db->find('projects', 'proj_1753892536_9899');
+if ($project) {
+    echo "ID: " . $project['id'] . "\n";
+    echo "Título: " . $project['title'] . "\n";
+    echo "Etapa atual: " . $project['workflow_stage'] . "\n";
+    echo "Status: " . $project['status'] . "\n";
+    echo "Última atualização: " . $project['updated_at'] . "\n";
+} else {
+    echo "Projeto não encontrado!\n";
+}
+
+echo "\n4. TESTE DE PERMISSÕES:\n";
+$roles = ['administrador', 'coordenador', 'analista'];
+foreach ($roles as $role) {
+    // Simular um usuário com essa role para testar permissões
+    $_SESSION['user_role'] = $role;
+    echo "Role $role - manage_workflow: " . ($auth->hasPermission('projects.manage_workflow') ? 'SIM' : 'NÃO') . "\n";
+}
+
+echo "\n5. ARQUIVOS DE SESSÃO:\n";
+$sessionPath = __DIR__ . '/../data/sessions/';
+if (is_dir($sessionPath)) {
+    $files = scandir($sessionPath);
+    foreach ($files as $file) {
+        if ($file !== '.' && $file !== '..') {
+            echo "Arquivo: $file\n";
+            $content = file_get_contents($sessionPath . $file);
+            echo "Conteúdo: $content\n\n";
+        }
+    }
+} else {
+    echo "Diretório de sessões não encontrado!\n";
+}
 ?>
