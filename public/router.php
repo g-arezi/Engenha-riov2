@@ -114,6 +114,12 @@ $router->post('/documents/{id}/edit', [DocumentController::class, 'edit'], [Auth
 $router->delete('/documents/{id}', [DocumentController::class, 'delete'], [AuthMiddleware::class]);
 $router->post('/documents/track-download/{id}', [DocumentController::class, 'trackDownload'], [AuthMiddleware::class]);
 
+// Project document routes (template-based uploads)
+$router->post('/documents/project/upload', [DocumentController::class, 'uploadProjectDocument'], [AuthMiddleware::class]);
+$router->get('/documents/project/{id}/download', [DocumentController::class, 'downloadProjectDocument'], [AuthMiddleware::class]);
+$router->post('/documents/project/{id}/approve', [DocumentController::class, 'approveProjectDocument'], [AuthMiddleware::class]);
+$router->post('/documents/project/{id}/reject', [DocumentController::class, 'rejectProjectDocument'], [AuthMiddleware::class]);
+
 // Categories routes
 $router->get('/categories/list', [DocumentController::class, 'listCategories'], [AuthMiddleware::class]);
 $router->post('/categories/add', [DocumentController::class, 'addCategory'], [AuthMiddleware::class]);
@@ -122,8 +128,8 @@ $router->delete('/categories/delete/{id}', [DocumentController::class, 'deleteCa
 
 // Document Workflow routes
 $router->get('/documents/project/{id}', [DocumentWorkflowController::class, 'projectDocuments'], [AuthMiddleware::class]);
-$router->get('/documents/project/upload', [DocumentWorkflowController::class, 'uploadDocument'], [AuthMiddleware::class]);
-$router->post('/documents/project/upload', [DocumentWorkflowController::class, 'uploadDocument'], [AuthMiddleware::class]);
+// Removed duplicate route: $router->get('/documents/project/upload', [DocumentWorkflowController::class, 'uploadDocument'], [AuthMiddleware::class]);
+// Removed duplicate route: $router->post('/documents/project/upload', [DocumentWorkflowController::class, 'uploadDocument'], [AuthMiddleware::class]);
 $router->post('/documents/{id}/approve', [DocumentWorkflowController::class, 'approveDocument'], [AuthMiddleware::class]);
 $router->post('/documents/{id}/reject', [DocumentWorkflowController::class, 'rejectDocument'], [AuthMiddleware::class]);
 $router->post('/documents/update-status', [DocumentWorkflowController::class, 'updateDocumentStatus'], [AuthMiddleware::class]);

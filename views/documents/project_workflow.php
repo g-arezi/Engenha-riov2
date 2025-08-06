@@ -67,6 +67,176 @@ ob_start();
     </div>
 </div>
 
+<!-- Checklist de Documentos Obrigatórios -->
+<?php if (!empty($documentChecklist['required_documents']) || !empty($documentChecklist['optional_documents'])): ?>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-clipboard-list me-2"></i>
+            Checklist de Documentos
+        </h5>
+        <div class="d-flex align-items-center">
+            <div class="progress me-3" style="width: 150px; height: 8px;">
+                <div class="progress-bar bg-success" role="progressbar" 
+                     style="width: <?= $documentChecklist['completion_percentage'] ?>%" 
+                     aria-valuenow="<?= $documentChecklist['completion_percentage'] ?>" 
+                     aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+            <small class="text-muted">
+                <?= $documentChecklist['completed_required'] ?>/<?= $documentChecklist['total_required'] ?> obrigatórios
+            </small>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($documentChecklist['required_documents'])): ?>
+        <h6 class="text-danger mb-3">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            Documentos Obrigatórios
+        </h6>
+        <div class="row">
+            <?php foreach ($documentChecklist['required_documents'] as $doc): ?>
+            <div class="col-md-6 mb-3">
+                <div class="card border-<?= $doc['uploaded'] ? ($doc['status'] === 'aprovado' ? 'success' : ($doc['status'] === 'rejeitado' ? 'danger' : 'warning')) : 'danger' ?>">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-title mb-0">
+                                <?php if ($doc['uploaded'] && $doc['status'] === 'aprovado'): ?>
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                <?php elseif ($doc['uploaded']): ?>
+                                    <i class="fas fa-clock text-warning me-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-times-circle text-danger me-1"></i>
+                                <?php endif; ?>
+                                <?= htmlspecialchars($doc['name']) ?>
+                            </h6>
+                            <span class="badge bg-<?= $doc['uploaded'] ? ($doc['status'] === 'aprovado' ? 'success' : ($doc['status'] === 'rejeitado' ? 'danger' : 'warning')) : 'danger' ?>">
+                                <?php if ($doc['uploaded']): ?>
+                                    <?= ucfirst($doc['status']) ?>
+                                <?php else: ?>
+                                    Pendente
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                        
+                        <p class="card-text small text-muted mb-2">
+                            <?= htmlspecialchars($doc['description']) ?>
+                        </p>
+                        
+                        <div class="small text-muted mb-2">
+                            <strong>Formato:</strong> <?= htmlspecialchars($doc['format']) ?> | 
+                            <strong>Tamanho máx:</strong> <?= htmlspecialchars($doc['max_size']) ?>
+                        </div>
+                        
+                        <?php if ($doc['uploaded']): ?>
+                            <div class="small text-muted mb-2">
+                                <i class="fas fa-upload me-1"></i>
+                                Enviado em: <?= date('d/m/Y H:i', strtotime($doc['upload_date'])) ?>
+                            </div>
+                            <?php if ($doc['file_info']): ?>
+                            <div class="d-flex gap-1">
+                                <a href="/documents/project/<?= $doc['file_info']['id'] ?>/download" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                <?php if (Auth::hasPermission('documents.upload')): ?>
+                                <button class="btn btn-outline-secondary btn-sm" 
+                                        onclick="uploadNewVersionWorkflow('<?= $doc['name'] ?>', <?= $doc['index'] ?>, '<?= $project['id'] ?>')">
+                                    <i class="fas fa-upload"></i> Nova versão
+                                </button>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <?php if (Auth::hasPermission('documents.upload')): ?>
+                            <button class="btn btn-primary btn-sm" onclick="uploadDocumentWorkflow('<?= $doc['name'] ?>', <?= $doc['index'] ?>, '<?= $project['id'] ?>')">
+                                <i class="fas fa-upload me-1"></i>
+                                Enviar Documento
+                            </button>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($documentChecklist['optional_documents'])): ?>
+        <h6 class="text-info mb-3 mt-4">
+            <i class="fas fa-info-circle me-1"></i>
+            Documentos Opcionais
+        </h6>
+        <div class="row">
+            <?php foreach ($documentChecklist['optional_documents'] as $doc): ?>
+            <div class="col-md-6 mb-3">
+                <div class="card border-<?= $doc['uploaded'] ? ($doc['status'] === 'aprovado' ? 'success' : ($doc['status'] === 'rejeitado' ? 'danger' : 'warning')) : 'light' ?>">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-title mb-0">
+                                <?php if ($doc['uploaded'] && $doc['status'] === 'aprovado'): ?>
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                <?php elseif ($doc['uploaded']): ?>
+                                    <i class="fas fa-clock text-warning me-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-minus-circle text-muted me-1"></i>
+                                <?php endif; ?>
+                                <?= htmlspecialchars($doc['name']) ?>
+                                <small class="text-muted">(opcional)</small>
+                            </h6>
+                            <?php if ($doc['uploaded']): ?>
+                            <span class="badge bg-<?= $doc['status'] === 'aprovado' ? 'success' : ($doc['status'] === 'rejeitado' ? 'danger' : 'warning') ?>">
+                                <?= ucfirst($doc['status']) ?>
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <p class="card-text small text-muted mb-2">
+                            <?= htmlspecialchars($doc['description']) ?>
+                        </p>
+                        
+                        <div class="small text-muted mb-2">
+                            <strong>Formato:</strong> <?= htmlspecialchars($doc['format']) ?> | 
+                            <strong>Tamanho máx:</strong> <?= htmlspecialchars($doc['max_size']) ?>
+                        </div>
+                        
+                        <?php if ($doc['uploaded']): ?>
+                            <div class="small text-muted mb-2">
+                                <i class="fas fa-upload me-1"></i>
+                                Enviado em: <?= date('d/m/Y H:i', strtotime($doc['upload_date'])) ?>
+                            </div>
+                            <?php if ($doc['file_info']): ?>
+                            <div class="d-flex gap-1">
+                                <a href="/documents/project/<?= $doc['file_info']['id'] ?>/download" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                <?php if (Auth::hasPermission('documents.upload')): ?>
+                                <button class="btn btn-outline-secondary btn-sm" 
+                                        onclick="uploadNewVersionWorkflow('<?= $doc['name'] ?>', <?= $doc['index'] ?>, '<?= $project['id'] ?>')">
+                                    <i class="fas fa-upload"></i> Nova versão
+                                </button>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <?php if (Auth::hasPermission('documents.upload')): ?>
+                            <button class="btn btn-outline-primary btn-sm" onclick="uploadDocumentWorkflow('<?= $doc['name'] ?>', <?= $doc['index'] ?>, '<?= $project['id'] ?>')">
+                                <i class="fas fa-upload me-1"></i>
+                                Enviar Documento
+                            </button>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Stage Information -->
 <div class="alert alert-info mb-4">
     <div class="d-flex align-items-center">
@@ -88,40 +258,40 @@ ob_start();
             <div class="stage-row d-flex justify-content-between align-items-center mb-3">
                 <!-- Documentos -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] >= 1 ? ($project['workflow_stage'] == 1 ? 'current' : 'completed') : 'disabled' ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] > 1 ? 'check' : ($project['workflow_stage'] == 1 ? 'file-alt' : 'lock') ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] >= 1 ? ($project['workflow_stage'] == 1 ? 'pending' : 'completed') : 'disabled' ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 1 ? 'check' : ($project['workflow_stage'] == 1 ? 'clock' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Documentos</div>
                 </div>
                 
                 <!-- Projeto -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] > 2 ? 'completed' : ($project['workflow_stage'] == 2 ? 'current' : 'disabled') ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] > 2 ? 'check' : ($project['workflow_stage'] == 2 ? 'sync-alt' : 'lock') ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] > 2 ? 'completed' : ($project['workflow_stage'] == 2 ? 'pending' : 'disabled') ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 2 ? 'check' : ($project['workflow_stage'] == 2 ? 'clock' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Projeto</div>
                 </div>
                 
                 <!-- Produção -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] > 3 ? 'completed' : ($project['workflow_stage'] == 3 ? 'current' : 'disabled') ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] > 3 ? 'check' : ($project['workflow_stage'] == 3 ? 'sync-alt' : 'lock') ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] > 3 ? 'completed' : ($project['workflow_stage'] == 3 ? 'pending' : 'disabled') ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 3 ? 'check' : ($project['workflow_stage'] == 3 ? 'clock' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Produção</div>
                 </div>
                 
                 <!-- Buildup -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] > 4 ? 'completed' : ($project['workflow_stage'] == 4 ? 'current' : 'disabled') ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] > 4 ? 'check' : ($project['workflow_stage'] == 4 ? 'sync-alt' : 'lock') ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] > 4 ? 'completed' : ($project['workflow_stage'] == 4 ? 'pending' : 'disabled') ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] > 4 ? 'check' : ($project['workflow_stage'] == 4 ? 'clock' : 'lock') ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Buildup</div>
                 </div>
                 
                 <!-- Aprovado -->
                 <div class="stage-item text-center">
-                    <div class="stage-icon <?= $project['workflow_stage'] == 5 ? 'current' : 'disabled' ?>">
-                        <i class="fas fa-<?= $project['workflow_stage'] == 5 ? 'check' : 'lock' ?>"></i>
+                    <div class="stage-icon <?= $project['workflow_stage'] == 5 ? 'pending' : 'disabled' ?>">
+                        <i class="fas fa-<?= $project['workflow_stage'] == 5 ? 'clock' : 'lock' ?>"></i>
                     </div>
                     <div class="stage-label mt-2">Aprovado</div>
                 </div>
@@ -341,6 +511,52 @@ ob_start();
     </div>
 </div>
 
+<!-- Modal para Upload de Documento Específico no Workflow -->
+<div class="modal fade" id="uploadDocumentWorkflowModal" tabindex="-1" aria-labelledby="uploadDocumentWorkflowModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadDocumentWorkflowModalLabel">Enviar Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadDocumentWorkflowForm" enctype="multipart/form-data">
+                    <input type="hidden" id="workflowProjectId" value="">
+                    <input type="hidden" id="workflowDocumentIndex" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Tipo de Documento:</strong></label>
+                        <div id="workflowDocumentTypeInfo" class="alert alert-info">
+                            <!-- Informações do documento serão inseridas aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="workflowDocumentFile" class="form-label">Selecionar Arquivo *</label>
+                        <input type="file" class="form-control" id="workflowDocumentFile" name="document_file" required>
+                        <div class="form-text">
+                            <span id="workflowFormatInfo"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="workflowDocumentDescription" class="form-label">Descrição (opcional)</label>
+                        <textarea class="form-control" id="workflowDocumentDescription" name="description" rows="3" 
+                                  placeholder="Adicione observações sobre o documento..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="submitWorkflowUpload">
+                    <i class="fas fa-upload me-1"></i>
+                    Enviar Documento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .project-info label {
     font-size: 0.75rem;
@@ -375,6 +591,11 @@ ob_start();
 }
 
 .stage-icon.in-progress {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.stage-icon.pending {
     background-color: #ffc107;
     color: #000;
 }
@@ -461,6 +682,216 @@ ob_start();
 </style>
 
 <script>
+<script>
+// Dados dos documentos do template para o JavaScript no workflow
+const workflowDocumentTemplate = <?= json_encode($documentChecklist) ?>;
+
+function uploadDocumentWorkflow(documentName, documentIndex, projectId) {
+    // Encontrar informações do documento
+    const allDocs = [...(workflowDocumentTemplate.required_documents || []), ...(workflowDocumentTemplate.optional_documents || [])];
+    const docInfo = allDocs.find(doc => doc.index === documentIndex);
+    
+    if (!docInfo) {
+        alert('Erro: Informações do documento não encontradas.');
+        return;
+    }
+    
+    // Preencher modal com informações
+    document.getElementById('workflowDocumentIndex').value = documentIndex;
+    document.getElementById('workflowProjectId').value = projectId;
+    document.getElementById('uploadDocumentWorkflowModalLabel').textContent = 'Enviar ' + documentName;
+    
+    // Mostrar informações do documento
+    const infoDiv = document.getElementById('workflowDocumentTypeInfo');
+    infoDiv.innerHTML = `
+        <h6>${docInfo.name} ${docInfo.required ? '<span class="badge bg-danger">Obrigatório</span>' : '<span class="badge bg-info">Opcional</span>'}</h6>
+        <p class="mb-1">${docInfo.description}</p>
+        <small><strong>Formato aceito:</strong> ${docInfo.format} | <strong>Tamanho máximo:</strong> ${docInfo.max_size}</small>
+    `;
+    
+    // Atualizar info de formato
+    document.getElementById('workflowFormatInfo').textContent = `Formato aceito: ${docInfo.format}, Tamanho máximo: ${docInfo.max_size}`;
+    
+    // Limpar form
+    document.getElementById('uploadDocumentWorkflowForm').reset();
+    document.getElementById('workflowProjectId').value = projectId;
+    document.getElementById('workflowDocumentIndex').value = documentIndex;
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('uploadDocumentWorkflowModal'));
+    modal.show();
+}
+
+function uploadNewVersionWorkflow(documentName, documentIndex, projectId) {
+    uploadDocumentWorkflow(documentName, documentIndex, projectId);
+    document.getElementById('uploadDocumentWorkflowModalLabel').textContent = 'Nova Versão - ' + documentName;
+}
+
+// Submit do upload no workflow
+document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submitWorkflowUpload');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // Evitar submit normal do form
+            
+            const form = document.getElementById('uploadDocumentWorkflowForm');
+            const fileInput = document.getElementById('workflowDocumentFile');
+            
+            if (!fileInput.files[0]) {
+                alert('Por favor, selecione um arquivo.');
+                return;
+            }
+            
+            // Validar tamanho do arquivo
+            const file = fileInput.files[0];
+            const documentIndex = parseInt(document.getElementById('workflowDocumentIndex').value);
+            const allDocs = [...(workflowDocumentTemplate.required_documents || []), ...(workflowDocumentTemplate.optional_documents || [])];
+            const docInfo = allDocs.find(doc => doc.index === documentIndex);
+            
+            if (docInfo) {
+                const maxSizeStr = docInfo.max_size;
+                const maxSizeMB = parseInt(maxSizeStr.replace(/[^\d]/g, ''));
+                const fileSizeMB = file.size / (1024 * 1024);
+                
+                if (fileSizeMB > maxSizeMB) {
+                    alert(`Arquivo muito grande. Tamanho máximo permitido: ${maxSizeStr}`);
+                    return;
+                }
+                
+                // Validar formato (se especificado)
+                if (docInfo.format !== 'Todos') {
+                    const allowedFormats = docInfo.format.toLowerCase().split(',').map(f => f.trim());
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                    
+                    if (!allowedFormats.includes(fileExtension) && !allowedFormats.includes('pdf') && fileExtension !== 'pdf') {
+                        if (!(allowedFormats.includes('pdf') && fileExtension === 'pdf')) {
+                            alert(`Formato não permitido. Formatos aceitos: ${docInfo.format}`);
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Desabilitar botão e mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enviando...';
+            
+            // Criar FormData
+            const formData = new FormData();
+            formData.append('document_file', file);
+            formData.append('project_id', document.getElementById('workflowProjectId').value);
+            formData.append('document_type', docInfo ? docInfo.name : 'Template Document');
+            formData.append('document_index', documentIndex);
+            formData.append('name', file.name);
+            formData.append('description', document.getElementById('workflowDocumentDescription').value || '');
+            formData.append('type', 'Template Document');
+            formData.append('category', 'Documento');
+            formData.append('template_based', '1');
+            
+            // Debug log
+            console.log('FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+            console.log('File object:', file);
+            console.log('File name:', file.name);
+            console.log('File size:', file.size);
+            
+            // Enviar arquivo via workflow controller
+            fetch('/documents/upload-project-file', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Fechar modal
+                    bootstrap.Modal.getInstance(document.getElementById('uploadDocumentWorkflowModal')).hide();
+                    
+                    // Mostrar sucesso
+                    showAlert('Documento enviado com sucesso!', 'success');
+                    
+                    // Recarregar página após 2 segundos
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    alert('Erro: ' + (data.message || 'Erro desconhecido'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro de conexão. Tente novamente.');
+            })
+            .finally(() => {
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Enviar Documento';
+            });
+        });
+    }
+});
+
+// Funções para avançar/retroceder workflow
+function advanceProjectWorkflow(projectId) {
+    if (confirm('Tem certeza que deseja avançar o projeto para a próxima etapa?')) {
+        fetch('/document-workflow/advance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                project_id: projectId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Projeto avançado para a próxima etapa!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert(data.message || 'Erro ao avançar etapa', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Erro de conexão', 'error');
+        });
+    }
+}
+
+function revertProjectWorkflow(projectId) {
+    if (confirm('Tem certeza que deseja retroceder o projeto para a etapa anterior?')) {
+        fetch('/document-workflow/revert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                project_id: projectId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Projeto retrocedido para a etapa anterior!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert(data.message || 'Erro ao retroceder etapa', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Erro de conexão', 'error');
+        });
+    }
+}
+
 // Controle do Workflow
 function updateWorkflowStage(projectId, stage) {
     fetch('/document-workflow/update-stage', {

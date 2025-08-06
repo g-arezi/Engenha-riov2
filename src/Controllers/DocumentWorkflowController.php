@@ -36,6 +36,9 @@ class DocumentWorkflowController
         // Buscar templates de documentos
         $documentTemplates = $this->db->findAll('document_templates');
         
+        // Gerar checklist de documentos baseado no template
+        $documentChecklist = $this->getDocumentChecklist($project, $documents);
+        
         // Organizar documentos por categoria/tipo
         $documentsByType = [];
         foreach ($documentTemplates as $template) {
@@ -1652,5 +1655,130 @@ class DocumentWorkflowController
         $i = floor(log($bytes) / log($k));
         
         return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    }
+
+    /**
+     * Gera checklist de documentos baseado no template do projeto
+     * (Mesmo método do ProjectController para consistência)
+     */
+    private function getDocumentChecklist(array $project, array $projectDocuments): array
+    {
+        $checklist = [
+            'required_documents' => [],
+            'optional_documents' => [],
+            'total_required' => 0,
+            'completed_required' => 0,
+            'completion_percentage' => 0
+        ];
+
+        // Verificar se o projeto tem template
+        if (empty($project['document_template'])) {
+            return $checklist;
+        }
+
+        // Carregar template
+        $templatesFile = __DIR__ . '/../../data/document_templates.json';
+        if (!file_exists($templatesFile)) {
+            return $checklist;
+        }
+
+        $templates = json_decode(file_get_contents($templatesFile), true) ?? [];
+        if (!isset($templates[$project['document_template']])) {
+            return $checklist;
+        }
+
+        $template = $templates[$project['document_template']];
+        if (!isset($template['required_documents'])) {
+            return $checklist;
+        }
+
+        // Mapear documentos enviados por tipo/nome
+        $uploadedDocuments = [];
+        foreach ($projectDocuments as $doc) {
+            // Verificar múltiplos campos possíveis para identificar o tipo do documento
+            $docType = '';
+            if (!empty($doc['document_type'])) {
+                $docType = $doc['document_type'];
+            } elseif (!empty($doc['type']) && $doc['type'] !== 'Template Document') {
+                $docType = $doc['type'];
+            } elseif (!empty($doc['name'])) {
+                $docType = $doc['name'];
+            }
+            
+            $docKey = strtolower(trim($docType));
+            if (!isset($uploadedDocuments[$docKey])) {
+                $uploadedDocuments[$docKey] = [];
+            }
+            $uploadedDocuments[$docKey][] = $doc;
+        }
+
+        // Processar documentos do template
+        foreach ($template['required_documents'] as $index => $requiredDoc) {
+            $docName = $requiredDoc['name'];
+            $docKey = strtolower(trim($docName));
+            $isRequired = $requiredDoc['required'] ?? false;
+            
+            // Verificar se foi enviado - buscar por diferentes chaves possíveis
+            $uploadedFiles = [];
+            
+            // Primeira tentativa: busca exata pelo nome
+            if (isset($uploadedDocuments[$docKey])) {
+                $uploadedFiles = $uploadedDocuments[$docKey];
+            } else {
+                // Segunda tentativa: busca por correspondência parcial ou similar
+                foreach ($uploadedDocuments as $key => $docs) {
+                    // Verificar se a chave contém o nome do documento ou vice-versa
+                    if (strpos($key, $docKey) !== false || strpos($docKey, $key) !== false) {
+                        $uploadedFiles = array_merge($uploadedFiles, $docs);
+                    }
+                }
+            }
+            
+            $isUploaded = !empty($uploadedFiles);
+            
+            // Pegar o status do documento mais recente
+            $status = 'pendente';
+            $lastUpload = null;
+            if ($isUploaded) {
+                // Ordenar por data de criação (mais recente primeiro)
+                usort($uploadedFiles, function($a, $b) {
+                    return strtotime($b['created_at']) - strtotime($a['created_at']);
+                });
+                $lastUpload = $uploadedFiles[0];
+                $status = $lastUpload['status'] ?? 'pendente';
+            }
+
+            $documentStatus = [
+                'name' => $docName,
+                'description' => $requiredDoc['description'] ?? '',
+                'required' => $isRequired,
+                'format' => $requiredDoc['format'] ?? 'Todos',
+                'max_size' => $requiredDoc['max_size'] ?? '50MB',
+                'uploaded' => $isUploaded,
+                'status' => $status,
+                'upload_date' => $lastUpload ? $lastUpload['created_at'] : null,
+                'file_info' => $lastUpload,
+                'index' => $index
+            ];
+
+            if ($isRequired) {
+                $checklist['required_documents'][] = $documentStatus;
+                $checklist['total_required']++;
+                if ($isUploaded && $status === 'aprovado') {
+                    $checklist['completed_required']++;
+                }
+            } else {
+                $checklist['optional_documents'][] = $documentStatus;
+            }
+        }
+
+        // Calcular porcentagem de conclusão
+        if ($checklist['total_required'] > 0) {
+            $checklist['completion_percentage'] = round(
+                ($checklist['completed_required'] / $checklist['total_required']) * 100
+            );
+        }
+
+        return $checklist;
     }
 }
