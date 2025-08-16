@@ -1,54 +1,47 @@
 {
-    "teste": {
-        "id": "teste",
-        "name": "Teste",
-        "code": "teste",
-        "description": "aqui está um teste, onde você deve selecionar a categoria, o status do tamplate, os documentos que o usuario terá que enviar(cada documento você escolhera e sempre que tiver mais de um documento, só clicar em \"adicionar outro documento\"",
-        "category": "documentacao_legal",
-        "status": "ativo",
-        "required_documents": [
-            {
-                "name": "documento teste",
-                "description": "documento teste, escolhido em pdf(obrigatório)",
-                "required": true,
-                "format": "PDF",
-                "max_size": "50MB"
-            },
-            {
-                "name": "documento teste2",
-                "description": "podendo escolher todo tipo de formato( podendo escolher se é obrigatório ou não)",
-                "required": false,
-                "format": "Todos",
-                "max_size": "50MB"
-            }
-        ],
-        "created_at": "2025-07-27 03:25:13",
-        "updated_at": "2025-07-27 03:25:13"
-    },
-    "rg_teste___teste": {
-        "id": "rg_teste___teste",
-        "name": "RG,TESTE , TESTE",
-        "code": "rg_teste___teste",
-        "description": "RG,TESTE , TESTE",
+    "projeto_teste_06_08": {
+        "id": "projeto_teste_06_08",
+        "name": "Projeto teste 06\/08",
+        "code": "projeto_teste_06_08",
+        "description": "Projeto teste 06\/08 - necessário RG",
         "category": "documentacao_legal",
         "status": "ativo",
         "required_documents": [
             {
                 "name": "RG",
-                "description": "documento teste, escolhido em pdf(obrigatório)",
-                "required": true,
-                "format": "PDF",
-                "max_size": "10MB"
-            },
-            {
-                "name": "CNH",
-                "description": "CNH, escolhido em pdf(obrigatório)",
+                "description": "RG - documentos",
                 "required": true,
                 "format": "PDF",
                 "max_size": "10MB"
             }
         ],
-        "created_at": "2025-07-31 17:02:48",
-        "updated_at": "2025-07-31 17:02:48"
+        "created_at": "2025-08-06 18:28:04",
+        "updated_at": "2025-08-06 18:28:04"
+    },
+    "engenhario_": {
+        "id": "engenhario_",
+        "name": "engenhario ",
+        "code": "engenhario_",
+        "description": "radasdascasc",
+        "category": "outros",
+        "status": "ativo",
+        "required_documents": [
+            {
+                "name": "identidade",
+                "description": "",
+                "required": true,
+                "format": "PDF",
+                "max_size": "50MB"
+            },
+            {
+                "name": "comprovante",
+                "description": "",
+                "required": true,
+                "format": "PDF",
+                "max_size": "10MB"
+            }
+        ],
+        "created_at": "2025-08-11 12:56:56",
+        "updated_at": "2025-08-11 12:56:56"
     }
 }

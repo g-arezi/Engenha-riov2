@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Criação de Projeto</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 300px; 
+            padding: 5px; 
+            margin-bottom: 10px; 
+        }
+        .button { background: #007cba; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .button:hover { background: #005a87; }
+        .result { margin: 20px 0; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Teste de Criação de Projeto</h1>
+    
+    <form id="projectForm">
+        <div class="form-group">
+            <label>Nome do Projeto:</label>
+            <input type="text" name="name" value="Teste Workflow - Projeto Novo" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Descrição:</label>
+            <textarea name="description">Projeto de teste para verificar se workflow_stage está sendo criado como número 1</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Número de Orçamento:</label>
+            <input type="text" name="budget_number" value="2025.0001.V1" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Tipo de Projeto:</label>
+            <select name="project_type" required>
+                <option value="residencial">Residencial</option>
+                <option value="comercial">Comercial</option>
+                <option value="outros">Outros</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Template de Documentos:</label>
+            <select name="document_template" required>
+                <option value="projeto_teste_06_08">projeto_teste_06_08</option>
+                <option value="rg_teste___teste">rg_teste___teste</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Cliente:</label>
+            <select name="client_id" required>
+                <option value="6887cdaf0cf3a8.51328972">Cliente Teste</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Analista:</label>
+            <select name="analyst_id">
+                <option value="6887cb7c384b75.22527396">Analista Teste</option>
+                <option value="rafael">Rafael</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Status:</label>
+            <select name="status">
+                <option value="pendente">Pendente</option>
+                <option value="ativo">Ativo</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Prioridade:</label>
+            <select name="priority">
+                <option value="baixa">Baixa</option>
+                <option value="media" selected>Média</option>
+                <option value="alta">Alta</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Deadline:</label>
+            <input type="date" name="deadline" value="2025-08-15">
+        </div>
+        
+        <button type="submit" class="button">Criar Projeto de Teste</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('projectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/projects/create', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (response.redirected) {
+                    document.getElementById('result').innerHTML = `
+                        <div class="result" style="border-color: green; background: #e8f5e8;">
+                            <h3>Sucesso!</h3>
+                            <p>Projeto criado com sucesso! Redirecionado para: <a href="${response.url}" target="_blank">${response.url}</a></p>
+                            <p>Agora vamos verificar se o workflow_stage foi criado corretamente como número 1...</p>
+                        </div>
+                    `;
+                    
+                    // Verificar o projeto criado
+                    setTimeout(() => {
+                        checkProjectWorkflow();
+                    }, 1000);
+                } else {
+                    const text = await response.text();
+                    document.getElementById('result').innerHTML = `
+                        <div class="result" style="border-color: red; background: #fee;">
+                            <h3>Erro</h3>
+                            <pre>${text}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result" style="border-color: red; background: #fee;">
+                        <h3>Erro</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+        
+        async function checkProjectWorkflow() {
+            try {
+                const response = await fetch('/debug-workflow.php?action=check_latest_project');
+                const result = await response.text();
+                
+                document.getElementById('result').innerHTML += `
+                    <div class="result">
+                        <h3>Verificação do Projeto Criado:</h3>
+                        <pre>${result}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erro ao verificar projeto:', error);
+            }
+        }
+    </script>
+</body>
+</html>

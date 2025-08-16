@@ -126,8 +126,25 @@ if (!$project) {
     exit;
 }
 
-// Verificar etapa atual
+// Verificar etapa atual e converter para número se necessário
 $currentStage = $project['workflow_stage'] ?? 1;
+
+// Mapeamento de strings para números
+$stageMapping = [
+    'documentos' => 1,
+    'projeto' => 2,
+    'producao' => 3,
+    'buildup' => 4,
+    'aprovado' => 5
+];
+
+// Converter string para número se necessário
+if (is_string($currentStage)) {
+    $currentStage = $stageMapping[strtolower($currentStage)] ?? 1;
+}
+
+// Garantir que é um número
+$currentStage = (int) $currentStage;
 
 // Se já está na última etapa, retornar erro
 if ($currentStage >= 5) {

@@ -1,0 +1,58 @@
+# Proteger diretório raiz do projeto
+Options -Indexes
+ServerSignature Off
+
+# Bloquear acesso direto a arquivos de configuração e dados
+<Files ".env">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files ".htaccess">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "composer.json">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "composer.lock">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "*.log">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Proteger diretórios sensíveis
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Bloquear acesso aos diretórios de código fonte e configuração
+    RewriteRule ^src/ - [F,L]
+    RewriteRule ^views/ - [F,L]
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^vendor/ - [F,L]
+    
+    # Permitir apenas acesso específico aos dados necessários
+    RewriteRule ^data/sessions/ - [F,L]
+    RewriteRule ^data/.*\.json$ - [F,L]
+    RewriteRule ^data/.*\.log$ - [F,L]
+    
+    # Redirecionar tudo para o diretório public
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Configurações de segurança
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options SAMEORIGIN
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>

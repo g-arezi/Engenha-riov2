@@ -32,6 +32,39 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_project') {
     exit;
 }
 
+// Verificar último projeto criado
+if (isset($_GET['action']) && $_GET['action'] === 'check_latest_project') {
+    header('Content-Type: application/json');
+    
+    $db = new Database();
+    $projects = $db->findAll('projects');
+    
+    if ($projects) {
+        // Ordenar por data de criação (mais recente primeiro)
+        uasort($projects, function($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+        
+        $latestProject = reset($projects);
+        
+        echo json_encode([
+            'success' => true,
+            'latest_project' => [
+                'id' => $latestProject['id'],
+                'name' => $latestProject['name'],
+                'workflow_stage' => $latestProject['workflow_stage'],
+                'workflow_stage_type' => gettype($latestProject['workflow_stage']),
+                'status' => $latestProject['status'],
+                'created_at' => $latestProject['created_at'],
+                'updated_at' => $latestProject['updated_at']
+            ]
+        ], JSON_PRETTY_PRINT);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Nenhum projeto encontrado']);
+    }
+    exit;
+}
+
 header('Content-Type: text/plain');
 
 echo "=== DEBUG WORKFLOW ===\n\n";

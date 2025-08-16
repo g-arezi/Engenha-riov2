@@ -5,10 +5,10 @@
         "url": "\/assets\/images\/login\/6891f735d83e9.jpg",
         "title": "",
         "description": "",
-        "active": true,
+        "active": false,
         "order": 1,
         "created_at": "2025-08-05 12:21:09",
-        "updated_at": "2025-08-05 12:21:09"
+        "updated_at": "2025-08-15 14:44:58"
     },
     "6891f9fb85805": {
         "id": "6891f9fb85805",
@@ -16,9 +16,20 @@
         "url": "\/assets\/images\/login\/6891f9fb7a0e9.jpg",
         "title": "",
         "description": "",
-        "active": true,
+        "active": false,
         "order": 2,
         "created_at": "2025-08-05 12:32:59",
-        "updated_at": "2025-08-05 12:32:59"
+        "updated_at": "2025-08-06 18:52:05"
+    },
+    "689f47e74a6f2": {
+        "id": "689f47e74a6f2",
+        "type": "image",
+        "url": "\/assets\/images\/login\/689f47e74a67b.jpg",
+        "title": "",
+        "description": "",
+        "active": true,
+        "order": 3,
+        "created_at": "2025-08-15 14:44:55",
+        "updated_at": "2025-08-15 14:44:55"
     }
 }

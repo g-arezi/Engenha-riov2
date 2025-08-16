@@ -1,0 +1,229 @@
+RewriteEngine On
+
+# Configurações de segurança
+Options -Indexes
+ServerSignature Off
+
+# Definir charset padrão
+AddDefaultCharset UTF-8
+
+# Configurações de cache para arquivos estáticos
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Imagens
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    
+    # CSS e JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    
+    # Fontes
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    
+    # Documentos
+    ExpiresByType application/pdf "access plus 1 week"
+</IfModule>
+
+# Compressão GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE text/javascript
+</IfModule>
+
+# Proteção de arquivos sensíveis
+<Files ".env">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files ".htaccess">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "composer.json">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "composer.lock">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Proteger diretórios de dados
+<IfModule mod_rewrite.c>
+    RewriteRule ^data/ - [F,L]
+    RewriteRule ^vendor/ - [F,L]
+    RewriteRule ^src/ - [F,L]
+    RewriteRule ^views/ - [F,L]
+    RewriteRule ^config/ - [F,L]
+</IfModule>
+
+# Configuração principal de reescrita de URLs
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Definir a base da aplicação (ajustar se estiver em subdiretório)
+    RewriteBase /
+    
+    # Redirecionar HTTPS (opcional - descomente se necessário SSL)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # Servir arquivos estáticos diretamente (sem passar pelo router)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|svg|webp|ico|pdf|woff|woff2|ttf|eot|mp3|mp4|avi|mov|wmv|flv)$ [NC]
+    RewriteRule ^ - [L]
+    
+    # Servir arquivos de upload diretamente
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} ^/uploads/ [NC]
+    RewriteRule ^ - [L]
+    
+    # Regras específicas para endpoints de workflow (para performance)
+    RewriteRule ^advance-workflow\.php$ advance-workflow.php [L]
+    RewriteRule ^revert-workflow\.php$ revert-workflow.php [L]
+    RewriteRule ^update-document-status\.php$ update-document-status.php [L]
+    RewriteRule ^update-ticket-status\.php$ update-ticket-status.php [L]
+    
+    # Regras específicas para arquivos PHP de teste/debug (manter acesso direto)
+    RewriteRule ^debug-.*\.php$ - [L]
+    RewriteRule ^test-.*\.(php|html)$ - [L]
+    RewriteRule ^phpinfo\.php$ - [L]
+    
+    # Regras específicas para APIs e endpoints especiais
+    RewriteRule ^(get-ticket-list|get-ticket-replies|reply-ticket|view-ticket)\.php$ - [L]
+    RewriteRule ^(session-ping|session-debug)\.php$ - [L]
+    RewriteRule ^upload-simples\.php$ - [L]
+    RewriteRule ^download-test\.php$ - [L]
+    
+    # ROTAS PRINCIPAIS DA APLICAÇÃO
+    
+    # Rota raiz - redirecionar para dashboard se autenticado, senão para home
+    RewriteRule ^$ index.php [L]
+    
+    # Rotas de autenticação
+    RewriteRule ^login/?$ index.php [L]
+    RewriteRule ^logout/?$ index.php [L]
+    RewriteRule ^auth/(login|register)/?$ index.php [L]
+    
+    # Dashboard
+    RewriteRule ^dashboard/?$ index.php [L]
+    RewriteRule ^dashboard/chart-data/?$ index.php [L]
+    
+    # Perfil do usuário
+    RewriteRule ^profile/?$ index.php [L]
+    
+    # Administração
+    RewriteRule ^admin/?$ index.php [L]
+    RewriteRule ^admin/(permissions|documents|users|templates)/?$ index.php [L]
+    RewriteRule ^admin/(documents|users|templates)/(create|[^/]+/edit)/?$ index.php [L]
+    RewriteRule ^admin/(documents|users|templates)/([^/]+)/?$ index.php [L]
+    RewriteRule ^admin/(delete-user|update-user-status|edit-user)/([^/]+)/?$ index.php [L]
+    
+    # Projetos
+    RewriteRule ^projects/?$ index.php [L]
+    RewriteRule ^projects/create/?$ index.php [L]
+    RewriteRule ^projects/view/([^/]+)/?$ index.php [L]
+    RewriteRule ^projects/([^/]+)/edit/?$ index.php [L]
+    RewriteRule ^projects/update-status/([^/]+)/?$ index.php [L]
+    RewriteRule ^projects/([^/]+)/?$ index.php [L]
+    
+    # Documentos
+    RewriteRule ^documents/?$ index.php [L]
+    RewriteRule ^documents/upload/?$ index.php [L]
+    RewriteRule ^documents/project/([^/]+)/?$ index.php [L]
+    RewriteRule ^documents/project/upload/?$ index.php [L]
+    RewriteRule ^documents/project/([^/]+)/(download|info)/?$ index.php [L]
+    RewriteRule ^documents/project/([^/]+)/(approve|reject)/?$ index.php [L]
+    RewriteRule ^documents/([^/]+)/(view|download|edit|approve|reject)/?$ index.php [L]
+    RewriteRule ^documents/([^/]+)/?$ index.php [L]
+    RewriteRule ^documents/(upload-project-file|handle-drag-drop)/?$ index.php [L]
+    RewriteRule ^documents/track-download/([^/]+)/?$ index.php [L]
+    
+    # Workflow de documentos
+    RewriteRule ^document-workflow/(update-stage|update-status|advance|revert|finalize)/?$ index.php [L]
+    RewriteRule ^document-workflow/(approve-document-ajax|reject-document-ajax)/?$ index.php [L]
+    
+    # Categorias
+    RewriteRule ^categories/(list|add)/?$ index.php [L]
+    RewriteRule ^categories/(update|delete)/([^/]+)/?$ index.php [L]
+    
+    # Suporte
+    RewriteRule ^support/?$ index.php [L]
+    RewriteRule ^support/create/?$ index.php [L]
+    RewriteRule ^support/([^/]+)/?$ index.php [L]
+    RewriteRule ^support/([^/]+)/reply/?$ index.php [L]
+    RewriteRule ^support/update-status/?$ index.php [L]
+    RewriteRule ^support/reply/?$ index.php [L]
+    RewriteRule ^support-ticket/?$ index.php [L]
+    
+    # Notificações
+    RewriteRule ^notifications/?$ index.php [L]
+    RewriteRule ^notifications/mark-read/([^/]+)/?$ index.php [L]
+    RewriteRule ^notifications/(mark-all-read|unread-count)/?$ index.php [L]
+    
+    # Pesquisa e exportação
+    RewriteRule ^search/?$ index.php [L]
+    RewriteRule ^export/([^/]+)/?$ index.php [L]
+    RewriteRule ^import/data/?$ index.php [L]
+    
+    # Home pública
+    RewriteRule ^home/?$ index.php [L]
+    
+    # Fallback: se não corresponder a nenhuma regra específica e não for um arquivo existente,
+    # redirecionar para o index.php (router principal)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L]
+</IfModule>
+
+# Configurações de segurança adicionais
+<IfModule mod_headers.c>
+    # Prevenir clickjacking
+    Header always append X-Frame-Options SAMEORIGIN
+    
+    # Prevenir MIME type sniffing
+    Header always set X-Content-Type-Options nosniff
+    
+    # Habilitar XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Configurar CSP básico (ajustar conforme necessário)
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"
+</IfModule>
+
+# Configurações de erro customizadas
+ErrorDocument 404 /views/errors/404.php
+ErrorDocument 403 /views/errors/403.php
+ErrorDocument 500 /views/errors/500.php
+
+# Configurações PHP (se mod_php estiver habilitado)
+<IfModule mod_php.c>
+    php_value upload_max_filesize 50M
+    php_value post_max_size 50M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+    php_flag display_errors Off
+    php_flag log_errors On
+</IfModule>
