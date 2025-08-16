@@ -219,11 +219,12 @@ ErrorDocument 500 /views/errors/500.php
 
 # Configurações PHP (se mod_php estiver habilitado)
 <IfModule mod_php.c>
-    php_value upload_max_filesize 50M
-    php_value post_max_size 50M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-    php_value memory_limit 256M
+    # Aumentar limites para permitir upload de arquivos grandes (até 2GB)
+    php_value upload_max_filesize 2048M
+    php_value post_max_size 2048M
+    php_value max_execution_time 600
+    php_value max_input_time 600
+    php_value memory_limit 3072M
     php_flag display_errors Off
     php_flag log_errors On
 </IfModule>
